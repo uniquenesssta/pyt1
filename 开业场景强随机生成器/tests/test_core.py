@@ -6,18 +6,19 @@ import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from core import DIMENSIONS, Randomizer, load_pools, make_prompt, atomic_json, validate_pools
+from core import DIMENSIONS, Randomizer, load_pools, make_prompt, atomic_json, validate_pools, upgrade_pools
+from generators import generate_brand, brand_from_parts, SYLLABLES
 
 
 class RandomizerTests(unittest.TestCase):
     def setUp(self):
         self.pools = load_pools(Path(__file__).resolve().parents[1] / 'pools.json')
-        self.engine = Randomizer(self.pools, random.Random(333))
+        self.engine = Randomizer(self.pools, random.Random(333), generated=False)
 
     def test_eleven_independent_dimensions(self):
         self.assertEqual(len(DIMENSIONS), 11)
         pools = {key: ['a', 'b', 'c', 'd'] for key, _ in DIMENSIONS}
-        values = Randomizer(pools, random.Random(333)).draw()
+        values = Randomizer(pools, random.Random(333), generated=False).draw()
         self.assertGreater(len(set(values.values())), 1)
 
     def test_strong_no_immediate_repeats_over_many_cycles(self):
@@ -71,7 +72,7 @@ class RandomizerTests(unittest.TestCase):
 
     def test_two_item_pool_and_manual_last_item(self):
         pools = {key: ['a', 'b'] for key, _ in DIMENSIONS}
-        engine = Randomizer(pools)
+        engine = Randomizer(pools, generated=False)
         current = engine.draw()
         for key in current:
             current[key] = engine.bags[key][0]
@@ -88,6 +89,41 @@ class RandomizerTests(unittest.TestCase):
         values['city'] = ''
         with self.assertRaises(ValueError):
             make_prompt(values)
+
+    def test_generated_brands_have_paired_chinese_syllables(self):
+        mapping = dict(SYLLABLES)
+        rng = random.Random(48)
+        for _ in range(1000):
+            western, chinese = generate_brand(rng).split()
+            parts = [western[i:i+2] for i in range(0, len(western), 2)]
+            self.assertIn(len(parts), (2, 3))
+            self.assertEqual(chinese, ''.join(mapping[x] for x in parts))
+        self.assertEqual(brand_from_parts([('LU', '露'), ('MI', '米'), ('NA', '娜')]), 'LUMINA 露米娜')
+
+    def test_generated_values_recent_history_and_locks(self):
+        engine = Randomizer(self.pools, random.Random(333))
+        values = {}
+        seen = {'brand': [], 'address': []}
+        for _ in range(1000):
+            values = engine.draw(values)
+            for key in seen:
+                self.assertNotIn(values[key], seen[key][-200:])
+                seen[key].append(values[key])
+        history = {k: list(v) for k, v in engine.recent.items()}
+        locked = engine.draw(values, ['brand', 'address'])
+        self.assertEqual(locked['brand'], values['brand'])
+        self.assertEqual(locked['address'], values['address'])
+        self.assertEqual(history, engine.recent)
+        restored = Randomizer(self.pools)
+        restored.restore_recent(history)
+        self.assertEqual(restored.recent, history)
+
+    def test_old_default_upgrade_preserves_customization(self):
+        legacy = {'city': ['旧城市1', '旧城市2']}
+        pools = dict(self.pools, city=legacy['city'])
+        self.assertEqual(upgrade_pools(pools, self.pools, legacy)['city'], self.pools['city'])
+        pools['city'] = ['自选城市1', '自选城市2']
+        self.assertEqual(upgrade_pools(pools, self.pools, legacy)['city'], pools['city'])
 
     def test_validation_and_atomic_utf8_roundtrip(self):
         broken = dict(self.pools, brand=['same', 'same'])

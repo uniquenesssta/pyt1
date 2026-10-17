@@ -8,7 +8,7 @@ from tkinter import ttk, messagebox, filedialog
 from tkinter.scrolledtext import ScrolledText
 
 from core import (DIMENSIONS, INDUSTRIES, DEFAULT_CONSTRAINTS, Randomizer,
-                  load_pools, validate_pools, atomic_json, make_prompt)
+                  load_pools, validate_pools, atomic_json, make_prompt, upgrade_pools)
 
 BASE = Path(__file__).resolve().parent
 DATA = BASE / 'data'
@@ -35,6 +35,7 @@ class App(tk.Tk):
         self.industry = tk.StringVar(value='美业')
         self.copyline = tk.StringVar(value='盛大开业 · 美好启幕')
         self.strong = tk.BooleanVar(value=True)
+        self.generated_names = tk.BooleanVar(value=True)
         self.status = tk.StringVar(value='')
         self.rendered = ''
         self.ready = False
@@ -46,6 +47,8 @@ class App(tk.Tk):
         except (OSError, ValueError) as exc:
             pools = load_pools(BASE / 'pools.json')
             self.startup_errors.append(f'自定义参数池无法读取，已使用默认池。\n{exc}')
+        pools = upgrade_pools(pools, load_pools(BASE / 'pools.json'),
+                              json.loads((BASE / 'legacy_pools_v1.json').read_text(encoding='utf-8')))
         self.engine = Randomizer(pools)
         self.build_ui()
         self.restore()
@@ -92,7 +95,8 @@ class App(tk.Tk):
         ttk.Button(controls, text='重新随机', style='Primary.TButton', command=self.randomize).pack(side='left')
         ttk.Button(controls, text='全部解锁', command=self.unlock).pack(side='left', padx=8)
         ttk.Button(controls, text='编辑参数池', command=self.edit_pools).pack(side='left')
-        ttk.Label(left, text='强随机：每维用完一轮再重复；未锁定项不沿用上次值。\n所有参数都可直接输入；城市与街道分别抽取，地址为示例。', wraplength=460).grid(row=15, column=0, columnspan=3, sticky='w', pady=10)
+        ttk.Checkbutton(left, text='品牌和街道随机组合（关闭则使用候选池）', variable=self.generated_names).grid(row=15, column=0, columnspan=3, sticky='w')
+        ttk.Label(left, text='品牌：西文音节与中文同步生成；街道：词根＋门牌号。\n其余维度独立轮换。地址为虚构示例，所有参数均可编辑。', wraplength=460).grid(row=16, column=0, columnspan=3, sticky='w', pady=10)
         right = ttk.Frame(body)
         right.grid(row=0, column=1, sticky='nsew')
         tabs = ttk.Notebook(right)
@@ -167,6 +171,7 @@ class App(tk.Tk):
         if self.pending:
             self.after_cancel(self.pending)
             self.pending = None
+        self.engine.generated = self.generated_names.get()
         values = self.engine.draw(self.current(), locked, self.strong.get())
         self.ready = False
         for key, value in values.items():
@@ -213,7 +218,7 @@ class App(tk.Tk):
         dialog.geometry('700x620')
         dialog.transient(self)
         dialog.grab_set()
-        ttk.Label(dialog, text='每行一个候选值；每个维度至少保留两个不同选项。', padding=12).pack(anchor='w')
+        ttk.Label(dialog, text='每行一个候选值；每维至少两项。品牌和街道池仅在关闭随机组合时使用。', padding=12).pack(anchor='w')
         label_to_key = {label: key for key, label in DIMENSIONS}
         selected = tk.StringVar(value=DIMENSIONS[0][1])
         selector = ttk.Combobox(dialog, textvariable=selected, values=list(label_to_key), state='readonly')
@@ -249,6 +254,7 @@ class App(tk.Tk):
 
     def save(self):
         state = {'values': self.current(), 'locks': {k: v.get() for k, v in self.locks.items()},
+                 'generated_names': self.generated_names.get(), 'recent': self.engine.recent,
                  'strong': self.strong.get(), 'industry': self.industry.get(), 'copy': self.copyline.get(),
                  'constraints': self.constraints.get('1.0', 'end-1c'), 'extra': self.extra.get('1.0', 'end-1c'),
                  'prompt': self.prompt.get('1.0', 'end-1c'), 'rendered': self.rendered, 'bags': self.engine.bags}
@@ -287,6 +293,9 @@ class App(tk.Tk):
                     widget.insert('1.0', state[name])
             self.rendered = state.get('rendered', '') if isinstance(state.get('rendered', ''), str) else ''
             self.engine.restore_bags(state.get('bags'))
+            self.engine.restore_recent(state.get('recent'))
+            if isinstance(state.get('generated_names'), bool):
+                self.generated_names.set(state['generated_names'])
             self.status.set('已恢复上次参数与提示词。点击“重新随机”生成下一组。')
         except (OSError, ValueError) as exc:
             self.startup_errors.append(f'上次设置无法读取，已尽可能恢复有效内容。\n{exc}')

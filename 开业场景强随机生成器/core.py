@@ -7,6 +7,8 @@ from pathlib import Path
 import random
 import tempfile
 
+from generators import fresh_value
+
 DIMENSIONS = (
     ('logo_shape', 'Logo 图形形态'), ('logo_structure', 'Logo 视觉结构'),
     ('brand', '品牌名称'), ('city', '地理位置'), ('address', '街道地址'),
@@ -39,6 +41,15 @@ def validate_pools(value):
     return result
 
 
+def upgrade_pools(pools, defaults, legacy):
+    """Upgrade untouched v1 pools, while preserving genuinely customized lists."""
+    result = dict(pools)
+    for key, previous in legacy.items():
+        if result.get(key) == previous:
+            result[key] = list(defaults[key])
+    return validate_pools(result)
+
+
 def load_pools(path):
     return validate_pools(json.loads(Path(path).read_text(encoding='utf-8')))
 
@@ -64,10 +75,12 @@ class Randomizer:
     Strong mode exhausts every option before refilling; both modes avoid the
     immediately previous value. No shared index ties dimensions together.
     """
-    def __init__(self, pools, rng=None):
+    def __init__(self, pools, rng=None, generated=True):
         self.pools = validate_pools(pools)
         self.rng = rng or random.SystemRandom()
         self.bags = {}
+        self.generated = generated
+        self.recent = {"brand": [], "address": []}
 
     def restore_bags(self, bags):
         if not isinstance(bags, dict):
@@ -77,6 +90,13 @@ class Randomizer:
                 self.bags[key] = list(dict.fromkeys(x for x in items
                     if isinstance(x, str) and x in self.pools[key]))
 
+    def restore_recent(self, recent):
+        if isinstance(recent, dict):
+            for key in self.recent:
+                items = recent.get(key, [])
+                if isinstance(items, list):
+                    self.recent[key] = [x for x in items if isinstance(x, str)][-200:]
+
     def draw(self, current=None, locked=(), strong=True):
         current = current or {}
         result = dict(current)
@@ -84,6 +104,11 @@ class Randomizer:
             if key in locked and current.get(key, '').strip():
                 continue
             previous = current.get(key)
+            if self.generated and key in self.recent:
+                value = fresh_value(key, self.rng, previous, self.recent[key])
+                self.recent[key] = (self.recent[key] + [value])[-200:]
+                result[key] = value
+                continue
             if not strong:
                 result[key] = self.rng.choice([x for x in self.pools[key] if x != previous])
                 continue
