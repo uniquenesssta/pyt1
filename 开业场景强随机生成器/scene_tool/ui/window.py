@@ -10,6 +10,7 @@ from scene_tool.ui.layout import build_ui
 from scene_tool.ui.pool_editor import edit_pools
 from scene_tool.ui.session_binding import save, restore
 from scene_tool.ui.prompt_controller import PromptController
+from scene_tool.ui.prompt_reset import PromptResetController
 
 
 class App(tk.Tk):
@@ -35,6 +36,7 @@ class App(tk.Tk):
         self.pool_path = DATA / 'custom_pools.json'
         pools, self.startup_errors = load_startup_pools(self.pool_path)
         self.prompt_controller = PromptController(self)
+        self.prompt_reset = PromptResetController(self)
         self.engine = Randomizer(pools)
         self.build_ui()
         self.restore()

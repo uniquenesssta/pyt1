@@ -12,7 +12,7 @@ def build_prompt_panel(self, body):
     tabs.add(rules_tab, text='  固定要求 / 补充  ')
     self.prompt = ScrolledText(prompt_tab, wrap='word', undo=True, font=('Microsoft YaHei UI', 11), padx=14, pady=14, relief='flat', width=35, height=15)
     self.prompt.pack(fill='both', expand=True, pady=(8, 0))
-    ttk.Label(rules_tab, text='固定要求（默认保留原图紫色背景和3.5×2.2米大板）').pack(anchor='w', pady=10)
+    ttk.Label(rules_tab, text='固定要求（手机实拍、禁止花艺会自动加入提示词）').pack(anchor='w', pady=10)
     self.constraints = ScrolledText(rules_tab, wrap='word', font=('Microsoft YaHei UI', 10), height=14, width=35, undo=True)
     self.constraints.pack(fill='both', expand=True)
     self.constraints.insert('1.0', DEFAULT_CONSTRAINTS)
@@ -26,3 +26,9 @@ def build_prompt_panel(self, body):
     ttk.Button(actions, text='复制提示词', style='Primary.TButton', command=self.copy_prompt).pack(side='left')
     ttk.Button(actions, text='更新提示词', command=lambda: self.refresh(force=True)).pack(side='left', padx=8)
     ttk.Button(actions, text='导出 TXT', command=self.export).pack(side='left')
+
+    reset_actions = ttk.Frame(right, padding=(0, 8, 0, 0))
+    reset_actions.pack(fill='x')
+    ttk.Button(reset_actions, text='复原默认提示词', command=self.prompt_reset.reset).pack(side='left')
+    self.undo_reset_button = ttk.Button(reset_actions, text='撤销复原', state='disabled', command=self.prompt_reset.undo)
+    self.undo_reset_button.pack(side='left', padx=8)

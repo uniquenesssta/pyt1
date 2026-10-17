@@ -1,4 +1,6 @@
-from scene_tool.config.paths import DATA
+from scene_tool.config.paths import DATA, RESOURCES
+from scene_tool.storage.json_files import load_json
+from scene_tool.domain.prompt_migration import migrate_prompt_state
 from scene_tool.storage.session import load_session, save_session
 
 def save(self):
@@ -20,7 +22,7 @@ def restore(self):
     if not path.exists():
         return
     try:
-        state = load_session(path)
+        state = migrate_prompt_state(load_session(path), load_json(RESOURCES / 'legacy_prompt_v1.json')['constraints'])
         for key, value in state.get('values', {}).items():
             if key in self.values and isinstance(value, str):
                 self.values[key].set(value)
@@ -45,6 +47,6 @@ def restore(self):
                 variable.set(state[name])
         if isinstance(state.get('generated_names'), bool):
             self.generated_names.set(state['generated_names'])
-        self.status.set('已恢复上次参数与提示词。点击“重新随机”生成下一组。')
+        self.status.set('已恢复设置。生成提示词已加入手机实拍和无花艺要求；手动编辑的旧提示词需点“更新提示词”。')
     except (OSError, ValueError) as exc:
         self.startup_errors.append(f'上次设置无法读取，已尽可能恢复有效内容。\n{exc}')
