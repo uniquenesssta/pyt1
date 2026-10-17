@@ -5,7 +5,8 @@ from scene_tool.domain.prompts import make_prompt
 
 def migrate_prompt_state(state, legacy_constraints):
     result = dict(state)
-    if result.get('constraints') == legacy_constraints:
+    known_defaults = (legacy_constraints,) if isinstance(legacy_constraints, str) else tuple(legacy_constraints)
+    if result.get('constraints') in known_defaults:
         result['constraints'] = DEFAULT_CONSTRAINTS
     # An edited prompt is user content, never silently replace it.
     if isinstance(result.get('prompt'), str) and result['prompt'] == result.get('rendered'):

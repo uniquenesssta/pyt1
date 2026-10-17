@@ -22,7 +22,9 @@ def restore(self):
     if not path.exists():
         return
     try:
-        state = migrate_prompt_state(load_session(path), load_json(RESOURCES / 'legacy_prompt_v1.json')['constraints'])
+        legacy = tuple(load_json(RESOURCES / name)['constraints']
+                       for name in ('legacy_prompt_v1.json', 'legacy_prompt_v2.json'))
+        state = migrate_prompt_state(load_session(path), legacy)
         for key, value in state.get('values', {}).items():
             if key in self.values and isinstance(value, str):
                 self.values[key].set(value)
@@ -47,6 +49,6 @@ def restore(self):
                 variable.set(state[name])
         if isinstance(state.get('generated_names'), bool):
             self.generated_names.set(state['generated_names'])
-        self.status.set('已恢复设置。生成提示词已加入手机实拍和无花艺要求；手动编辑的旧提示词需点“更新提示词”。')
+        self.status.set('已恢复设置并升级未修改的默认提示词。自定义要求保留；可点“复原默认提示词”采用新版完整要求。')
     except (OSError, ValueError) as exc:
         self.startup_errors.append(f'上次设置无法读取，已尽可能恢复有效内容。\n{exc}')

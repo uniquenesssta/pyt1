@@ -40,3 +40,14 @@ class PhotoTests(unittest.TestCase):
         state = {'values': self.values, 'constraints': self.legacy, 'prompt': '旧', 'rendered': '旧'}
         new = migrate_prompt_state(state, self.legacy)
         self.assertEqual(migrate_prompt_state(new, self.legacy), new)
+
+    def test_both_default_versions_upgrade_without_losing_other_state(self):
+        previous = load_json(RESOURCES / 'legacy_prompt_v2.json')['constraints']
+        versions = (self.legacy, previous)
+        for old in versions:
+            state = {'values': self.values, 'constraints': old, 'prompt': '手改提示词',
+                     'rendered': '旧输出', 'extra': '不要行人', 'locks': {'brand': True}}
+            new = migrate_prompt_state(state, versions)
+            self.assertEqual(new, dict(state, constraints=DEFAULT_CONSTRAINTS))
+        custom = dict(state, constraints=previous + '\n我的新要求')
+        self.assertEqual(migrate_prompt_state(custom, versions), custom)

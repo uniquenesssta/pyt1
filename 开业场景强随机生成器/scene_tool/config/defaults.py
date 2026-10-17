@@ -1,3 +1,5 @@
+from scene_tool.config.prompt_template import DEFAULT_CONSTRAINTS
+
 DIMENSIONS = (
     ('logo_shape', 'Logo 图形形态'), ('logo_structure', 'Logo 视觉结构'),
     ('brand', '品牌名称'), ('city', '地理位置'), ('address', '街道地址'),
@@ -6,8 +8,3 @@ DIMENSIONS = (
     ('lighting', '天气及光线'), ('ratio', '画面比例'),
 )
 INDUSTRIES = ('美业', '服装', '咖啡', '餐饮', '花店', '家居', '通用 / 自定义')
-DEFAULT_CONSTRAINTS = '''参考图仅用于确定KT板的平面设计和气球配色，不沿用参考图的场景、构图或渲染质感。
-KT板为3.5米宽、2.2米高的横版大板，按真实门店尺寸呈现；板材比例与照片画幅分别执行。
-保留参考图背景图案、波浪线条和紫色渐变配色，仅替换Logo、品牌名称、开业文案和地址，可合理调整文字排版。
-紫白气球颜色保持一致，略微通透，表面有轻微褶皱和柔和高光，固定方式符合现实。
-按本轮参数布置门店、KT板和气球；画面中的文字应正确，并保留与实际拍摄距离相符的清晰度。'''

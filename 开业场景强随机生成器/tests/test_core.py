@@ -90,7 +90,7 @@ class RandomizerTests(unittest.TestCase):
         prompt = make_prompt(values, industry='咖啡', extra='不要行人')
         for key, label in DIMENSIONS:
             self.assertIn(f'{label}：{values[key]}', prompt)
-        for text in ['3.5米宽', '2.2米高', '紫色渐变', '略微通透', '本轮行业：咖啡', '不要行人']:
+        for text in ['3.5米宽', '2.2米高', '印刷背景图案', '略微通透', '本轮行业：咖啡', '不要行人']:
             self.assertIn(text, prompt)
         values['city'] = ''
         with self.assertRaises(ValueError):
