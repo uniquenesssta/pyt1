@@ -7,6 +7,8 @@ import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 from tkinter.scrolledtext import ScrolledText
 
+from copywriting import CopyRandomizer
+
 from core import (DIMENSIONS, INDUSTRIES, DEFAULT_CONSTRAINTS, Randomizer,
                   load_pools, validate_pools, atomic_json, make_prompt, upgrade_pools)
 
@@ -33,6 +35,9 @@ class App(tk.Tk):
         self.values = {k: tk.StringVar() for k, _ in DIMENSIONS}
         self.locks = {k: tk.BooleanVar() for k, _ in DIMENSIONS}
         self.industry = tk.StringVar(value='美业')
+        self.copy_random = tk.BooleanVar(value=True)
+        self.copy_locked = tk.BooleanVar(value=False)
+        self.copy_engine = CopyRandomizer()
         self.copyline = tk.StringVar(value='盛大开业 · 美好启幕')
         self.strong = tk.BooleanVar(value=True)
         self.generated_names = tk.BooleanVar(value=True)
@@ -89,14 +94,18 @@ class App(tk.Tk):
         ttk.Label(left, text='行业 / 自定义').grid(row=12, column=0, sticky='w', pady=(18, 7))
         ttk.Combobox(left, textvariable=self.industry, values=INDUSTRIES).grid(row=12, column=1, columnspan=2, sticky='ew', pady=(18, 7))
         ttk.Label(left, text='开业文案').grid(row=13, column=0, sticky='w', pady=7)
-        ttk.Entry(left, textvariable=self.copyline).grid(row=13, column=1, columnspan=2, sticky='ew')
+        ttk.Entry(left, textvariable=self.copyline).grid(row=13, column=1, sticky='ew')
+        ttk.Checkbutton(left, variable=self.copy_locked).grid(row=13, column=2, padx=(10, 0))
+        copy_controls = ttk.Frame(left)
+        copy_controls.grid(row=14, column=0, columnspan=3, sticky='ew')
+        ttk.Checkbutton(copy_controls, text='随机开业文案（100条主标题 × 100条副句）', variable=self.copy_random).pack(side='left')
         controls = ttk.Frame(left)
-        controls.grid(row=14, column=0, columnspan=3, sticky='ew', pady=(16, 8))
+        controls.grid(row=15, column=0, columnspan=3, sticky='ew', pady=(16, 8))
         ttk.Button(controls, text='重新随机', style='Primary.TButton', command=self.randomize).pack(side='left')
         ttk.Button(controls, text='全部解锁', command=self.unlock).pack(side='left', padx=8)
         ttk.Button(controls, text='编辑参数池', command=self.edit_pools).pack(side='left')
-        ttk.Checkbutton(left, text='品牌和街道随机组合（关闭则使用候选池）', variable=self.generated_names).grid(row=15, column=0, columnspan=3, sticky='w')
-        ttk.Label(left, text='品牌：西文音节与中文同步生成；街道：词根＋门牌号。\n其余维度独立轮换。地址为虚构示例，所有参数均可编辑。', wraplength=460).grid(row=16, column=0, columnspan=3, sticky='w', pady=10)
+        ttk.Checkbutton(left, text='品牌和街道随机组合（关闭则使用候选池）', variable=self.generated_names).grid(row=16, column=0, columnspan=3, sticky='w')
+        ttk.Label(left, text='品牌：西文音节与中文同步生成；街道：词根＋门牌号。\n其余维度独立轮换。地址为虚构示例，所有参数均可编辑。', wraplength=460).grid(row=17, column=0, columnspan=3, sticky='w', pady=10)
         right = ttk.Frame(body)
         right.grid(row=0, column=1, sticky='nsew')
         tabs = ttk.Notebook(right)
@@ -163,8 +172,8 @@ class App(tk.Tk):
 
     def randomize(self):
         locked = [k for k, v in self.locks.items() if v.get()]
-        if len(locked) == len(DIMENSIONS):
-            self.status.set('11项已全部锁定，请解锁需要重新抽取的参数。')
+        if len(locked) == len(DIMENSIONS) and (not self.copy_random.get() or self.copy_locked.get()):
+            self.status.set('参数已全部锁定，且文案随机已关闭或锁定，请解锁需要随机的项目。')
             return
         if self.edited() and not messagebox.askyesno('重新随机', '重新随机会生成新提示词，并替换右侧手动编辑。继续吗？', parent=self):
             return
@@ -174,6 +183,7 @@ class App(tk.Tk):
         self.engine.generated = self.generated_names.get()
         values = self.engine.draw(self.current(), locked, self.strong.get())
         self.ready = False
+        self.copyline.set(self.copy_engine.draw(self.copyline.get(), self.copy_random.get(), self.copy_locked.get()))
         for key, value in values.items():
             self.values[key].set(value)
         self.ready = True
@@ -184,6 +194,7 @@ class App(tk.Tk):
     def unlock(self):
         for value in self.locks.values():
             value.set(False)
+        self.copy_locked.set(False)
         self.status.set('已全部解锁。')
 
     def copy_prompt(self):
@@ -253,7 +264,8 @@ class App(tk.Tk):
         ttk.Button(dialog, text='保存全部参数池', command=save).pack(pady=(0, 12))
 
     def save(self):
-        state = {'values': self.current(), 'locks': {k: v.get() for k, v in self.locks.items()},
+        state = {'copy_random': self.copy_random.get(), 'copy_locked': self.copy_locked.get(),
+                 'copy_recent': self.copy_engine.recent, 'values': self.current(), 'locks': {k: v.get() for k, v in self.locks.items()},
                  'generated_names': self.generated_names.get(), 'recent': self.engine.recent,
                  'strong': self.strong.get(), 'industry': self.industry.get(), 'copy': self.copyline.get(),
                  'constraints': self.constraints.get('1.0', 'end-1c'), 'extra': self.extra.get('1.0', 'end-1c'),
@@ -294,6 +306,10 @@ class App(tk.Tk):
             self.rendered = state.get('rendered', '') if isinstance(state.get('rendered', ''), str) else ''
             self.engine.restore_bags(state.get('bags'))
             self.engine.restore_recent(state.get('recent'))
+            self.copy_engine.restore(state.get('copy_recent'))
+            for name, variable in [('copy_random', self.copy_random), ('copy_locked', self.copy_locked)]:
+                if isinstance(state.get(name), bool):
+                    variable.set(state[name])
             if isinstance(state.get('generated_names'), bool):
                 self.generated_names.set(state['generated_names'])
             self.status.set('已恢复上次参数与提示词。点击“重新随机”生成下一组。')
