@@ -6,13 +6,19 @@ import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from core import DIMENSIONS, Randomizer, load_pools, make_prompt, atomic_json, validate_pools, upgrade_pools
-from generators import generate_brand, brand_from_parts, SYLLABLES
+from scene_tool.config.defaults import DIMENSIONS
+from scene_tool.generation.parameters import Randomizer
+from scene_tool.storage.pools import load_pools
+from scene_tool.domain.prompts import make_prompt
+from scene_tool.storage.json_files import atomic_json
+from scene_tool.domain.pools import validate_pools, upgrade_pools
+from scene_tool.generation.brands import generate_brand, brand_from_parts
+from scene_tool.config.vocabulary import SYLLABLES
 
 
 class RandomizerTests(unittest.TestCase):
     def setUp(self):
-        self.pools = load_pools(Path(__file__).resolve().parents[1] / 'pools.json')
+        self.pools = load_pools(Path(__file__).resolve().parents[1] / 'resources' / 'pools.json')
         self.engine = Randomizer(self.pools, random.Random(333), generated=False)
 
     def test_eleven_independent_dimensions(self):

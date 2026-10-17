@@ -3,7 +3,8 @@ import unittest
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from copywriting import HEADLINES, SUBLINES, SEPARATOR, CopyRandomizer
+from scene_tool.config.copy_phrases import HEADLINES, SUBLINES, SEPARATOR
+from scene_tool.generation.copywriting import CopyRandomizer
 
 
 class CopyTests(unittest.TestCase):
