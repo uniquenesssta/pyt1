@@ -18,3 +18,9 @@ def apply_theme(self):
                 ('Button.label', {'sticky': 'nswe'})]})]})])
     style.configure('Primary.TButton', background='#6357df', foreground='white')
     style.map('Primary.TButton', background=[('active', '#5043c5')])
+
+    style.configure('Section.TLabel', font=('Microsoft YaHei UI', 11, 'bold'), foreground='#24324b')
+    style.configure('Result.TFrame', background='#ffffff')
+    style.configure('Result.TLabel', background='#ffffff', foreground='#253148', font=('Microsoft YaHei UI', 10))
+    style.configure('Muted.TLabel', background='#ffffff', foreground='#747d8c', font=('Microsoft YaHei UI', 9))
+    style.configure('Result.TCheckbutton', background='#ffffff')

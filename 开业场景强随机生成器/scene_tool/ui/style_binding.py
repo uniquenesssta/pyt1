@@ -13,8 +13,9 @@ def sync_style(view, replace=False):
     ):
         key, other = (indoor_key, field) if indoor else (field, indoor_key)
         label = inside_label if indoor else outside_label
-        view.parameter_labels[field].configure(text=f'{row:02d}  {label}')
-        view.combos[field].configure(values=view.engine.pools[key])
+        view.parameter_labels[field].configure(text=label)
+        if field in view.combos:
+            view.combos[field].configure(values=view.engine.pools[key])
         current = view.values[field].get()
         retired = field == 'balloons' and current in retired_balloon_values() and current not in view.engine.pools[key]
         if replace or current in view.engine.pools[other] or retired:

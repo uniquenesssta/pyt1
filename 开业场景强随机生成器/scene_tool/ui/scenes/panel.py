@@ -14,6 +14,17 @@ class ScenePanel(ttk.Frame):
         for variable in self.values.values():
             variable.trace_add('write', self.schedule)
         self.extra.bind('<KeyRelease>', self.schedule)
+        self.prompt.bind('<<Modified>>', self.prompt_changed)
+        self.update_status()
+
+    def update_status(self):
+        edited = self.prompt.get('1.0', 'end-1c') != self.model.rendered
+        self.sync_status.set('已手动编辑' if edited else ('待更新' if self.pending else '已同步'))
+
+    def prompt_changed(self, _):
+        if self.prompt.edit_modified():
+            self.prompt.edit_modified(False)
+            self.update_status()
 
     def capture(self):
         self.model.values = {k: v.get().strip() for k, v in self.values.items()}
@@ -33,6 +44,7 @@ class ScenePanel(ttk.Frame):
         if self.pending is not None:
             self.after_cancel(self.pending)
         self.pending = self.after(250, self.auto_update)
+        self.update_status()
 
     def auto_update(self):
         self.pending = None
@@ -44,6 +56,8 @@ class ScenePanel(ttk.Frame):
             except ValueError:
                 pass
 
+        self.update_status()
+
     def allow_replace(self):
         self.pause()
         return self.model.prompt == self.model.rendered or messagebox.askyesno('替换手改提示词', '按当前参数重新生成，将替换手动修改。继续吗？', parent=self)
@@ -52,6 +66,7 @@ class ScenePanel(ttk.Frame):
         if self.prompt.get('1.0', 'end-1c') != self.model.prompt:
             self.prompt.delete('1.0', 'end')
             self.prompt.insert('1.0', self.model.prompt)
+        self.update_status()
 
     def randomize(self):
         if not self.allow_replace():
@@ -80,6 +95,7 @@ class ScenePanel(ttk.Frame):
             self.auto_update()
         self.clipboard_clear()
         self.clipboard_append(self.prompt.get('1.0', 'end-1c'))
+        self.sync_status.set('已复制')
         self.persist()
 
     def export(self):

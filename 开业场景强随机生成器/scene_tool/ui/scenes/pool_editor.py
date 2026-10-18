@@ -35,7 +35,8 @@ def edit_pool(panel):
             return
         for key, items in working.items():
             model.set_pool(key, items)
-            panel.combos[key].configure(values=model.pools[key])
+            if key in panel.combos:
+                panel.combos[key].configure(values=model.pools[key])
         panel.persist()
         dialog.destroy()
     ttk.Button(dialog, text='保存本场景候选池', command=save).pack(pady=12)
