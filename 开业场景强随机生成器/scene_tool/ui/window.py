@@ -13,6 +13,7 @@ from scene_tool.ui.session_binding import save, restore
 from scene_tool.ui.prompt_controller import PromptController
 from scene_tool.ui.prompt_reset import PromptResetController
 from scene_tool.ui.resize_controller import ResizeController
+from scene_tool.ui.scenes.switcher import SceneSwitcher
 
 
 class App(tk.Tk):
@@ -54,6 +55,7 @@ class App(tk.Tk):
         elif not self.prompt.get('1.0', 'end-1c'):
             self.refresh()
         self.values['environment'].trace_add('write', lambda *_: environment_changed(self))
+        self.scene_switcher = SceneSwitcher(self)
         self.protocol('WM_DELETE_WINDOW', self.close)
         for error in self.startup_errors:
             self.after_idle(lambda e=error: messagebox.showwarning('读取设置', e, parent=self))
@@ -90,6 +92,8 @@ class App(tk.Tk):
         self.status.set('已全部解锁。')
 
     def close(self):
+        if not self.scene_switcher.save() and not messagebox.askyesno('场景保存失败', '场景设置未保存，仍要退出吗？', parent=self):
+            return
         self.flush_refresh()
         if not self.save() and not messagebox.askyesno('设置保存失败', '无法保存当前设置，仍要退出吗？可以先复制或导出提示词。', parent=self):
             return

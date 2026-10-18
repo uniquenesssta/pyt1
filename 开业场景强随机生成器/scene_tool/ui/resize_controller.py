@@ -6,6 +6,7 @@ class ResizeController:
     def __init__(self, window, surface, button_down=primary_button_down):
         self.window, self.surface = window, surface
         self.button_down = button_down
+        self.height_offset = 0
         self.size = None
         self.frozen = False
         self.pending = None
@@ -23,7 +24,7 @@ class ResizeController:
         if self.button_down():
             self.frozen = True
             self.surface.place_configure(relwidth=0, relheight=0,
-                                         width=previous[0], height=previous[1])
+                                         width=previous[0], height=previous[1] + self.height_offset)
             self.pending = self.window.after(20, self.check_release)
 
     def check_release(self):
@@ -32,7 +33,7 @@ class ResizeController:
             self.pending = self.window.after(20, self.check_release)
             return
         self.frozen = False
-        self.surface.place_configure(width=0, height=0, relwidth=1, relheight=1)
+        self.surface.place_configure(width=0, height=self.height_offset, relwidth=1, relheight=1)
 
     def on_destroy(self, event):
         if event.widget is self.window and self.pending is not None:
