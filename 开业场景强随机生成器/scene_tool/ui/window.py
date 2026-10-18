@@ -11,6 +11,7 @@ from scene_tool.ui.pool_editor import edit_pools
 from scene_tool.ui.session_binding import save, restore
 from scene_tool.ui.prompt_controller import PromptController
 from scene_tool.ui.prompt_reset import PromptResetController
+from scene_tool.ui.resize_controller import ResizeController
 
 
 class App(tk.Tk):
@@ -40,6 +41,7 @@ class App(tk.Tk):
         self.engine = Randomizer(pools)
         self.build_ui()
         self.restore()
+        self.resize_controller = ResizeController(self, (self.prompt, self.constraints, self.extra))
         self.ready = True
         for var in [*self.values.values(), self.industry, self.copyline]:
             var.trace_add('write', self.schedule_refresh)
