@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from tkinter.scrolledtext import ScrolledText
 from scene_tool.config.defaults import DIMENSIONS
+from scene_tool.ui.style_binding import sync_style
 from scene_tool.domain.pools import validate_pools
 from scene_tool.storage.pools import save_pools
 from scene_tool.generation.parameters import Randomizer
@@ -13,7 +14,7 @@ def edit_pools(self):
     dialog.transient(self)
     dialog.grab_set()
     ttk.Label(dialog, text='每行一个候选值；每维至少两项。品牌和街道池仅在关闭随机组合时使用。', padding=12).pack(anchor='w')
-    label_to_key = {label: key for key, label in DIMENSIONS}
+    label_to_key = {label: key for key, label in (*DIMENSIONS, ('interior', '内部装潢风格'))}
     selected = tk.StringVar(value=DIMENSIONS[0][1])
     selector = ttk.Combobox(dialog, textvariable=selected, values=list(label_to_key), state='readonly')
     selector.pack(fill='x', padx=12)
@@ -45,6 +46,7 @@ def edit_pools(self):
                                   if old_engine.pools[k] == pools[k]})
         for key, combo in self.combos.items():
             combo.configure(values=pools[key])
+        sync_style(self)
         dialog.destroy()
         self.save()
         self.status.set('参数池已保存，下一次随机使用新选项。')

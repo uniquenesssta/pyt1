@@ -34,8 +34,10 @@ class Randomizer:
     def draw(self, current=None, locked=(), strong=True):
         current = current or {}
         result = dict(current)
-        for key, _ in DIMENSIONS:
-            if key in locked and current.get(key, '').strip():
+        for key in ['environment'] + [k for k, _ in DIMENSIONS if k != 'environment']:
+            pool_key = 'interior' if key == 'architecture' and result.get('environment') == '室内' else key
+            switched = key == 'architecture' and result.get('environment') != current.get('environment', '室外')
+            if key in locked and current.get(key, '').strip() and not switched:
                 continue
             previous = current.get(key)
             if self.generated and key in self.recent:
@@ -44,17 +46,17 @@ class Randomizer:
                 result[key] = value
                 continue
             if not strong:
-                result[key] = self.rng.choice([x for x in self.pools[key] if x != previous])
+                result[key] = self.rng.choice([x for x in self.pools[pool_key] if x != previous])
                 continue
-            bag = self.bags.setdefault(key, [])
+            bag = self.bags.setdefault(pool_key, [])
             if not bag:
-                bag.extend(self.pools[key])
+                bag.extend(self.pools[pool_key])
                 self.rng.shuffle(bag)
             candidates = [x for x in bag if x != previous]
             if not candidates:
                 # A manual edit may equal the final remaining entry. Begin a new
                 # cycle to prioritize never repeating the value currently shown.
-                bag[:] = self.pools[key]
+                bag[:] = self.pools[pool_key]
                 self.rng.shuffle(bag)
                 candidates = [x for x in bag if x != previous]
             selected = self.rng.choice(candidates)

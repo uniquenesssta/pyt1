@@ -5,7 +5,6 @@ def scene_parameters(values):
     result = dict(values)
     if values.get('environment') != '室内':
         return result
-    result['architecture'] = '门店室内空间；装修材质和风格参考“' + values['architecture'] + '”，不是拍摄建筑外立面'
     placement = values['placement']
     for original, replacement in (
         ('入口', '室内入口'), ('建筑外墙前', '室内背景墙前'),
@@ -34,3 +33,7 @@ def environment_instructions(values):
                 '采用下列转换后的室内摆位与视角。天气仅用于窗外或门外及自然采光，不在室内制造天气效果。'
                 '使用室内现有灯光；可有0—3位顾客或工作人员，室内不出现车辆。')
     return '场地要求：KT板、气球和拍摄者均在室外，按本轮建筑、摆位和天气拍摄。'
+
+
+def dimension_label(key, label, values):
+    return "内部装潢风格" if key == "architecture" and values.get("environment") == "室内" else label

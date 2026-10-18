@@ -6,6 +6,7 @@ from scene_tool.generation.copywriting import CopyRandomizer
 from scene_tool.generation.parameters import Randomizer
 from scene_tool.storage.pools import load_startup_pools
 from scene_tool.ui.theme import apply_theme
+from scene_tool.ui.style_binding import sync_style, environment_changed
 from scene_tool.ui.layout import build_ui
 from scene_tool.ui.pool_editor import edit_pools
 from scene_tool.ui.session_binding import save, restore
@@ -41,6 +42,9 @@ class App(tk.Tk):
         self.engine = Randomizer(pools)
         self.build_ui()
         self.restore()
+        sync_style(self)
+        if not self.edited():
+            self.refresh()
         self.resize_controller = ResizeController(self, self.content_surface)
         self.ready = True
         for var in [*self.values.values(), self.industry, self.copyline]:
@@ -49,6 +53,7 @@ class App(tk.Tk):
             self.randomize()
         elif not self.prompt.get('1.0', 'end-1c'):
             self.refresh()
+        self.values['environment'].trace_add('write', lambda *_: environment_changed(self))
         self.protocol('WM_DELETE_WINDOW', self.close)
         for error in self.startup_errors:
             self.after_idle(lambda e=error: messagebox.showwarning('读取设置', e, parent=self))
@@ -72,6 +77,7 @@ class App(tk.Tk):
         self.copyline.set(self.copy_engine.draw(self.copyline.get(), self.copy_random.get(), self.copy_locked.get()))
         for key, value in values.items():
             self.values[key].set(value)
+        sync_style(self)
         self.ready = True
         self.rendered = self.prompt.get('1.0', 'end-1c')
         self.refresh()

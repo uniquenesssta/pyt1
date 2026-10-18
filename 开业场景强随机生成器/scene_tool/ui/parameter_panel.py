@@ -9,9 +9,11 @@ def build_parameters(self, body):
     ttk.Checkbutton(left, text='强随机轮换', variable=self.strong).grid(row=0, column=1, sticky='e')
     ttk.Label(left, text='锁定').grid(row=0, column=2, padx=(10, 0))
     self.combos = {}
+    self.parameter_labels = {}
     extra_row = len(DIMENSIONS) + 1
     for row, (key, label) in enumerate(DIMENSIONS, 1):
-        ttk.Label(left, text=f'{row:02d}  {label}').grid(row=row, column=0, sticky='w', pady=5, padx=(0, 10))
+        self.parameter_labels[key] = ttk.Label(left, text=f'{row:02d}  {label}')
+        self.parameter_labels[key].grid(row=row, column=0, sticky='w', pady=5, padx=(0, 10))
         combo = ttk.Combobox(left, textvariable=self.values[key], values=self.engine.pools[key], width=25)
         combo.grid(row=row, column=1, sticky='ew')
         self.combos[key] = combo

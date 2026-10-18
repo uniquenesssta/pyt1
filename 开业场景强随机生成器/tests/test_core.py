@@ -33,18 +33,20 @@ class RandomizerTests(unittest.TestCase):
             current = self.engine.draw(previous)
             for key, _ in DIMENSIONS:
                 self.assertNotEqual(current[key], previous[key])
-                self.assertIn(current[key], self.pools[key])
+                pool_key = 'interior' if key == 'architecture' and current['environment'] == '室内' else key
+                self.assertIn(current[key], self.pools[pool_key])
             previous = current
 
     def test_each_dimension_exhausts_pool_before_repeating(self):
         previous = {}
-        seen = {key: [] for key, _ in DIMENSIONS}
-        for i in range(max(map(len, self.pools.values()))):
+        seen = {key: [] for key in self.pools}
+        for _ in range(400):
             previous = self.engine.draw(previous)
             for key, _ in DIMENSIONS:
-                if i < len(self.pools[key]):
-                    seen[key].append(previous[key])
-        for key, _ in DIMENSIONS:
+                pool_key = 'interior' if key == 'architecture' and previous['environment'] == '室内' else key
+                if len(seen[pool_key]) < len(self.pools[pool_key]):
+                    seen[pool_key].append(previous[key])
+        for key in self.pools:
             self.assertEqual(set(seen[key]), set(self.pools[key]))
             self.assertEqual(len(seen[key]), len(set(seen[key])))
 
