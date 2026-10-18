@@ -5,6 +5,9 @@ from scene_tool.domain.prompts import make_prompt
 
 def migrate_prompt_state(state, legacy_constraints):
     result = dict(state)
+    if isinstance(state.get("values"), dict):
+        result["values"] = dict(state["values"])
+        result["values"].setdefault("environment", "室外")
     known_defaults = (legacy_constraints,) if isinstance(legacy_constraints, str) else tuple(legacy_constraints)
     if result.get('constraints') in known_defaults:
         result['constraints'] = DEFAULT_CONSTRAINTS

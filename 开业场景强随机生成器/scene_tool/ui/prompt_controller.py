@@ -40,6 +40,9 @@ class PromptController:
         return True
 
     def set_prompt(self, content):
+        if self.view.prompt.get('1.0', 'end-1c') == content:
+            self.view.rendered = content
+            return
         self.view.prompt.delete('1.0', 'end')
         self.view.prompt.insert('1.0', content)
         self.view.rendered = content

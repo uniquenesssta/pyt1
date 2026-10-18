@@ -8,7 +8,7 @@ from scene_tool.generation.parameters import Randomizer
 
 def edit_pools(self):
     dialog = tk.Toplevel(self)
-    dialog.title('编辑11维参数池')
+    dialog.title('编辑12维参数池')
     dialog.geometry('700x620')
     dialog.transient(self)
     dialog.grab_set()

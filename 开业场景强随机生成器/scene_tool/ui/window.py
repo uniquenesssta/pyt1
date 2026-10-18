@@ -16,7 +16,7 @@ from scene_tool.ui.prompt_reset import PromptResetController
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title('11维强随机 · 开业场景提示词')
+        self.title('12维强随机 · 开业场景提示词')
         self.geometry('1180x800')
         self.minsize(940, 660)
         apply_theme(self)

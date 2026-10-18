@@ -21,8 +21,8 @@ class RandomizerTests(unittest.TestCase):
         self.pools = load_pools(Path(__file__).resolve().parents[1] / 'resources' / 'pools.json')
         self.engine = Randomizer(self.pools, random.Random(333), generated=False)
 
-    def test_eleven_independent_dimensions(self):
-        self.assertEqual(len(DIMENSIONS), 11)
+    def test_twelve_independent_dimensions(self):
+        self.assertEqual(len(DIMENSIONS), 12)
         pools = {key: ['a', 'b', 'c', 'd'] for key, _ in DIMENSIONS}
         values = Randomizer(pools, random.Random(333), generated=False).draw()
         self.assertGreater(len(set(values.values())), 1)
@@ -87,6 +87,7 @@ class RandomizerTests(unittest.TestCase):
 
     def test_prompt_has_exact_parameters_and_fixed_constraints(self):
         values = self.engine.draw()
+        values['environment'] = '室外'
         prompt = make_prompt(values, industry='咖啡', extra='不要行人')
         for key, label in DIMENSIONS:
             self.assertIn(f'{label}：{values[key]}', prompt)

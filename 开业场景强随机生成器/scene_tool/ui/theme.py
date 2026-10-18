@@ -1,9 +1,11 @@
+import sys
 from tkinter import ttk
 
 def apply_theme(self):
     self.configure(bg='#f3f5fa')
     style = ttk.Style(self)
-    style.theme_use('clam')
+    native = sys.platform == 'win32' and 'vista' in style.theme_names()
+    style.theme_use('vista' if native else 'clam')
     style.configure('.', font=('Microsoft YaHei UI', 10))
     style.configure('TFrame', background='#f3f5fa')
     style.configure('TLabel', background='#f3f5fa', foreground='#24324b')

@@ -5,7 +5,7 @@ def validate_pools(value):
         raise ValueError('参数池必须是 JSON 对象。')
     result = {}
     for key, label in DIMENSIONS:
-        items = value.get(key)
+        items = value.get(key, ['室内', '室外'] if key == 'environment' else None)
         if not isinstance(items, list) or not all(isinstance(x, str) and x.strip() for x in items):
             raise ValueError(f'{label}：必须是非空字符串列表。')
         items = list(dict.fromkeys(x.strip() for x in items))
