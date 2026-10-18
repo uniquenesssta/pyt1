@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox
 from tkinter.scrolledtext import ScrolledText
 from scene_tool.config.defaults import DIMENSIONS
 from scene_tool.ui.style_binding import sync_style
+from scene_tool.domain.scene_pools import EXTRA_LABELS
 from scene_tool.domain.pools import validate_pools
 from scene_tool.storage.pools import save_pools
 from scene_tool.generation.parameters import Randomizer
@@ -14,7 +15,9 @@ def edit_pools(self):
     dialog.transient(self)
     dialog.grab_set()
     ttk.Label(dialog, text='每行一个候选值；每维至少两项。品牌和街道池仅在关闭随机组合时使用。', padding=12).pack(anchor='w')
-    label_to_key = {label: key for key, label in (*DIMENSIONS, ('interior', '内部装潢风格'))}
+    label_to_key = {label: key for key, label in (*DIMENSIONS, *EXTRA_LABELS)}
+    label_to_key['室外KT板布置位置'] = label_to_key.pop('KT板布置位置')
+    label_to_key['室外气球造型'] = label_to_key.pop('气球造型')
     selected = tk.StringVar(value=DIMENSIONS[0][1])
     selector = ttk.Combobox(dialog, textvariable=selected, values=list(label_to_key), state='readonly')
     selector.pack(fill='x', padx=12)

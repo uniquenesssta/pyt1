@@ -33,7 +33,7 @@ class RandomizerTests(unittest.TestCase):
             current = self.engine.draw(previous)
             for key, _ in DIMENSIONS:
                 self.assertNotEqual(current[key], previous[key])
-                pool_key = 'interior' if key == 'architecture' and current['environment'] == '室内' else key
+                pool_key = {'architecture': 'interior', 'placement': 'indoor_placement', 'balloons': 'indoor_balloons'}.get(key, key) if current['environment'] == '室内' else key
                 self.assertIn(current[key], self.pools[pool_key])
             previous = current
 
@@ -43,7 +43,7 @@ class RandomizerTests(unittest.TestCase):
         for _ in range(400):
             previous = self.engine.draw(previous)
             for key, _ in DIMENSIONS:
-                pool_key = 'interior' if key == 'architecture' and previous['environment'] == '室内' else key
+                pool_key = {'architecture': 'interior', 'placement': 'indoor_placement', 'balloons': 'indoor_balloons'}.get(key, key) if previous['environment'] == '室内' else key
                 if len(seen[pool_key]) < len(self.pools[pool_key]):
                     seen[pool_key].append(previous[key])
         for key in self.pools:

@@ -1,12 +1,15 @@
 from scene_tool.config.defaults import DIMENSIONS
 from scene_tool.config.interior_styles import INTERIOR_STYLES
+from scene_tool.config.indoor_decor import INDOOR_PLACEMENTS, INDOOR_BALLOONS
+from scene_tool.domain.scene_pools import EXTRA_LABELS
 
 def validate_pools(value):
     if not isinstance(value, dict):
         raise ValueError('参数池必须是 JSON 对象。')
     result = {}
-    for key, label in (*DIMENSIONS, ('interior', '内部装潢风格')):
-        fallback = INTERIOR_STYLES if key == 'interior' else ['室内', '室外'] if key == 'environment' else None
+    for key, label in (*DIMENSIONS, *EXTRA_LABELS):
+        fallback = {'interior': INTERIOR_STYLES, 'indoor_placement': INDOOR_PLACEMENTS,
+                    'indoor_balloons': INDOOR_BALLOONS, 'environment': ['室内', '室外']}.get(key)
         items = value.get(key, fallback)
         if not isinstance(items, list) or not all(isinstance(x, str) and x.strip() for x in items):
             raise ValueError(f'{label}：必须是非空字符串列表。')

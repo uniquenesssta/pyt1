@@ -33,3 +33,24 @@ class InteriorTests(unittest.TestCase):
         self.assertIn(new['architecture'], INTERIOR_STYLES)
         locked = self.engine.draw(new, ['architecture', 'environment'])
         self.assertEqual(locked['architecture'], new['architecture'])
+
+    def test_indoor_decor_pools_exhaust_independently(self):
+        values = {'environment': '室内'}
+        places, balloons = [], []
+        for _ in range(24):
+            values = self.engine.draw(values, ['environment'])
+            places.append(values['placement'])
+            balloons.append(values['balloons'])
+        self.assertEqual(set(places), set(self.engine.pools['indoor_placement']))
+        self.assertEqual(set(balloons), set(self.engine.pools['indoor_balloons']))
+        self.assertNotIn('placement', self.engine.bags)
+        self.assertNotIn('balloons', self.engine.bags)
+
+    def test_scene_switch_replaces_locked_decor(self):
+        outside = self.engine.draw({'environment': '室外'}, ['environment'])
+        inside = self.engine.draw(outside, ['placement', 'balloons'])
+        self.assertIn(inside['placement'], self.engine.pools['indoor_placement'])
+        self.assertIn(inside['balloons'], self.engine.pools['indoor_balloons'])
+        kept = self.engine.draw(inside, ['environment', 'placement', 'balloons'])
+        self.assertEqual(kept['placement'], inside['placement'])
+        self.assertEqual(kept['balloons'], inside['balloons'])

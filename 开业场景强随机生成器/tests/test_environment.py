@@ -33,12 +33,12 @@ class EnvironmentTests(unittest.TestCase):
 
     def test_indoor_camera_and_placement_are_resolved(self):
         values = Randomizer(self.pools).draw()
-        values.update(environment='室内', camera='站在街道对面的人行道上，手持手机拍向店面', placement='门前空地偏左斜放')
+        values.update(environment='室内', camera='站在街道对面的人行道上，手持手机拍向店面', placement='室内入口左侧墙前')
         resolved = scene_parameters(values)
         self.assertNotIn('人行道', resolved['camera'])
-        self.assertEqual(resolved['placement'], '室内入口旁空地偏左斜放')
+        self.assertEqual(resolved['placement'], '室内入口左侧墙前')
         self.assertIn('室内不出现车辆', make_prompt(values))
-        self.assertEqual(values['placement'], '门前空地偏左斜放')
+        self.assertEqual(values['placement'], '室内入口左侧墙前')
 
     def test_environment_lock_and_switch(self):
         engine = Randomizer(self.pools)

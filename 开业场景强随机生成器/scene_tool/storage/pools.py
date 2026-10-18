@@ -15,10 +15,14 @@ def load_startup_pools(custom_path):
     except (OSError, ValueError) as exc:
         pools = defaults
         errors.append(f'自定义参数池无法读取，已使用默认池。\n{exc}')
-    for name in ('legacy_pools_v1.json', 'legacy_pools_v2.json'):
+    for name in ('legacy_pools_v1.json', 'legacy_pools_v2.json', 'legacy_pools_v3.json'):
         pools = upgrade_pools(pools, defaults, load_json(RESOURCES / name))
     return pools, errors
 
 
 def save_pools(path, pools):
     atomic_json(path, validate_pools(pools))
+
+
+def retired_balloon_values():
+    return load_json(RESOURCES / 'legacy_pools_v3.json')['balloons']

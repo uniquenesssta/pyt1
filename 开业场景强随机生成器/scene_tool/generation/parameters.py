@@ -1,4 +1,5 @@
 import random
+from scene_tool.domain.scene_pools import pool_key as active_pool, INDOOR_KEYS
 from scene_tool.config.defaults import DIMENSIONS
 from scene_tool.domain.pools import validate_pools
 from scene_tool.generation.unique import fresh_value
@@ -35,8 +36,8 @@ class Randomizer:
         current = current or {}
         result = dict(current)
         for key in ['environment'] + [k for k, _ in DIMENSIONS if k != 'environment']:
-            pool_key = 'interior' if key == 'architecture' and result.get('environment') == '室内' else key
-            switched = key == 'architecture' and result.get('environment') != current.get('environment', '室外')
+            pool_key = active_pool(key, result.get('environment'))
+            switched = key in INDOOR_KEYS and result.get('environment') != current.get('environment', '室外')
             if key in locked and current.get(key, '').strip() and not switched:
                 continue
             previous = current.get(key)
