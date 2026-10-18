@@ -24,6 +24,9 @@ class SceneModeTests(unittest.TestCase):
                 self.assertGreaterEqual(len(dim['options']), 4)
                 self.assertEqual(len(dim['options']), len(set(dim['options'])))
         self.assertEqual(len(set(schemas)), 7)
+        for profile in self.profiles:
+            counts = [len(d['options']) for d in profile['dimensions']]
+            self.assertEqual(counts[:8], [60, 40, 40, 40, 40, 32, 56, 32])
 
     def test_every_scene_has_independent_nonrepeating_bags(self):
         for profile in self.profiles:
@@ -88,3 +91,29 @@ class SceneModeTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             model.set_pool('camera', ['只有一项', '只有一项'])
         self.assertEqual(model.pools['camera'], original)
+
+    def test_untouched_old_pools_upgrade_but_manual_edits_survive(self):
+        profile = self.profiles[0]
+        old = profile['legacy_pools']
+        model = SceneModel(profile)
+        state = json.loads(json.dumps(model.state()))
+        state['pools'] = dict(old)
+        state['pools']['camera'] = ['自定义角度一', '自定义角度二']
+        state['bags'] = dict(old)
+        state['prompt'] = '我手改过的完整提示词'
+        restored = SceneModel(profile, state)
+        first = profile['dimensions'][0]['key']
+        self.assertEqual(len(restored.pools[first]), 60)
+        self.assertEqual(restored.bags[first], [])
+        self.assertEqual(restored.pools['camera'], ['自定义角度一', '自定义角度二'])
+        self.assertEqual(restored.prompt, state['prompt'])
+        self.assertEqual(restored.values, state['values'])
+
+    def test_prefers_different_base_scene_when_bag_has_alternatives(self):
+        model = SceneModel(self.profiles[0])
+        key = self.profiles[0]['dimensions'][0]['key']
+        model.set_pool(key, ['现代酒店；左侧入口', '现代酒店；右侧入口', '中式酒店；院落入口'])
+        model.values[key] = '现代酒店；左侧入口'
+        model.bags[key] = ['现代酒店；右侧入口', '中式酒店；院落入口']
+        model.draw()
+        self.assertEqual(model.values[key], '中式酒店；院落入口')

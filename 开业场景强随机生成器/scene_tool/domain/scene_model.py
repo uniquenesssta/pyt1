@@ -10,13 +10,19 @@ class SceneModel:
         self.profile, self.rng = profile, rng or random.SystemRandom()
         state = state if isinstance(state, dict) else {}
         self.pools = {d['key']: list(d['options']) for d in profile['dimensions']}
+        upgraded = set()
         for key, items in state.get('pools', {}).items():
+            if items == profile.get('legacy_pools', {}).get(key) and key in self.pools:
+                upgraded.add(key)
+                continue
             if key in self.pools and isinstance(items, list) and len(set(items)) >= 2 and all(isinstance(x, str) and x.strip() for x in items):
                 self.pools[key] = list(dict.fromkeys(items))
         values = state.get('values', {})
         self.values = {k: values.get(k, '') if isinstance(values.get(k, ''), str) else '' for k in self.pools}
         self.locks = {k: bool(state.get('locks', {}).get(k, False)) for k in self.pools}
         self.bags = {k: list(dict.fromkeys(x for x in state.get('bags', {}).get(k, []) if x in pool)) for k, pool in self.pools.items()}
+        for key in upgraded:
+            self.bags[key] = []
         self.extra = state.get('extra', '')
         if any(not isinstance(state.get(k, ''), str) for k in ('extra', 'prompt', 'rendered')):
             raise ValueError('场景文本必须是字符串')
@@ -36,7 +42,9 @@ class SceneModel:
             if not any(x != self.values[key] for x in bag):
                 bag[:] = pool
             choices = [x for x in bag if x != self.values[key]]
-            selected = self.rng.choice(choices)
+            previous_family = self.values[key].split('；', 1)[0]
+            different = [x for x in choices if x.split('；', 1)[0] != previous_family]
+            selected = self.rng.choice(different or choices)
             bag.remove(selected)
             self.values[key] = selected
 
