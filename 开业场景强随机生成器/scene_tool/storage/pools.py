@@ -15,8 +15,9 @@ def load_startup_pools(custom_path):
     except (OSError, ValueError) as exc:
         pools = defaults
         errors.append(f'自定义参数池无法读取，已使用默认池。\n{exc}')
-    legacy = load_json(RESOURCES / 'legacy_pools_v1.json')
-    return upgrade_pools(pools, defaults, legacy), errors
+    for name in ('legacy_pools_v1.json', 'legacy_pools_v2.json'):
+        pools = upgrade_pools(pools, defaults, load_json(RESOURCES / name))
+    return pools, errors
 
 
 def save_pools(path, pools):
