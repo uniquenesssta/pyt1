@@ -1,40 +1,40 @@
-"""Suspend wrapping for the entire native border-drag operation."""
-from scene_tool.ui.windows_resize import WindowsResizeHook
+"""Freeze the whole client layout while the user holds a resize border."""
+from scene_tool.ui.windows_resize import primary_button_down
 
 
 class ResizeController:
-    def __init__(self, window, widgets):
-        self.window = window
-        self.widgets = widgets
-        self.snapshot = None
-        self.hook = WindowsResizeHook(window, self.pause, self.restore)
-        self.install_pending = window.after_idle(self.install)
+    def __init__(self, window, surface, button_down=primary_button_down):
+        self.window, self.surface = window, surface
+        self.button_down = button_down
+        self.size = None
+        self.frozen = False
+        self.pending = None
+        window.bind('<Configure>', self.on_configure, add='+')
         window.bind('<Destroy>', self.on_destroy, add='+')
 
-    def install(self):
-        self.install_pending = None
-        self.hook.install()
-
-    def pause(self):
-        if self.snapshot is not None:
-            return
-        self.snapshot = [(widget, widget.cget('wrap'), widget.index('@0,0'))
-                         for widget in self.widgets]
-        for widget, _, _ in self.snapshot:
-            widget.configure(wrap='none')
-
-    def restore(self):
-        snapshot, self.snapshot = self.snapshot, None
-        for widget, wrap, top in snapshot or ():
-            widget.configure(wrap=wrap)
-            widget.xview_moveto(0)
-            widget.yview(top)
-
-    def on_destroy(self, event):
+    def on_configure(self, event):
         if event.widget is not self.window:
             return
-        if self.install_pending is not None:
-            self.window.after_cancel(self.install_pending)
-            self.install_pending = None
-        self.hook.close()
-        self.snapshot = None
+        size = (event.width, event.height)
+        previous = self.size
+        self.size = size
+        if previous is None or previous == size or self.frozen:
+            return
+        if self.button_down():
+            self.frozen = True
+            self.surface.place_configure(relwidth=0, relheight=0,
+                                         width=previous[0], height=previous[1])
+            self.pending = self.window.after(20, self.check_release)
+
+    def check_release(self):
+        self.pending = None
+        if self.button_down():
+            self.pending = self.window.after(20, self.check_release)
+            return
+        self.frozen = False
+        self.surface.place_configure(width=0, height=0, relwidth=1, relheight=1)
+
+    def on_destroy(self, event):
+        if event.widget is self.window and self.pending is not None:
+            self.window.after_cancel(self.pending)
+            self.pending = None

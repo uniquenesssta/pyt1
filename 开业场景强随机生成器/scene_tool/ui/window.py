@@ -41,7 +41,7 @@ class App(tk.Tk):
         self.engine = Randomizer(pools)
         self.build_ui()
         self.restore()
-        self.resize_controller = ResizeController(self, (self.prompt, self.constraints, self.extra))
+        self.resize_controller = ResizeController(self, self.content_surface)
         self.ready = True
         for var in [*self.values.values(), self.industry, self.copyline]:
             var.trace_add('write', self.schedule_refresh)
