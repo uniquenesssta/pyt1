@@ -15,6 +15,8 @@ class SceneSwitcher:
         except (OSError, ValueError) as exc:
             state = {}
             window.after_idle(lambda error=str(exc): messagebox.showwarning('场景设置读取失败', error, parent=window))
+        for error in state.get('errors', []):
+            window.after_idle(lambda e=error: messagebox.showwarning('场景设置读取失败', e, parent=window))
         self.profiles = {p['name']: p for p in load_profiles()}
         for name, profile in self.profiles.items():
             try:
