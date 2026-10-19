@@ -1,0 +1,53 @@
+{
+  "number": 26,
+  "name": "大畜",
+  "full_name": "山天大畜",
+  "pattern": "111001",
+  "lower": "乾",
+  "upper": "艮",
+  "judgement": "利貞，不家食吉，利涉大川。",
+  "lines": [
+    {
+      "label": "初九",
+      "text": "有厲利已。"
+    },
+    {
+      "label": "九二",
+      "text": "輿說輹（异文：腹）。"
+    },
+    {
+      "label": "九三",
+      "text": "良馬逐，利艱貞，吉。日閑輿衛，利有攸往。"
+    },
+    {
+      "label": "六四",
+      "text": "童牛之告（异文：牿），元吉。"
+    },
+    {
+      "label": "六五",
+      "text": "豶豕之牙，吉。"
+    },
+    {
+      "label": "上九",
+      "text": "何天之衢，亨。"
+    }
+  ],
+  "special": [],
+  "image": "天在山中，大畜；君子以多識前言往行，以畜其德。",
+  "source": {
+    "title": "周易/大畜",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E5%A4%A7%E7%95%9C",
+    "revision": 10646304,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E5%A4%A7%E7%95%9C&oldid=10646304"
+  },
+  "editorial": {
+    "keywords": [
+      "积蓄",
+      "约束",
+      "能力"
+    ],
+    "summary": "把暂时的收束用于积累能力与经验。",
+    "opportunity": "建立储备，借助经验校正行动。",
+    "caution": "把约束变成长期僵停，或储备不足便承担过多。"
+  }
+}

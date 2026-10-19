@@ -1,0 +1,53 @@
+{
+  "number": 45,
+  "name": "萃",
+  "full_name": "泽地萃",
+  "pattern": "000110",
+  "lower": "坤",
+  "upper": "兑",
+  "judgement": "王假有廟，利見大人，亨。利貞。用大牲吉，利有攸往。",
+  "lines": [
+    {
+      "label": "初六",
+      "text": "有孚不終，乃亂乃萃，若號一握為笑，勿恤，往无咎。"
+    },
+    {
+      "label": "六二",
+      "text": "引吉，无咎，孚乃利用禴。"
+    },
+    {
+      "label": "六三",
+      "text": "萃如，嗟如，无攸利，往无咎，小吝。"
+    },
+    {
+      "label": "九四",
+      "text": "大吉，无咎。"
+    },
+    {
+      "label": "九五",
+      "text": "萃有位，无咎。匪孚，元永貞，悔亡。"
+    },
+    {
+      "label": "上六",
+      "text": "齎資（异文：咨）涕洟，无咎。"
+    }
+  ],
+  "special": [],
+  "image": "澤上于地，萃；君子以除戎器，戒不虞。",
+  "source": {
+    "title": "周易/萃",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E8%90%83",
+    "revision": 10647546,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E8%90%83&oldid=10647546"
+  },
+  "editorial": {
+    "keywords": [
+      "聚集",
+      "共同目标",
+      "组织"
+    ],
+    "summary": "聚集需要共同目的与相应的承接安排。",
+    "opportunity": "明确为何聚在一起，以及怎样分工和维护联系。",
+    "caution": "只有人数或热度，没有实际目标与组织能力。"
+  }
+}

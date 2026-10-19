@@ -1,0 +1,53 @@
+{
+  "number": 60,
+  "name": "节",
+  "full_name": "水泽节",
+  "pattern": "110010",
+  "lower": "兑",
+  "upper": "坎",
+  "judgement": "亨。苦節不可貞。",
+  "lines": [
+    {
+      "label": "初九",
+      "text": "不出戶庭，无咎。"
+    },
+    {
+      "label": "九二",
+      "text": "不出門庭，凶。"
+    },
+    {
+      "label": "六三",
+      "text": "不節若，則嗟若，无咎。"
+    },
+    {
+      "label": "六四",
+      "text": "安節，亨。"
+    },
+    {
+      "label": "九五",
+      "text": "甘節，吉；往有尚。"
+    },
+    {
+      "label": "上六",
+      "text": "苦節，貞凶，悔亡。"
+    }
+  ],
+  "special": [],
+  "image": "澤上有水，節；君子以制數度，議德行。",
+  "source": {
+    "title": "周易/節",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E7%AF%80",
+    "revision": 2405027,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E7%AF%80&oldid=2405027"
+  },
+  "editorial": {
+    "keywords": [
+      "节制",
+      "规则",
+      "可持续性"
+    ],
+    "summary": "为行动设置能够长期维持的边界。",
+    "opportunity": "明确范围、节奏与约定，让规则服务实际需要。",
+    "caution": "规则过严而难以持续，或把限制强加给单独一方。"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "number": 38,
+  "name": "睽",
+  "full_name": "火泽睽",
+  "pattern": "110101",
+  "lower": "兑",
+  "upper": "离",
+  "judgement": "小事吉。",
+  "lines": [
+    {
+      "label": "初九",
+      "text": "悔亡，喪馬勿逐，自復；見惡人无咎。"
+    },
+    {
+      "label": "九二",
+      "text": "遇主于巷，无咎。"
+    },
+    {
+      "label": "六三",
+      "text": "見輿曳，其牛𧤊（异文：掣），其人天且劓，无初有終。"
+    },
+    {
+      "label": "九四",
+      "text": "睽孤，遇元夫，交孚，厲无咎。"
+    },
+    {
+      "label": "六五",
+      "text": "悔亡，厥宗噬膚，往何咎。"
+    },
+    {
+      "label": "上九",
+      "text": "睽孤， 見豕負涂，載鬼一車， 先張之弧，後說之弧，匪寇婚媾，往遇雨則吉。"
+    }
+  ],
+  "special": [],
+  "image": "上火下澤，睽；君子以同而異。",
+  "source": {
+    "title": "周易/睽",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E7%9D%BD",
+    "revision": 10646622,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E7%9D%BD&oldid=10646622"
+  },
+  "editorial": {
+    "keywords": [
+      "差异",
+      "分歧",
+      "局部合作"
+    ],
+    "summary": "差异存在时，也可以寻找有限的共同事项。",
+    "opportunity": "在具体小事上建立可核对的合作。",
+    "caution": "要求所有方面都一致，或把差异直接等同于敌意。"
+  }
+}

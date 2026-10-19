@@ -1,0 +1,53 @@
+{
+  "number": 12,
+  "name": "否",
+  "full_name": "天地否",
+  "pattern": "000111",
+  "lower": "坤",
+  "upper": "乾",
+  "judgement": "否之匪人，不利君子貞，大往小來。",
+  "lines": [
+    {
+      "label": "初六",
+      "text": "拔茅茹以其彙，貞吉。亨。"
+    },
+    {
+      "label": "六二",
+      "text": "包承，小人吉，大人否。亨。"
+    },
+    {
+      "label": "六三",
+      "text": "包羞。"
+    },
+    {
+      "label": "九四",
+      "text": "有命，无咎，疇離祉。"
+    },
+    {
+      "label": "九五",
+      "text": "休否，大人吉。其亡其亡，繫于包（异文：苞）桑。"
+    },
+    {
+      "label": "上九",
+      "text": "傾否，先否後喜。"
+    }
+  ],
+  "special": [],
+  "image": "天地不交，否；君子以儉德辟難，不可榮以祿。",
+  "source": {
+    "title": "周易/否",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E5%90%A6",
+    "revision": 10645603,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E5%90%A6&oldid=10645603"
+  },
+  "editorial": {
+    "keywords": [
+      "闭塞",
+      "隔阂",
+      "保全"
+    ],
+    "summary": "区分外部阻塞与自身仍能调整的部分。",
+    "opportunity": "保留基本能力，寻找可重新建立联系的节点。",
+    "caution": "在沟通不畅时继续硬推，耗尽可以保留的资源。"
+  }
+}

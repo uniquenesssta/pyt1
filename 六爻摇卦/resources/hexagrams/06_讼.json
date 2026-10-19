@@ -1,0 +1,53 @@
+{
+  "number": 6,
+  "name": "讼",
+  "full_name": "天水讼",
+  "pattern": "010111",
+  "lower": "坎",
+  "upper": "乾",
+  "judgement": "有孚，窒，惕，中吉，終凶。利見大人，不利涉大川。",
+  "lines": [
+    {
+      "label": "初六",
+      "text": "不永所事，小有言，終吉。"
+    },
+    {
+      "label": "九二",
+      "text": "不克訟，歸而逋，其邑人三百戶无眚。"
+    },
+    {
+      "label": "六三",
+      "text": "食舊德，貞厲，終吉。或從王事，无成。"
+    },
+    {
+      "label": "九四",
+      "text": "不克訟，復即命渝，安貞吉。"
+    },
+    {
+      "label": "九五",
+      "text": "訟，元吉。"
+    },
+    {
+      "label": "上九",
+      "text": "或錫之鞶帶，終朝三褫（异文：拕）之。"
+    }
+  ],
+  "special": [],
+  "image": "天與水違行，訟；君子以作事謀始。",
+  "source": {
+    "title": "周易/訟",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E8%A8%9F",
+    "revision": 10645409,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E8%A8%9F&oldid=10645409"
+  },
+  "editorial": {
+    "keywords": [
+      "分歧",
+      "争执",
+      "边界"
+    ],
+    "summary": "区分事实分歧、利益分歧与沟通方式的问题。",
+    "opportunity": "先澄清约定、证据和可协商的边界。",
+    "caution": "把争胜本身当成目标，使矛盾不断扩大。"
+  }
+}

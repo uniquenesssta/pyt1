@@ -1,0 +1,53 @@
+{
+  "number": 40,
+  "name": "解",
+  "full_name": "雷水解",
+  "pattern": "010100",
+  "lower": "坎",
+  "upper": "震",
+  "judgement": "利西南，无所往，其來復吉。有攸往，夙吉。",
+  "lines": [
+    {
+      "label": "初六",
+      "text": "无咎。"
+    },
+    {
+      "label": "九二",
+      "text": "田獲三狐，得黃矢，貞吉。"
+    },
+    {
+      "label": "六三",
+      "text": "負且乘，致寇至，貞吝。"
+    },
+    {
+      "label": "九四",
+      "text": "解而拇，朋至斯孚。"
+    },
+    {
+      "label": "六五",
+      "text": "君子惟（异文：維）有解，吉；有孚于小人。"
+    },
+    {
+      "label": "上六",
+      "text": "公用射隼，于高墉（异文：庸）之上，獲之，无不利。"
+    }
+  ],
+  "special": [],
+  "image": "雷雨作，解；君子以赦過宥罪。",
+  "source": {
+    "title": "周易/解",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E8%A7%A3",
+    "revision": 10646666,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E8%A7%A3&oldid=10646666"
+  },
+  "editorial": {
+    "keywords": [
+      "缓解",
+      "松绑",
+      "及时处理"
+    ],
+    "summary": "条件有所松动时，及时处理造成牵制的事项。",
+    "opportunity": "解除不必要的负担，让修复落实到具体行动。",
+    "caution": "因暂时缓解就忽略后续整理，或拖延应做的处理。"
+  }
+}

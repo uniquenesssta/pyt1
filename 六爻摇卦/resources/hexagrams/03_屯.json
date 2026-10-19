@@ -1,0 +1,52 @@
+{
+  "number": 3,
+  "name": "屯",
+  "full_name": "水雷屯",
+  "pattern": "100010",
+  "lower": "震",
+  "upper": "坎",
+  "judgement": "元亨，利貞。勿用有攸往，利建侯。",
+  "lines": [
+    {
+      "label": "初九",
+      "text": "磐（异文：盤）桓，利居貞，利建侯。"
+    },
+    {
+      "label": "六二",
+      "text": "屯如邅如，乘馬班如，匪寇婚媾，女子貞不字，十年乃字。"
+    },
+    {
+      "label": "六三",
+      "text": "即鹿无虞，惟入于林中，君子幾不如舍，往吝。"
+    },
+    {
+      "label": "六四",
+      "text": "乘馬班如，求婚媾，往，吉无不利。"
+    },
+    {
+      "label": "九五",
+      "text": "屯其膏；小貞吉，大貞凶。"
+    },
+    {
+      "label": "上六",
+      "text": "乘馬班如，泣血漣如。"
+    }
+  ],
+  "special": [],
+  "image": "雲雷，屯；君子以經綸。",
+  "source": {
+    "title": "周易/屯",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E5%B1%AF",
+    "revision": 10643482,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E5%B1%AF&oldid=10643482"
+  },
+  "editorial": {
+    "keywords": [
+      "初始困难",
+      "建立秩序"
+    ],
+    "summary": "起步时混乱与条件未齐，可以分别处理。",
+    "opportunity": "先建立基本规则，找到能解决关键障碍的支持。",
+    "caution": "条件尚未厘清就扩大投入或同时推进过多事项。"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "number": 56,
+  "name": "旅",
+  "full_name": "火山旅",
+  "pattern": "001101",
+  "lower": "艮",
+  "upper": "离",
+  "judgement": "小亨，旅貞吉。",
+  "lines": [
+    {
+      "label": "初六",
+      "text": "旅瑣瑣，斯其所取災。"
+    },
+    {
+      "label": "六二",
+      "text": "旅即次，懷其資，得僮（异文：童）僕貞。"
+    },
+    {
+      "label": "九三",
+      "text": "旅焚其次，喪其僮（异文：童）僕，貞厲。"
+    },
+    {
+      "label": "九四",
+      "text": "旅于處，得其資斧，我心不快。"
+    },
+    {
+      "label": "六五",
+      "text": "射雉一矢亡，終以譽命。"
+    },
+    {
+      "label": "上九",
+      "text": "鳥焚其巢，旅人先笑後號咷。喪牛于易，凶。"
+    }
+  ],
+  "special": [],
+  "image": "山上有火，旅；君子以明慎用刑，而不留獄。",
+  "source": {
+    "title": "周易/旅",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E6%97%85",
+    "revision": 10647234,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E6%97%85&oldid=10647234"
+  },
+  "editorial": {
+    "keywords": [
+      "暂居",
+      "适应",
+      "有限承诺"
+    ],
+    "summary": "身处不熟悉的环境时，重视基本规则与分寸。",
+    "opportunity": "先了解环境，以适当的行动建立立足点。",
+    "caution": "把暂时条件当成长期保障，或贸然承担超出位置的事。"
+  }
+}

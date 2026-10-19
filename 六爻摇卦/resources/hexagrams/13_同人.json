@@ -1,0 +1,52 @@
+{
+  "number": 13,
+  "name": "同人",
+  "full_name": "天火同人",
+  "pattern": "101111",
+  "lower": "离",
+  "upper": "乾",
+  "judgement": "同人于野，亨。 利涉大川，利君子貞。",
+  "lines": [
+    {
+      "label": "初九",
+      "text": "同人于門，無咎。"
+    },
+    {
+      "label": "六二",
+      "text": "同人于宗，吝。"
+    },
+    {
+      "label": "九三",
+      "text": "伏戎于莽，升其高陵，三歲不興。"
+    },
+    {
+      "label": "九四",
+      "text": "乘其庸（异文：墉），弗克攻，吉。"
+    },
+    {
+      "label": "九五",
+      "text": "同人，先號啕而後笑。大師克相遇。"
+    },
+    {
+      "label": "上九",
+      "text": "同人于郊，無悔。"
+    }
+  ],
+  "special": [],
+  "image": "天與火，同人；君子以類族辨物。",
+  "source": {
+    "title": "周易/同人",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E5%90%8C%E4%BA%BA",
+    "revision": 10645635,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E5%90%8C%E4%BA%BA&oldid=10645635"
+  },
+  "editorial": {
+    "keywords": [
+      "共同目标",
+      "开放合作"
+    ],
+    "summary": "寻找共同目标，同时允许各自保留差异。",
+    "opportunity": "扩大交流范围，以公开规则促进合作。",
+    "caution": "只维护小圈子的利益，把暂时一致误当成长期共识。"
+  }
+}

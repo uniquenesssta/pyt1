@@ -1,0 +1,53 @@
+{
+  "number": 62,
+  "name": "小过",
+  "full_name": "雷山小过",
+  "pattern": "001100",
+  "lower": "艮",
+  "upper": "震",
+  "judgement": "亨。利貞。可小事，不可大事。飛鳥遺之音，不宜上宜下，大吉。",
+  "lines": [
+    {
+      "label": "初六",
+      "text": "飛鳥以凶。"
+    },
+    {
+      "label": "六二",
+      "text": "過其祖，遇其妣；不及其君，遇其臣；无咎。"
+    },
+    {
+      "label": "九三",
+      "text": "弗過防之，從或戕之，凶。"
+    },
+    {
+      "label": "九四",
+      "text": "无咎，弗過遇之。往厲必戒，勿用永貞。"
+    },
+    {
+      "label": "六五",
+      "text": "密雲不雨，自我西郊，公弋取彼在穴。"
+    },
+    {
+      "label": "上六",
+      "text": "弗遇過之，飛鳥離之，凶，是謂災眚。"
+    }
+  ],
+  "special": [],
+  "image": "山上有雷，小過；君子以行過乎恭，喪過乎哀，用過乎儉。",
+  "source": {
+    "title": "周易/小過",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E5%B0%8F%E9%81%8E",
+    "revision": 10643238,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E5%B0%8F%E9%81%8E&oldid=10643238"
+  },
+  "editorial": {
+    "keywords": [
+      "小步",
+      "细节",
+      "适度"
+    ],
+    "summary": "条件有限时，把注意力放在可控的小事上。",
+    "opportunity": "先修正细节，再观察是否具备扩大行动的条件。",
+    "caution": "为了证明能力而贸然扩大规模，忽略分寸。"
+  }
+}

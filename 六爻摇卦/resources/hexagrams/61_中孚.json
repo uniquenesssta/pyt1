@@ -1,0 +1,53 @@
+{
+  "number": 61,
+  "name": "中孚",
+  "full_name": "风泽中孚",
+  "pattern": "110011",
+  "lower": "兑",
+  "upper": "巽",
+  "judgement": "豚魚吉，利涉大川，利貞。",
+  "lines": [
+    {
+      "label": "初九",
+      "text": "虞吉，有它（异文：他）不燕。"
+    },
+    {
+      "label": "九二",
+      "text": "鳴鶴在陰，其子和之，我有好爵，吾與爾靡之。"
+    },
+    {
+      "label": "六三",
+      "text": "得敵，或鼓或罷，或泣或歌。"
+    },
+    {
+      "label": "六四",
+      "text": "月既（异文：几、幾）望，馬匹亡，无咎。"
+    },
+    {
+      "label": "九五",
+      "text": "有孚攣如，无咎。"
+    },
+    {
+      "label": "上九",
+      "text": "翰音登于天，貞凶。"
+    }
+  ],
+  "special": [],
+  "image": "澤上有風，中孚；君子以議獄緩死。",
+  "source": {
+    "title": "周易/中孚",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E4%B8%AD%E5%AD%9A",
+    "revision": 10647425,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E4%B8%AD%E5%AD%9A&oldid=10647425"
+  },
+  "editorial": {
+    "keywords": [
+      "诚信",
+      "内在一致",
+      "信任"
+    ],
+    "summary": "审视说法、意愿与行动是否相互一致。",
+    "opportunity": "用可以核对的行动逐步建立信任。",
+    "caution": "把真诚的感觉等同于事实已经得到验证。"
+  }
+}

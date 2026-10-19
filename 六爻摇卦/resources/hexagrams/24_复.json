@@ -1,0 +1,53 @@
+{
+  "number": 24,
+  "name": "复",
+  "full_name": "地雷复",
+  "pattern": "100000",
+  "lower": "震",
+  "upper": "坤",
+  "judgement": "亨。出入无疾，朋來无咎。反復其道，七日來復，利有攸往。",
+  "lines": [
+    {
+      "label": "初九",
+      "text": "不遠復，无祇悔，元吉。"
+    },
+    {
+      "label": "六二",
+      "text": "休復，吉。"
+    },
+    {
+      "label": "六三",
+      "text": "頻復，厲无咎。"
+    },
+    {
+      "label": "六四",
+      "text": "中行獨復。"
+    },
+    {
+      "label": "六五",
+      "text": "敦復，无悔。"
+    },
+    {
+      "label": "上六",
+      "text": "迷復，凶，有災眚。用行師，終有大敗，以其國君，凶；至于十年，不克征。"
+    }
+  ],
+  "special": [],
+  "image": "雷在地中，復；先王以至日閉關，商旅不行，后不省方。",
+  "source": {
+    "title": "周易/復",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E5%BE%A9",
+    "revision": 10643037,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E5%BE%A9&oldid=10643037"
+  },
+  "editorial": {
+    "keywords": [
+      "返回",
+      "恢复",
+      "重新开始"
+    ],
+    "summary": "允许从偏离中返回，重新建立稳定节奏。",
+    "opportunity": "从可持续的小步骤恢复，而非急于追回所有损失。",
+    "caution": "把一次恢复迹象当作已经完全恢复。"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "number": 9,
+  "name": "小畜",
+  "full_name": "风天小畜",
+  "pattern": "111011",
+  "lower": "乾",
+  "upper": "巽",
+  "judgement": "亨。密雲不雨，自我西郊。",
+  "lines": [
+    {
+      "label": "初九",
+      "text": "復自道，何其咎，吉。"
+    },
+    {
+      "label": "九二",
+      "text": "牽復，吉。"
+    },
+    {
+      "label": "九三",
+      "text": "車（异文：輿）說輹（异文：輻），夫妻反目。"
+    },
+    {
+      "label": "六四",
+      "text": "有孚，血去惕出，无咎。"
+    },
+    {
+      "label": "九五",
+      "text": "有孚攣如，富以其鄰。"
+    },
+    {
+      "label": "上九",
+      "text": "既雨既處，尚得（异文：德）載，婦貞厲，月幾望，君子征凶。"
+    }
+  ],
+  "special": [],
+  "image": "風行天上，小畜，君子以懿文德。",
+  "source": {
+    "title": "周易/小畜",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E5%B0%8F%E7%95%9C",
+    "revision": 10645530,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E5%B0%8F%E7%95%9C&oldid=10645530"
+  },
+  "editorial": {
+    "keywords": [
+      "小幅积累",
+      "节制",
+      "蓄势"
+    ],
+    "summary": "条件有限时，细小积累也有价值。",
+    "opportunity": "先做可控制的小改进，让准备逐渐成形。",
+    "caution": "把尚在积累的迹象当成条件已经充分。"
+  }
+}

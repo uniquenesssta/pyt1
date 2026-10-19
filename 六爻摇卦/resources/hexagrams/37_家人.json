@@ -1,0 +1,52 @@
+{
+  "number": 37,
+  "name": "家人",
+  "full_name": "风火家人",
+  "pattern": "101011",
+  "lower": "离",
+  "upper": "巽",
+  "judgement": "利女貞。",
+  "lines": [
+    {
+      "label": "初九",
+      "text": "閑有家，悔亡。"
+    },
+    {
+      "label": "六二",
+      "text": "无攸遂，在中饋，貞吉。"
+    },
+    {
+      "label": "九三",
+      "text": "家人嗃嗃，悔厲吉；婦子嘻嘻，終吝。"
+    },
+    {
+      "label": "六四",
+      "text": "富家，大吉。"
+    },
+    {
+      "label": "九五",
+      "text": "王假有家，勿恤。吉。"
+    },
+    {
+      "label": "上九",
+      "text": "有孚威如，終吉。"
+    }
+  ],
+  "special": [],
+  "image": "風自火出，家人；君子以言有物，而行有恆。",
+  "source": {
+    "title": "周易/家人",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E5%AE%B6%E4%BA%BA",
+    "revision": 2405005,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E5%AE%B6%E4%BA%BA&oldid=2405005"
+  },
+  "editorial": {
+    "keywords": [
+      "关系分工",
+      "内部秩序"
+    ],
+    "summary": "日常关系需要明确责任与相互配合。",
+    "opportunity": "把角色、约定和沟通方式说清楚。",
+    "caution": "把固定角色当成单方面要求，忽略实际需要与边界。"
+  }
+}

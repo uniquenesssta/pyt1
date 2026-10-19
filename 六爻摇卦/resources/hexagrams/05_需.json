@@ -1,0 +1,53 @@
+{
+  "number": 5,
+  "name": "需",
+  "full_name": "水天需",
+  "pattern": "111010",
+  "lower": "乾",
+  "upper": "坎",
+  "judgement": "有孚，光亨。貞吉，利涉大川。",
+  "lines": [
+    {
+      "label": "初九",
+      "text": "需于郊，利用恆，无咎。"
+    },
+    {
+      "label": "九二",
+      "text": "需于沙，小有言，終吉。"
+    },
+    {
+      "label": "九三",
+      "text": "需于泥，致寇至。"
+    },
+    {
+      "label": "六四",
+      "text": "需于血，出自穴。"
+    },
+    {
+      "label": "九五",
+      "text": "需于酒食，貞吉。"
+    },
+    {
+      "label": "上六",
+      "text": "入于穴，有不速之客三人來，敬之終吉。"
+    }
+  ],
+  "special": [],
+  "image": "雲上於天，需；君子以飲食宴樂。",
+  "source": {
+    "title": "周易/需",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E9%9C%80",
+    "revision": 10643261,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E9%9C%80&oldid=10643261"
+  },
+  "editorial": {
+    "keywords": [
+      "等待",
+      "准备",
+      "时机"
+    ],
+    "summary": "等待也可以用于准备与观察，而非完全停滞。",
+    "opportunity": "完善条件，并为行动设置可观察的启动信号。",
+    "caution": "因焦虑而抢先行动，或以等待回避应做的准备。"
+  }
+}

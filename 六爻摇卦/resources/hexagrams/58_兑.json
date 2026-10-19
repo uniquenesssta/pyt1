@@ -1,0 +1,53 @@
+{
+  "number": 58,
+  "name": "兑",
+  "full_name": "兑为泽",
+  "pattern": "110110",
+  "lower": "兑",
+  "upper": "兑",
+  "judgement": "亨。利貞。",
+  "lines": [
+    {
+      "label": "初九",
+      "text": "和兌，吉。"
+    },
+    {
+      "label": "九二",
+      "text": "孚兌，吉，悔亡。"
+    },
+    {
+      "label": "六三",
+      "text": "來兌，凶。"
+    },
+    {
+      "label": "九四",
+      "text": "商兌，未寧，介疾有喜。"
+    },
+    {
+      "label": "九五",
+      "text": "孚于剝，有厲。"
+    },
+    {
+      "label": "上六",
+      "text": "引兌。"
+    }
+  ],
+  "special": [],
+  "image": "麗澤，兌；君子以朋友講習。",
+  "source": {
+    "title": "周易/兌",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E5%85%8C",
+    "revision": 2404993,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E5%85%8C&oldid=2404993"
+  },
+  "editorial": {
+    "keywords": [
+      "交流",
+      "愉悦",
+      "相互支持"
+    ],
+    "summary": "交流既需要开放，也需要真实与分寸。",
+    "opportunity": "通过诚恳表达与倾听形成相互支持。",
+    "caution": "把取悦和表面和气代替真实的理解。"
+  }
+}

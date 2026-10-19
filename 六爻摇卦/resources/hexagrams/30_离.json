@@ -1,0 +1,53 @@
+{
+  "number": 30,
+  "name": "离",
+  "full_name": "离为火",
+  "pattern": "101101",
+  "lower": "离",
+  "upper": "离",
+  "judgement": "利貞。亨。畜牝牛，吉。",
+  "lines": [
+    {
+      "label": "初九",
+      "text": "履錯然，敬之无咎。"
+    },
+    {
+      "label": "六二",
+      "text": "黃離，元吉。"
+    },
+    {
+      "label": "九三",
+      "text": "日昃之離，不鼓缶而歌，則大耋之差（异文：嗟），凶。"
+    },
+    {
+      "label": "九四",
+      "text": "突如其來如，焚如，死如，棄如。"
+    },
+    {
+      "label": "六五",
+      "text": "出涕沱若，戚嗟若，吉。"
+    },
+    {
+      "label": "上九",
+      "text": "王用出征，有嘉折首，獲匪其醜，无咎。"
+    }
+  ],
+  "special": [],
+  "image": "明兩作離，大人以繼明照于四方。",
+  "source": {
+    "title": "周易/離",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E9%9B%A2",
+    "revision": 10646424,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E9%9B%A2&oldid=10646424"
+  },
+  "editorial": {
+    "keywords": [
+      "明晰",
+      "依托",
+      "持续照料"
+    ],
+    "summary": "明确所依托的条件，并维持清楚的判断。",
+    "opportunity": "找到可靠依托，让行动与信息保持清晰。",
+    "caution": "只追求表面的明亮与关注，忽略维持所需的条件。"
+  }
+}

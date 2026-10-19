@@ -1,0 +1,53 @@
+{
+  "number": 39,
+  "name": "蹇",
+  "full_name": "水山蹇",
+  "pattern": "001010",
+  "lower": "艮",
+  "upper": "坎",
+  "judgement": "利西南，不利東北；利見大人，貞吉。",
+  "lines": [
+    {
+      "label": "初六",
+      "text": "往蹇，來譽。"
+    },
+    {
+      "label": "六二",
+      "text": "王臣蹇蹇，匪躬之故。"
+    },
+    {
+      "label": "九三",
+      "text": "往蹇來反。"
+    },
+    {
+      "label": "六四",
+      "text": "往蹇來連。"
+    },
+    {
+      "label": "九五",
+      "text": "大蹇朋來。"
+    },
+    {
+      "label": "上六",
+      "text": "往蹇來碩，吉；利見大人。"
+    }
+  ],
+  "special": [],
+  "image": "山上有水，蹇；君子以反身修德。",
+  "source": {
+    "title": "周易/蹇",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E8%B9%87",
+    "revision": 2405036,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E8%B9%87&oldid=2405036"
+  },
+  "editorial": {
+    "keywords": [
+      "受阻",
+      "换路",
+      "求助"
+    ],
+    "summary": "遇到阻力时，检查路径是否需要调整。",
+    "opportunity": "先识别难点，再寻找替代路径或可靠帮助。",
+    "caution": "只沿原路反复硬推，忽略已经出现的限制。"
+  }
+}

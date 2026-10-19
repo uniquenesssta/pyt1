@@ -1,0 +1,53 @@
+{
+  "number": 15,
+  "name": "谦",
+  "full_name": "地山谦",
+  "pattern": "001000",
+  "lower": "艮",
+  "upper": "坤",
+  "judgement": "亨，君子有終。",
+  "lines": [
+    {
+      "label": "初六",
+      "text": "謙謙君子，用涉大川，吉。"
+    },
+    {
+      "label": "六二",
+      "text": "鳴謙，貞吉。"
+    },
+    {
+      "label": "九三",
+      "text": "勞謙君子，有終吉。"
+    },
+    {
+      "label": "六四",
+      "text": "无不利，撝謙。"
+    },
+    {
+      "label": "六五",
+      "text": "不富，以其鄰，利用侵伐，无不利。"
+    },
+    {
+      "label": "上六",
+      "text": "鳴謙，利用行師，征邑國。"
+    }
+  ],
+  "special": [],
+  "image": "地中有山，謙；君子以裒多益寡，稱物平施。",
+  "source": {
+    "title": "周易/謙",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E8%AC%99",
+    "revision": 2106142,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E8%AC%99&oldid=2106142"
+  },
+  "editorial": {
+    "keywords": [
+      "谦逊",
+      "调整",
+      "平衡"
+    ],
+    "summary": "让能力、位置和表达保持适当比例。",
+    "opportunity": "以务实行动修正过满或不足之处。",
+    "caution": "把谦逊变成自我贬低，或表面退让而不处理问题。"
+  }
+}

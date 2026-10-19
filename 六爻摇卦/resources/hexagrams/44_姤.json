@@ -1,0 +1,53 @@
+{
+  "number": 44,
+  "name": "姤",
+  "full_name": "天风姤",
+  "pattern": "011111",
+  "lower": "巽",
+  "upper": "乾",
+  "judgement": "女壯，勿用取女。",
+  "lines": [
+    {
+      "label": "初六",
+      "text": "系于金柅，貞吉，有攸往，見凶，羸豕，孚，蹢躅（异文：𨅙𨄃）。"
+    },
+    {
+      "label": "九二",
+      "text": "包有魚，无咎，不利賓。"
+    },
+    {
+      "label": "九三",
+      "text": "臀无膚，其行次且，厲，无大咎。"
+    },
+    {
+      "label": "九四",
+      "text": "包无魚，起凶。"
+    },
+    {
+      "label": "九五",
+      "text": "以杞包（异文：苞）瓜，含章，有隕自天。"
+    },
+    {
+      "label": "上九",
+      "text": "姤其角，吝，无咎。"
+    }
+  ],
+  "special": [],
+  "image": "天下有風，姤；后以施命誥四方。",
+  "source": {
+    "title": "周易/姤",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E5%A7%A4",
+    "revision": 10646826,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E5%A7%A4&oldid=10646826"
+  },
+  "editorial": {
+    "keywords": [
+      "相遇",
+      "突然出现",
+      "边界"
+    ],
+    "summary": "面对新出现的人或条件，先观察其影响范围。",
+    "opportunity": "保留接触与了解的空间，同时明确边界。",
+    "caution": "因新鲜或偶然接触而过早作出长期承诺。"
+  }
+}

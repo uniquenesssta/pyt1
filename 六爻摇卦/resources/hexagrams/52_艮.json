@@ -1,0 +1,53 @@
+{
+  "number": 52,
+  "name": "艮",
+  "full_name": "艮为山",
+  "pattern": "001001",
+  "lower": "艮",
+  "upper": "艮",
+  "judgement": "艮其背，不獲其身，行其庭，不見其人，无咎。",
+  "lines": [
+    {
+      "label": "初六",
+      "text": "艮其趾，无咎，利永貞。"
+    },
+    {
+      "label": "六二",
+      "text": "艮其腓，不拯其隨，其心不快。"
+    },
+    {
+      "label": "九三",
+      "text": "艮其限，裂（异文：列）其夤，厲閽（异文：薰）心。"
+    },
+    {
+      "label": "六四",
+      "text": "艮其身，无咎。"
+    },
+    {
+      "label": "六五",
+      "text": "艮其輔，言有孚（异文：序），悔亡。"
+    },
+    {
+      "label": "上九",
+      "text": "敦艮，吉。"
+    }
+  ],
+  "special": [],
+  "image": "兼山，艮；君子以思不出其位。",
+  "source": {
+    "title": "周易/艮",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E8%89%AE",
+    "revision": 10647135,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E8%89%AE&oldid=10647135"
+  },
+  "editorial": {
+    "keywords": [
+      "停止",
+      "界限",
+      "安定"
+    ],
+    "summary": "明确哪里需要停下，以及什么边界值得保留。",
+    "opportunity": "通过适当停顿整理注意力和行动范围。",
+    "caution": "把停止变成回避，或在应停处继续用力。"
+  }
+}

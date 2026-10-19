@@ -1,0 +1,53 @@
+{
+  "number": 18,
+  "name": "蛊",
+  "full_name": "山风蛊",
+  "pattern": "011001",
+  "lower": "巽",
+  "upper": "艮",
+  "judgement": "元亨。利涉大川。先甲三日，後甲三日。",
+  "lines": [
+    {
+      "label": "初六",
+      "text": "幹父之蠱，有子考，无咎，厲終吉。"
+    },
+    {
+      "label": "九二",
+      "text": "幹母之蠱，不可貞。"
+    },
+    {
+      "label": "九三",
+      "text": "幹父之蠱，小有悔，无大咎。"
+    },
+    {
+      "label": "六四",
+      "text": "裕父之蠱，往見吝。"
+    },
+    {
+      "label": "六五",
+      "text": "幹父之蠱，用譽。"
+    },
+    {
+      "label": "上九",
+      "text": "不事王侯，高尚其事。"
+    }
+  ],
+  "special": [],
+  "image": "山下有風，蠱；君子以振民育德。",
+  "source": {
+    "title": "周易/蠱",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E8%A0%B1",
+    "revision": 2106145,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E8%A0%B1&oldid=2106145"
+  },
+  "editorial": {
+    "keywords": [
+      "整顿",
+      "旧问题",
+      "修复"
+    ],
+    "summary": "把积累已久的问题拆成可以修复的具体环节。",
+    "opportunity": "查明成因、修正流程，并安排后续检查。",
+    "caution": "只处理表面现象，或在未了解前因时仓促推翻。"
+  }
+}

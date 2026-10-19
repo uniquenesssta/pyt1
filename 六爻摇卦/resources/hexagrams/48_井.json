@@ -1,0 +1,53 @@
+{
+  "number": 48,
+  "name": "井",
+  "full_name": "水风井",
+  "pattern": "011010",
+  "lower": "巽",
+  "upper": "坎",
+  "judgement": "改邑不改井，无喪无得，往來井井。汔至亦未繘井。羸其瓶，凶。",
+  "lines": [
+    {
+      "label": "初六",
+      "text": "井泥不食，舊井无禽。"
+    },
+    {
+      "label": "九二",
+      "text": "井谷射鮒，瓮敝漏。"
+    },
+    {
+      "label": "九三",
+      "text": "井渫不食，為我心惻，可用汲，王明，並受其福。"
+    },
+    {
+      "label": "六四",
+      "text": "井甃，无咎。"
+    },
+    {
+      "label": "九五",
+      "text": "井冽，寒泉食。"
+    },
+    {
+      "label": "上六",
+      "text": "井收勿幕，有孚元吉。"
+    }
+  ],
+  "special": [],
+  "image": "木上有水，井；君子以勞民勸相。",
+  "source": {
+    "title": "周易/井",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E4%BA%95",
+    "revision": 10645240,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E4%BA%95&oldid=10645240"
+  },
+  "editorial": {
+    "keywords": [
+      "基础资源",
+      "维护",
+      "共同使用"
+    ],
+    "summary": "关注基础支持是否稳定、可获得并得到维护。",
+    "opportunity": "修复取得资源的路径和长期维护方式。",
+    "caution": "只看到资源存在，却忽略是否真正能够使用。"
+  }
+}

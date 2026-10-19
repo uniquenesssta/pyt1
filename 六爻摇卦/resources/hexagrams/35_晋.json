@@ -1,0 +1,53 @@
+{
+  "number": 35,
+  "name": "晋",
+  "full_name": "火地晋",
+  "pattern": "000101",
+  "lower": "坤",
+  "upper": "离",
+  "judgement": "康侯用錫馬蕃庶，晝日三接。",
+  "lines": [
+    {
+      "label": "初六",
+      "text": "晉如，摧如，貞吉。罔孚，裕无咎。"
+    },
+    {
+      "label": "六二",
+      "text": "晉如，愁如，貞吉。受茲介福，于其王母。"
+    },
+    {
+      "label": "六三",
+      "text": "眾允，悔亡。"
+    },
+    {
+      "label": "九四",
+      "text": "晉如鼫（异文：碩）鼠，貞厲。"
+    },
+    {
+      "label": "六五",
+      "text": "悔亡，矢（异文：失）得勿恤，往吉无不利。"
+    },
+    {
+      "label": "上九",
+      "text": "晉其角，維用伐邑，厲吉无咎，貞吝。"
+    }
+  ],
+  "special": [],
+  "image": "明出地上，晉；君子以自昭明德。",
+  "source": {
+    "title": "周易/晉",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E6%99%89",
+    "revision": 10646579,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E6%99%89&oldid=10646579"
+  },
+  "editorial": {
+    "keywords": [
+      "进展",
+      "展现",
+      "获得支持"
+    ],
+    "summary": "观察进展如何获得看见、理解与支持。",
+    "opportunity": "用清楚的成果和可靠行动逐步扩大空间。",
+    "caution": "把被看见误当成所有条件都已成熟。"
+  }
+}

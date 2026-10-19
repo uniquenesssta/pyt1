@@ -1,0 +1,53 @@
+{
+  "number": 54,
+  "name": "归妹",
+  "full_name": "雷泽归妹",
+  "pattern": "110100",
+  "lower": "兑",
+  "upper": "震",
+  "judgement": "征凶，无攸利。",
+  "lines": [
+    {
+      "label": "初九",
+      "text": "歸妹以娣，跛能履，征吉。"
+    },
+    {
+      "label": "九二",
+      "text": "眇能（异文：而）視，利幽人之貞。"
+    },
+    {
+      "label": "六三",
+      "text": "歸妹以須，反歸以娣。"
+    },
+    {
+      "label": "九四",
+      "text": "歸妹愆期，遲歸有時。"
+    },
+    {
+      "label": "六五",
+      "text": "帝乙歸妹，其君之袂，不如其娣之袂良，月幾望，吉。"
+    },
+    {
+      "label": "上六",
+      "text": "女承筐无實，士刲羊无血，无攸利。"
+    }
+  ],
+  "special": [],
+  "image": "澤上有雷，歸妹；君子以永終知敝。",
+  "source": {
+    "title": "周易/歸妹",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E6%AD%B8%E5%A6%B9",
+    "revision": 10647182,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E6%AD%B8%E5%A6%B9&oldid=10647182"
+  },
+  "editorial": {
+    "keywords": [
+      "关系位置",
+      "顺序",
+      "安排"
+    ],
+    "summary": "检查进入关系或新安排时的位置与条件。",
+    "opportunity": "先澄清双方角色、意愿及现实约束。",
+    "caution": "只看进入的愿望，忽略是否有合适的位置与程序。"
+  }
+}

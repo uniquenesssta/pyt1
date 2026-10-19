@@ -1,0 +1,53 @@
+{
+  "number": 4,
+  "name": "蒙",
+  "full_name": "山水蒙",
+  "pattern": "010001",
+  "lower": "坎",
+  "upper": "艮",
+  "judgement": "亨。匪我求童蒙，童蒙求我。初筮告，再三瀆，瀆則不告。利貞。",
+  "lines": [
+    {
+      "label": "初六",
+      "text": "發蒙，利用刑人，用說桎梏，以往吝。"
+    },
+    {
+      "label": "九二",
+      "text": "包蒙吉，納婦吉，子克家。"
+    },
+    {
+      "label": "六三",
+      "text": "勿用取（异文：娶）女，見金夫，不有躬，无攸利。"
+    },
+    {
+      "label": "六四",
+      "text": "困蒙，吝。"
+    },
+    {
+      "label": "六五",
+      "text": "童蒙，吉。"
+    },
+    {
+      "label": "上九",
+      "text": "擊蒙，不利為寇，利禦寇。"
+    }
+  ],
+  "special": [],
+  "image": "山下出泉，蒙；君子以果行育德。",
+  "source": {
+    "title": "周易/蒙",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E8%92%99",
+    "revision": 10645379,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E8%92%99&oldid=10645379"
+  },
+  "editorial": {
+    "keywords": [
+      "求知",
+      "启蒙",
+      "澄清"
+    ],
+    "summary": "先承认信息不足，再确定需要问清的关键问题。",
+    "opportunity": "通过学习、请教和小范围验证减少盲点。",
+    "caution": "反复索要答案，却不核对自己的理解与行动。"
+  }
+}

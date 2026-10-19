@@ -1,0 +1,53 @@
+{
+  "number": 50,
+  "name": "鼎",
+  "full_name": "火风鼎",
+  "pattern": "011101",
+  "lower": "巽",
+  "upper": "离",
+  "judgement": "元吉，亨。",
+  "lines": [
+    {
+      "label": "初六",
+      "text": "鼎顛趾，利出否，得妾以其子，无咎。"
+    },
+    {
+      "label": "九二",
+      "text": "鼎有實，我仇有疾，不我能即，吉。"
+    },
+    {
+      "label": "九三",
+      "text": "鼎耳革，其行塞，雉膏不食，方雨虧悔，終吉。"
+    },
+    {
+      "label": "九四",
+      "text": "鼎折足，覆公餗，其刑（异文：形）渥，凶。"
+    },
+    {
+      "label": "六五",
+      "text": "鼎黃耳金鉉，利貞。"
+    },
+    {
+      "label": "上九",
+      "text": "鼎玉鉉，大吉，无不利。"
+    }
+  ],
+  "special": [],
+  "image": "木上有火，鼎；君子以正位凝命。",
+  "source": {
+    "title": "周易/鼎",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E9%BC%8E",
+    "revision": 10647086,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E9%BC%8E&oldid=10647086"
+  },
+  "editorial": {
+    "keywords": [
+      "更新承载",
+      "整合",
+      "责任"
+    ],
+    "summary": "更新之后，需要能承接新安排的结构与责任。",
+    "opportunity": "整合现有条件，让新的分工和用途稳定下来。",
+    "caution": "形式已经改变，能力、支持与责任却没有跟上。"
+  }
+}

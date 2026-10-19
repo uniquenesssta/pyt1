@@ -1,0 +1,53 @@
+{
+  "number": 20,
+  "name": "观",
+  "full_name": "风地观",
+  "pattern": "000011",
+  "lower": "坤",
+  "upper": "巽",
+  "judgement": "盥而不薦，有孚顒若。",
+  "lines": [
+    {
+      "label": "初六",
+      "text": "童觀，小人无咎，君子吝。"
+    },
+    {
+      "label": "六二",
+      "text": "窺觀，利女貞。"
+    },
+    {
+      "label": "六三",
+      "text": "觀我生，進退。"
+    },
+    {
+      "label": "六四",
+      "text": "觀國之光，利用賓于王。"
+    },
+    {
+      "label": "九五",
+      "text": "觀我生，君子无咎。"
+    },
+    {
+      "label": "上九",
+      "text": "觀其生，君子无咎。"
+    }
+  ],
+  "special": [],
+  "image": "風行地上，觀；先王以省方，觀民設教。",
+  "source": {
+    "title": "周易/觀",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E8%A7%80",
+    "revision": 10645159,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E8%A7%80&oldid=10645159"
+  },
+  "editorial": {
+    "keywords": [
+      "观察",
+      "反省",
+      "视角"
+    ],
+    "summary": "先检查自己看到的是否只是局部。",
+    "opportunity": "补充不同立场的信息，再决定怎样行动。",
+    "caution": "用单一视角替代全面观察，或只看别人而不自省。"
+  }
+}

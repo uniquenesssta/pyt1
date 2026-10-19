@@ -1,0 +1,53 @@
+{
+  "number": 53,
+  "name": "渐",
+  "full_name": "风山渐",
+  "pattern": "001011",
+  "lower": "艮",
+  "upper": "巽",
+  "judgement": "女歸吉，利貞。",
+  "lines": [
+    {
+      "label": "初六",
+      "text": "鴻漸于干，小子厲，有言，无咎。"
+    },
+    {
+      "label": "六二",
+      "text": "鴻漸于磐，飲食衎衎，吉。"
+    },
+    {
+      "label": "九三",
+      "text": "鴻漸于陸，夫征不復，婦孕不育，凶；利禦寇。"
+    },
+    {
+      "label": "六四",
+      "text": "鴻漸于木，或得其桷，无咎。"
+    },
+    {
+      "label": "九五",
+      "text": "鴻漸于陵，婦三歲不孕，終莫之勝，吉。"
+    },
+    {
+      "label": "上九",
+      "text": "鴻漸于陸，其羽可用為儀，吉。"
+    }
+  ],
+  "special": [],
+  "image": "山上有木，漸；君子以居賢德，善俗。",
+  "source": {
+    "title": "周易/漸",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E6%BC%B8",
+    "revision": 2560535,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E6%BC%B8&oldid=2560535"
+  },
+  "editorial": {
+    "keywords": [
+      "渐进",
+      "顺序",
+      "稳定发展"
+    ],
+    "summary": "尊重形成关系或成果所需的过程。",
+    "opportunity": "按顺序推进，让每一步都有稳定依据。",
+    "caution": "以速度取代过程，跳过必要的理解与准备。"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "number": 1,
+  "name": "乾",
+  "full_name": "乾为天",
+  "pattern": "111111",
+  "lower": "乾",
+  "upper": "乾",
+  "judgement": "元亨。利貞。",
+  "lines": [
+    {
+      "label": "初九",
+      "text": "潛龍勿用。"
+    },
+    {
+      "label": "九二",
+      "text": "見龍在田，利見大人。"
+    },
+    {
+      "label": "九三",
+      "text": "君子終日乾乾，夕惕若；厲，无咎。"
+    },
+    {
+      "label": "九四",
+      "text": "或躍在淵，无咎。"
+    },
+    {
+      "label": "九五",
+      "text": "飛龍在天，利見大人。"
+    },
+    {
+      "label": "上九",
+      "text": "亢龍，有悔。"
+    }
+  ],
+  "special": [
+    {
+      "label": "用九",
+      "text": "見羣龍无首，吉。"
+    }
+  ],
+  "image": "天行健，君子以自強不息。",
+  "source": {
+    "title": "周易/乾",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E4%B9%BE",
+    "revision": 2404991,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E4%B9%BE&oldid=2404991"
+  },
+  "editorial": {
+    "keywords": [
+      "主动",
+      "创造",
+      "持续精进"
+    ],
+    "summary": "把主动性用于建立可持续的行动，而非一次性用力。",
+    "opportunity": "主动承担、明确目标并逐步验证能力。",
+    "caution": "推进过度、只顾速度而忽略承受能力。"
+  }
+}

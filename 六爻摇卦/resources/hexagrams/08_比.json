@@ -1,0 +1,53 @@
+{
+  "number": 8,
+  "name": "比",
+  "full_name": "水地比",
+  "pattern": "000010",
+  "lower": "坤",
+  "upper": "坎",
+  "judgement": "吉。原筮元永貞，无咎。不寧方來，後夫凶。",
+  "lines": [
+    {
+      "label": "初六",
+      "text": "有孚，比之，无咎。有孚盈缶，終來有它，吉。"
+    },
+    {
+      "label": "六二",
+      "text": "比之自內，貞吉。"
+    },
+    {
+      "label": "六三",
+      "text": "比之匪人。"
+    },
+    {
+      "label": "六四",
+      "text": "外比之，貞吉。"
+    },
+    {
+      "label": "九五",
+      "text": "顯比。王用三敺（异文：驅），失前禽，邑人不誡，吉。"
+    },
+    {
+      "label": "上六",
+      "text": "比之无首，凶。"
+    }
+  ],
+  "special": [],
+  "image": "地上有水，比；先王以建萬國，親諸侯。",
+  "source": {
+    "title": "周易/比",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E6%AF%94",
+    "revision": 10645543,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E6%AF%94&oldid=10645543"
+  },
+  "editorial": {
+    "keywords": [
+      "亲近",
+      "选择同伴",
+      "互信"
+    ],
+    "summary": "审视与谁建立联系，以及连接依据是什么。",
+    "opportunity": "通过共同目标和可靠行动逐步形成信任。",
+    "caution": "为获得归属而忽略原则，或没有判断便仓促依附。"
+  }
+}

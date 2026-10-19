@@ -1,0 +1,53 @@
+{
+  "number": 33,
+  "name": "遯",
+  "full_name": "天山遯",
+  "pattern": "001111",
+  "lower": "艮",
+  "upper": "乾",
+  "judgement": "亨。小利貞。",
+  "lines": [
+    {
+      "label": "初六",
+      "text": "遯尾，厲，勿用有攸往。"
+    },
+    {
+      "label": "六二",
+      "text": "執之用黃牛之革，莫之勝說。"
+    },
+    {
+      "label": "九三",
+      "text": "係遯，有疾厲，畜臣妾吉。"
+    },
+    {
+      "label": "九四",
+      "text": "好遯君子吉，小人否。"
+    },
+    {
+      "label": "九五",
+      "text": "嘉遯，貞吉。"
+    },
+    {
+      "label": "上九",
+      "text": "肥遯，无不利。"
+    }
+  ],
+  "special": [],
+  "image": "天下有山，遯；君子以遠小人，不惡而嚴。",
+  "source": {
+    "title": "周易/遯",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E9%81%AF",
+    "revision": 10645108,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E9%81%AF&oldid=10645108"
+  },
+  "editorial": {
+    "keywords": [
+      "退让",
+      "距离",
+      "保留余地"
+    ],
+    "summary": "审视拉开距离能否保护重要条件。",
+    "opportunity": "有计划地收缩、整理边界并保留选择。",
+    "caution": "因情绪仓促切断联系，或把退让理解为彻底放弃。"
+  }
+}

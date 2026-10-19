@@ -1,0 +1,53 @@
+{
+  "number": 7,
+  "name": "师",
+  "full_name": "地水师",
+  "pattern": "010000",
+  "lower": "坎",
+  "upper": "坤",
+  "judgement": "貞丈人吉，无咎。",
+  "lines": [
+    {
+      "label": "初六",
+      "text": "師出以律，否臧，凶。"
+    },
+    {
+      "label": "九二",
+      "text": "在師中吉，无咎；王三錫命。"
+    },
+    {
+      "label": "六三",
+      "text": "師或輿尸，凶。"
+    },
+    {
+      "label": "六四",
+      "text": "師左次，无咎。"
+    },
+    {
+      "label": "六五",
+      "text": "田有禽，利執言，无咎。長子帥師，弟子輿尸，貞凶。"
+    },
+    {
+      "label": "上六",
+      "text": "大君有命，開國承家，小人勿用。"
+    }
+  ],
+  "special": [],
+  "image": "地中有水，師；君子以容民畜衆。",
+  "source": {
+    "title": "周易/師",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E5%B8%AB",
+    "revision": 2405011,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E5%B8%AB&oldid=2405011"
+  },
+  "editorial": {
+    "keywords": [
+      "组织",
+      "纪律",
+      "责任"
+    ],
+    "summary": "多人行动需要清晰的分工与共同规则。",
+    "opportunity": "明确负责人、目标和执行秩序。",
+    "caution": "只依靠强硬指令，而缺少信任、能力与相互支持。"
+  }
+}

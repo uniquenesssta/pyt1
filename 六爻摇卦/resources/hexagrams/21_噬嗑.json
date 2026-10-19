@@ -1,0 +1,53 @@
+{
+  "number": 21,
+  "name": "噬嗑",
+  "full_name": "火雷噬嗑",
+  "pattern": "100101",
+  "lower": "震",
+  "upper": "离",
+  "judgement": "亨。利用獄。",
+  "lines": [
+    {
+      "label": "初九",
+      "text": "屨校滅趾，无咎。"
+    },
+    {
+      "label": "六二",
+      "text": "噬膚滅鼻，无咎。"
+    },
+    {
+      "label": "六三",
+      "text": "噬昔（异文：臘）肉，遇毒；小吝，无咎。"
+    },
+    {
+      "label": "九四",
+      "text": "噬乾胏，得金矢，利艱貞，吉。"
+    },
+    {
+      "label": "六五",
+      "text": "噬乾肉，得黃金，貞厲，无咎。"
+    },
+    {
+      "label": "上九",
+      "text": "何校滅耳，凶。"
+    }
+  ],
+  "special": [],
+  "image": "雷電噬嗑；先王以明罰敕法。",
+  "source": {
+    "title": "周易/噬嗑",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E5%99%AC%E5%97%91",
+    "revision": 10645753,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E5%99%AC%E5%97%91&oldid=10645753"
+  },
+  "editorial": {
+    "keywords": [
+      "障碍",
+      "规则",
+      "处理"
+    ],
+    "summary": "辨认妨碍推进的关键问题和处理依据。",
+    "opportunity": "按清楚的规则逐项解决障碍。",
+    "caution": "处理过急或过重，只求扫除阻碍而忽略尺度。"
+  }
+}

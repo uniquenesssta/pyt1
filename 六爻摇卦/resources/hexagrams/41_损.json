@@ -1,0 +1,53 @@
+{
+  "number": 41,
+  "name": "损",
+  "full_name": "山泽损",
+  "pattern": "110001",
+  "lower": "兑",
+  "upper": "艮",
+  "judgement": "有孚，元吉。无咎，可貞，利有攸往。曷之用？二簋可用享。",
+  "lines": [
+    {
+      "label": "初九",
+      "text": "祀（异文：已）事遄往，无咎，酌損之。"
+    },
+    {
+      "label": "九二",
+      "text": "利貞，征凶，弗損益之。"
+    },
+    {
+      "label": "六三",
+      "text": "三人行，則損一人；一人行，則得其友。"
+    },
+    {
+      "label": "六四",
+      "text": "損其疾，使遄有喜，无咎。"
+    },
+    {
+      "label": "六五",
+      "text": "或益之，十朋之龜弗克違，元吉。"
+    },
+    {
+      "label": "上九",
+      "text": "弗損益之，无咎，貞吉，利有攸往，得臣无家。"
+    }
+  ],
+  "special": [],
+  "image": "山下有澤，損；君子以懲忿窒欲。",
+  "source": {
+    "title": "周易/損",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E6%90%8D",
+    "revision": 10646704,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E6%90%8D&oldid=10646704"
+  },
+  "editorial": {
+    "keywords": [
+      "减少",
+      "取舍",
+      "共同承受"
+    ],
+    "summary": "明确减少什么、保护什么，以及由谁承担。",
+    "opportunity": "通过有依据的取舍集中重要条件。",
+    "caution": "把减少变成无差别压缩，或让一方长期单独承担。"
+  }
+}

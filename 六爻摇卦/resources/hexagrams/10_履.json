@@ -1,0 +1,53 @@
+{
+  "number": 10,
+  "name": "履",
+  "full_name": "天泽履",
+  "pattern": "110111",
+  "lower": "兑",
+  "upper": "乾",
+  "judgement": "履虎尾，不咥人，亨。",
+  "lines": [
+    {
+      "label": "初九",
+      "text": "素履，往无咎。"
+    },
+    {
+      "label": "九二",
+      "text": "履道坦坦，幽人貞吉。"
+    },
+    {
+      "label": "六三",
+      "text": "眇能視，跛能履，履虎尾，咥人，凶。武人為于大君。"
+    },
+    {
+      "label": "九四",
+      "text": "履虎尾，愬愬終吉。"
+    },
+    {
+      "label": "九五",
+      "text": "夬履，貞厲。"
+    },
+    {
+      "label": "上九",
+      "text": "視履考詳，其旋元吉。"
+    }
+  ],
+  "special": [],
+  "image": "上天下澤，履；君子以辨上下，定民志。",
+  "source": {
+    "title": "周易/履",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E5%B1%A5",
+    "revision": 10647513,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E5%B1%A5&oldid=10647513"
+  },
+  "editorial": {
+    "keywords": [
+      "行事分寸",
+      "规则",
+      "谨慎"
+    ],
+    "summary": "面对强约束时，行动方式与分寸值得注意。",
+    "opportunity": "先理解边界，再选择稳妥的表达与行动路径。",
+    "caution": "轻视规则或只顾自己的判断，忽略对方反应。"
+  }
+}

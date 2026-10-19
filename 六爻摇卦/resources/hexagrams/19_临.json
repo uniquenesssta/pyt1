@@ -1,0 +1,53 @@
+{
+  "number": 19,
+  "name": "临",
+  "full_name": "地泽临",
+  "pattern": "110000",
+  "lower": "兑",
+  "upper": "坤",
+  "judgement": "元亨。利貞。至于八月有凶。",
+  "lines": [
+    {
+      "label": "初九",
+      "text": "咸臨，貞吉。"
+    },
+    {
+      "label": "九二",
+      "text": "咸臨，吉无不利。"
+    },
+    {
+      "label": "六三",
+      "text": "甘臨，无攸利。既憂之，无咎。"
+    },
+    {
+      "label": "六四",
+      "text": "至臨，无咎。"
+    },
+    {
+      "label": "六五",
+      "text": "知臨，大君之宜，吉。"
+    },
+    {
+      "label": "上六",
+      "text": "敦臨，吉无咎。"
+    }
+  ],
+  "special": [],
+  "image": "澤上有地，臨；君子以教思无窮，容保民无疆。",
+  "source": {
+    "title": "周易/臨",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E8%87%A8",
+    "revision": 2106146,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E8%87%A8&oldid=2106146"
+  },
+  "editorial": {
+    "keywords": [
+      "接近",
+      "支持",
+      "阶段性"
+    ],
+    "summary": "接近目标或他人时，留意方式和阶段变化。",
+    "opportunity": "通过真实接触理解需要，以支持促成进展。",
+    "caution": "以居高临下的态度干预，或忽略条件会随时间改变。"
+  }
+}

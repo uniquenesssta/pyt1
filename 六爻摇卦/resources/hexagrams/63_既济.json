@@ -1,0 +1,53 @@
+{
+  "number": 63,
+  "name": "既济",
+  "full_name": "水火既济",
+  "pattern": "101010",
+  "lower": "离",
+  "upper": "坎",
+  "judgement": "亨小。利貞。初吉終亂。",
+  "lines": [
+    {
+      "label": "初九",
+      "text": "曳其輪，濡其尾，无咎。"
+    },
+    {
+      "label": "六二",
+      "text": "婦喪其茀，勿逐，七日得。"
+    },
+    {
+      "label": "九三",
+      "text": "高宗伐鬼方，三年克之，小人勿用。"
+    },
+    {
+      "label": "六四",
+      "text": "繻有衣袽，終日戒。"
+    },
+    {
+      "label": "九五",
+      "text": "東鄰殺牛，不如西鄰之禴祭，實受其福。"
+    },
+    {
+      "label": "上六",
+      "text": "濡其首，厲。"
+    }
+  ],
+  "special": [],
+  "image": "水在火上，既濟；君子以思患而豫防之。",
+  "source": {
+    "title": "周易/既濟",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E6%97%A2%E6%BF%9F",
+    "revision": 2572417,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E6%97%A2%E6%BF%9F&oldid=2572417"
+  },
+  "editorial": {
+    "keywords": [
+      "阶段完成",
+      "维持",
+      "复查"
+    ],
+    "summary": "完成之后仍需要维护和检查。",
+    "opportunity": "确认成果是否稳定，处理交接与后续细节。",
+    "caution": "因已经完成而放松检查，让小问题重新积累。"
+  }
+}

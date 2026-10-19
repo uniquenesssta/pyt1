@@ -1,0 +1,53 @@
+{
+  "number": 59,
+  "name": "涣",
+  "full_name": "风水涣",
+  "pattern": "010011",
+  "lower": "坎",
+  "upper": "巽",
+  "judgement": "亨，王假有廟，利涉大川，利貞。",
+  "lines": [
+    {
+      "label": "初六",
+      "text": "用拯馬壯，吉，悔亡。"
+    },
+    {
+      "label": "九二",
+      "text": "渙奔其机，悔亡。"
+    },
+    {
+      "label": "六三",
+      "text": "渙其躬，无悔。"
+    },
+    {
+      "label": "六四",
+      "text": "渙其群，元吉。渙有丘，匪夷所思。"
+    },
+    {
+      "label": "九五",
+      "text": "渙汗其大號，渙王居，无咎。"
+    },
+    {
+      "label": "上九",
+      "text": "渙其血，去逖出，无咎。"
+    }
+  ],
+  "special": [],
+  "image": "風行水上，渙；先王以享于帝立廟。",
+  "source": {
+    "title": "周易/渙",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E6%B8%99",
+    "revision": 10647580,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E6%B8%99&oldid=10647580"
+  },
+  "editorial": {
+    "keywords": [
+      "疏解",
+      "分散",
+      "重新连接"
+    ],
+    "summary": "处理隔阂时，同时寻找能够重新凝聚的依据。",
+    "opportunity": "松开僵硬环节，以共同关切恢复联系。",
+    "caution": "只有分散与释放，却没有后续的连接与安排。"
+  }
+}

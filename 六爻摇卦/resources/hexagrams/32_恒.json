@@ -1,0 +1,53 @@
+{
+  "number": 32,
+  "name": "恒",
+  "full_name": "雷风恒",
+  "pattern": "011100",
+  "lower": "巽",
+  "upper": "震",
+  "judgement": "恆：亨，无咎。利貞，利有攸往。",
+  "lines": [
+    {
+      "label": "初六",
+      "text": "浚恆，貞凶，无攸利。"
+    },
+    {
+      "label": "九二",
+      "text": "悔亡。"
+    },
+    {
+      "label": "九三",
+      "text": "不恆其德，或承之羞，貞吝。"
+    },
+    {
+      "label": "九四",
+      "text": "田无禽。"
+    },
+    {
+      "label": "六五",
+      "text": "恆其德，貞，婦人吉，夫子凶。"
+    },
+    {
+      "label": "上六",
+      "text": "震（异文：振）恆，凶。"
+    }
+  ],
+  "special": [],
+  "image": "雷風，恆；君子以立不易方。",
+  "source": {
+    "title": "周易/恒",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E6%81%92",
+    "revision": 10646486,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E6%81%92&oldid=10646486"
+  },
+  "editorial": {
+    "keywords": [
+      "持续",
+      "原则",
+      "节奏"
+    ],
+    "summary": "区分需要长期坚持的原则与可以调整的方式。",
+    "opportunity": "建立稳定节奏，用可持续行动兑现约定。",
+    "caution": "把坚持误作僵硬重复，忽略条件与反馈的改变。"
+  }
+}

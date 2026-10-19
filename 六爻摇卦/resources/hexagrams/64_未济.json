@@ -1,0 +1,53 @@
+{
+  "number": 64,
+  "name": "未济",
+  "full_name": "火水未济",
+  "pattern": "010101",
+  "lower": "坎",
+  "upper": "离",
+  "judgement": "亨。小狐汔濟，濡其尾，无攸利。",
+  "lines": [
+    {
+      "label": "初六",
+      "text": "濡其尾，吝。"
+    },
+    {
+      "label": "九二",
+      "text": "曳其輪，貞吉。"
+    },
+    {
+      "label": "六三",
+      "text": "未濟，征凶，利涉大川。"
+    },
+    {
+      "label": "九四",
+      "text": "貞吉，悔亡，震用伐鬼方，三年有賞于大國（异文：邦）。"
+    },
+    {
+      "label": "六五",
+      "text": "貞吉，无悔，君子之光，有孚，吉。"
+    },
+    {
+      "label": "上九",
+      "text": "有孚于飲酒，无咎，濡其首，有孚失是。"
+    }
+  ],
+  "special": [],
+  "image": "火在水上，未濟；君子以慎辨物居方。",
+  "source": {
+    "title": "周易/未濟",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E6%9C%AA%E6%BF%9F",
+    "revision": 10647450,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E6%9C%AA%E6%BF%9F&oldid=10647450"
+  },
+  "editorial": {
+    "keywords": [
+      "尚未完成",
+      "协调",
+      "收尾"
+    ],
+    "summary": "接近目标时，仍需核对尚未衔接的部分。",
+    "opportunity": "稳住步骤，补齐最后的条件与协调。",
+    "caution": "在结束之前过早庆祝，或急于得到确定结论。"
+  }
+}

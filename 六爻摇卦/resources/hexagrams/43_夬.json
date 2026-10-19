@@ -1,0 +1,53 @@
+{
+  "number": 43,
+  "name": "夬",
+  "full_name": "泽天夬",
+  "pattern": "111110",
+  "lower": "乾",
+  "upper": "兑",
+  "judgement": "揚于王庭，孚號，有厲，告自邑，不利即戎，利有攸往。",
+  "lines": [
+    {
+      "label": "初九",
+      "text": "壯于前趾，往不勝為咎。"
+    },
+    {
+      "label": "九二",
+      "text": "惕號，莫夜有戎，勿恤。"
+    },
+    {
+      "label": "九三",
+      "text": "壯于頄，有凶。君子夬夬，獨行遇雨，若濡有慍，无咎。"
+    },
+    {
+      "label": "九四",
+      "text": "臀无膚，其行次且。牽羊悔亡，聞言不信。"
+    },
+    {
+      "label": "九五",
+      "text": "莧陸夬夬，中行无咎。"
+    },
+    {
+      "label": "上六",
+      "text": "无號，終有凶。"
+    }
+  ],
+  "special": [],
+  "image": "澤上于天，夬；君子以施祿及下，居德則忌。",
+  "source": {
+    "title": "周易/夬",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E5%A4%AC",
+    "revision": 2405003,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E5%A4%AC&oldid=2405003"
+  },
+  "editorial": {
+    "keywords": [
+      "决断",
+      "公开",
+      "处理积弊"
+    ],
+    "summary": "需要决定时，同时说明依据与承担。",
+    "opportunity": "把问题公开说清，采取有边界的行动。",
+    "caution": "以强硬情绪替代判断，或只宣布决定而不安排执行。"
+  }
+}

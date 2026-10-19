@@ -1,0 +1,53 @@
+{
+  "number": 16,
+  "name": "豫",
+  "full_name": "雷地豫",
+  "pattern": "000100",
+  "lower": "坤",
+  "upper": "震",
+  "judgement": "利建侯行師。",
+  "lines": [
+    {
+      "label": "初六",
+      "text": "鳴豫，凶。"
+    },
+    {
+      "label": "六二",
+      "text": "介于石，不終日，貞吉。"
+    },
+    {
+      "label": "六三",
+      "text": "盱豫，悔。遲有悔。"
+    },
+    {
+      "label": "九四",
+      "text": "由豫，大有得。勿疑。朋盍戠（异文：簪）。"
+    },
+    {
+      "label": "六五",
+      "text": "貞疾，恆不死。"
+    },
+    {
+      "label": "上六",
+      "text": "冥豫，成有渝，无咎。"
+    }
+  ],
+  "special": [],
+  "image": "雷出地奮，豫。先王以作樂崇德，殷薦之上帝，以配祖考。",
+  "source": {
+    "title": "周易/豫",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E8%B1%AB",
+    "revision": 10645735,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E8%B1%AB&oldid=10645735"
+  },
+  "editorial": {
+    "keywords": [
+      "动员",
+      "准备",
+      "情绪"
+    ],
+    "summary": "热情与响应需要实际准备来承接。",
+    "opportunity": "将意愿转化为明确步骤，检查大家是否真正准备好。",
+    "caution": "只依靠兴奋或期待推动，缺少执行条件。"
+  }
+}

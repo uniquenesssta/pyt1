@@ -1,0 +1,53 @@
+{
+  "number": 57,
+  "name": "巽",
+  "full_name": "巽为风",
+  "pattern": "011011",
+  "lower": "巽",
+  "upper": "巽",
+  "judgement": "小亨。利有攸往。利見大人。",
+  "lines": [
+    {
+      "label": "初六",
+      "text": "進退，利武人之貞。"
+    },
+    {
+      "label": "九二",
+      "text": "巽在牀下，用史巫紛若，吉无咎。"
+    },
+    {
+      "label": "九三",
+      "text": "頻巽，吝。"
+    },
+    {
+      "label": "六四",
+      "text": "悔亡，田獲三品。"
+    },
+    {
+      "label": "九五",
+      "text": "貞吉悔亡，无不利。无初有終，先庚三日，後庚三日，吉。"
+    },
+    {
+      "label": "上九",
+      "text": "巽在牀下，喪其資斧，貞凶。"
+    }
+  ],
+  "special": [],
+  "image": "隨風，巽；君子以申命行事。",
+  "source": {
+    "title": "周易/巽",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E5%B7%BD",
+    "revision": 10644966,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E5%B7%BD&oldid=10644966"
+  },
+  "editorial": {
+    "keywords": [
+      "渐入",
+      "沟通",
+      "持续影响"
+    ],
+    "summary": "温和而持续的调整也能改变局面。",
+    "opportunity": "明确表达，逐步推进，并确认对方真正理解。",
+    "caution": "反复犹疑或含糊迎合，使行动缺少方向。"
+  }
+}

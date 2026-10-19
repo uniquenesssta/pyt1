@@ -1,0 +1,53 @@
+{
+  "number": 25,
+  "name": "无妄",
+  "full_name": "天雷无妄",
+  "pattern": "100111",
+  "lower": "震",
+  "upper": "乾",
+  "judgement": "元亨。利貞。其匪正有眚，不利有攸往。",
+  "lines": [
+    {
+      "label": "初九",
+      "text": "无妄，往吉。"
+    },
+    {
+      "label": "六二",
+      "text": "不耕穫，不菑畬，則利有攸往。"
+    },
+    {
+      "label": "六三",
+      "text": "无妄之災，或繫之牛，行人之得，邑人之災。"
+    },
+    {
+      "label": "九四",
+      "text": "可貞，无咎。"
+    },
+    {
+      "label": "九五",
+      "text": "无妄之疾，勿藥有喜。"
+    },
+    {
+      "label": "上九",
+      "text": "无妄，行有眚，无攸利。"
+    }
+  ],
+  "special": [],
+  "image": "天下雷行，物與无妄；先王以茂對時，育萬物。",
+  "source": {
+    "title": "周易/无妄",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E6%97%A0%E5%A6%84",
+    "revision": 10645038,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E6%97%A0%E5%A6%84&oldid=10645038"
+  },
+  "editorial": {
+    "keywords": [
+      "真实",
+      "自然",
+      "减少妄动"
+    ],
+    "summary": "检查行动是否出于真实需要，而非额外想象。",
+    "opportunity": "回到事实与本分，减少没有依据的猜测。",
+    "caution": "把偶然迹象过度解释，或以冒进代替诚实判断。"
+  }
+}

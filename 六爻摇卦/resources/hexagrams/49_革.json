@@ -1,0 +1,53 @@
+{
+  "number": 49,
+  "name": "革",
+  "full_name": "泽火革",
+  "pattern": "101110",
+  "lower": "离",
+  "upper": "兑",
+  "judgement": "已日乃孚，元亨。利貞。悔亡。",
+  "lines": [
+    {
+      "label": "初九",
+      "text": "鞏用黃牛之革。"
+    },
+    {
+      "label": "六二",
+      "text": "已日乃革之，征吉，无咎。"
+    },
+    {
+      "label": "九三",
+      "text": "征凶，貞厲，革言三就，有孚。"
+    },
+    {
+      "label": "九四",
+      "text": "悔亡，有孚改命，吉。"
+    },
+    {
+      "label": "九五",
+      "text": "大人虎變，未占有孚。"
+    },
+    {
+      "label": "上六",
+      "text": "君子豹變，小人革面，征凶，居貞吉。"
+    }
+  ],
+  "special": [],
+  "image": "澤中有火，革；君子以治歷明時。",
+  "source": {
+    "title": "周易/革",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E9%9D%A9",
+    "revision": 10643173,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E9%9D%A9&oldid=10643173"
+  },
+  "editorial": {
+    "keywords": [
+      "改变",
+      "时机",
+      "共识"
+    ],
+    "summary": "改变需要理由、准备与相应的信任。",
+    "opportunity": "说明改变的必要性，让步骤与条件相互配合。",
+    "caution": "把不满直接当作改变依据，忽略承接与共同理解。"
+  }
+}

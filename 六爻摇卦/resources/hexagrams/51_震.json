@@ -1,0 +1,53 @@
+{
+  "number": 51,
+  "name": "震",
+  "full_name": "震为雷",
+  "pattern": "100100",
+  "lower": "震",
+  "upper": "震",
+  "judgement": "亨。震來虩虩，笑言啞啞。震驚百里，不喪匕鬯。",
+  "lines": [
+    {
+      "label": "初九",
+      "text": "震來虩虩，後笑言啞啞，吉。"
+    },
+    {
+      "label": "六二",
+      "text": "震來厲，億喪貝，躋于九陵，勿逐，七日得。"
+    },
+    {
+      "label": "六三",
+      "text": "震蘇蘇，震行无眚。"
+    },
+    {
+      "label": "九四",
+      "text": "震遂泥。"
+    },
+    {
+      "label": "六五",
+      "text": "震往來厲，億无喪，有事。"
+    },
+    {
+      "label": "上六",
+      "text": "震索索，視矍矍，征凶。震不于其躬，于其鄰，无咎。婚媾有言。"
+    }
+  ],
+  "special": [],
+  "image": "洊雷，震；君子以恐懼修省。",
+  "source": {
+    "title": "周易/震",
+    "url": "https://zh.wikisource.org/wiki/%E5%91%A8%E6%98%93/%E9%9C%87",
+    "revision": 10644930,
+    "revision_url": "https://zh.wikisource.org/w/index.php?title=%E5%91%A8%E6%98%93%2F%E9%9C%87&oldid=10644930"
+  },
+  "editorial": {
+    "keywords": [
+      "震动",
+      "惊扰",
+      "恢复秩序"
+    ],
+    "summary": "突发变化时，先恢复基本判断与行动秩序。",
+    "opportunity": "在反应之后核对事实，维持重要事项的连续性。",
+    "caution": "被惊扰带着走，把短暂反应当成长期结论。"
+  }
+}
