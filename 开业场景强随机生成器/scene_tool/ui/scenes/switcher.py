@@ -4,11 +4,13 @@ from tkinter import ttk, messagebox
 from scene_tool.domain.scene_model import SceneModel
 from scene_tool.storage.scenes import load_profiles, load_scene_states, save_scene_states
 from scene_tool.ui.scenes.panel import ScenePanel
+from scene_tool.ui.prompt_scroll import PromptScrollMemory
 
 
 class SceneSwitcher:
     def __init__(self, window):
         self.window = window
+        self.scroll_memory = PromptScrollMemory(window)
         self.models, self.panels = {}, {}
         try:
             state = load_scene_states()
@@ -58,6 +60,8 @@ class SceneSwitcher:
         target = self.selection.get()
         if target == self.active:
             return
+        previous_prompt = self.window.prompt if self.active == '开业场景' else self.panels[self.active].prompt
+        self.scroll_memory.remember(previous_prompt)
         if self.active == '开业场景':
             self.window.flush_refresh()
             if not self.window.save():
@@ -76,9 +80,12 @@ class SceneSwitcher:
                 self.panels[target] = ScenePanel(self.viewport, self.models[target], self.persist)
             self.panels[target].place(x=0, y=0, relwidth=1, relheight=1)
             self.panels[target].lift()
+        prompt = self.window.prompt if target == '开业场景' else self.panels[target].prompt
+        self.scroll_memory.restore(prompt)
         self.persist()
 
     def save(self):
         for panel in self.panels.values():
             panel.pause()
         return self.persist()
+
