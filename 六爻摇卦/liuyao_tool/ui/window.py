@@ -1,6 +1,7 @@
 """维护显示状态；布局和摇卦控制器分别位于独立模块。"""
 import tkinter as tk
 
+from ..domain.text import format_changed, format_original
 from .layout import build_layout
 
 
@@ -15,12 +16,16 @@ class LiuYaoWindow:
         self.original_names = [tk.StringVar(master) for _ in range(6)]
         self.changed_symbols = [tk.StringVar(master) for _ in range(6)]
         self.changed_title = tk.StringVar(master, value="之卦（变化结果）")
+        self._result = None
         build_layout(self)
 
     def bind_start(self, callback):
         self.start_button.configure(command=callback)
 
     def reset(self):
+        self._result = None
+        self.original_copy_button.configure(state=tk.DISABLED, text="复制本卦")
+        self.changed_copy_button.configure(state=tk.DISABLED, text="复制之卦")
         self.changed_title.set("之卦（变化结果）")
         for index in range(6):
             self.original_symbols[index].set("摇动中…")
@@ -47,3 +52,20 @@ class LiuYaoWindow:
         self.changed_title.set(f"之卦（{state}）")
         for index, symbol in enumerate(hexagram.changed_symbols):
             self.changed_symbols[index].set(symbol)
+        self._result = hexagram
+        self.original_copy_button.configure(state=tk.NORMAL, text="复制本卦")
+        self.changed_copy_button.configure(state=tk.NORMAL, text="复制之卦")
+
+    def copy_original(self):
+        self._copy_result(format_original, self.original_copy_button)
+
+    def copy_changed(self):
+        self._copy_result(format_changed, self.changed_copy_button)
+
+    def _copy_result(self, formatter, button):
+        if self._result is None:
+            return
+        text = formatter(self._result)
+        self.master.clipboard_clear()
+        self.master.clipboard_append(text)
+        button.configure(text="已复制")

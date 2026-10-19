@@ -46,8 +46,22 @@ def _build_hexagram(view, parent, fonts, original):
     background = "#e0e0e0" if original else "#d0d0d0"
     panel = tk.Frame(parent, bg=background, relief=tk.SUNKEN, borderwidth=2)
     panel.grid(row=0, column=0 if original else 1, sticky="nsew", padx=4)
+    header = tk.Frame(panel, bg=background)
+    header.pack(fill=tk.X, padx=8, pady=(8, 3))
+    header.columnconfigure(0, weight=1)
     title = {"text": "本卦（初始状态）"} if original else {"textvariable": view.changed_title}
-    tk.Label(panel, **title, font=fonts["header"], bg=background).pack(pady=(8, 3))
+    tk.Label(header, **title, font=fonts["header"], bg=background).grid(row=0, column=0)
+    copy_button = tk.Button(
+        header, text="复制本卦" if original else "复制之卦",
+        command=view.copy_original if original else view.copy_changed,
+        state=tk.DISABLED, font=fonts["small"], width=8, padx=3, pady=2,
+        relief=tk.GROOVE, borderwidth=1,
+    )
+    copy_button.grid(row=0, column=1, padx=(6, 0))
+    if original:
+        view.original_copy_button = copy_button
+    else:
+        view.changed_copy_button = copy_button
     explanation = (
         "本卦是直接摇得的卦象，显示初始状态；O、X 标记动爻。"
         if original else "之卦由动爻阴阳反转而来；静爻保持不变。"
