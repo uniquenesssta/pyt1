@@ -1,4 +1,4 @@
-"""Carry the current scrollbar position across scene switches."""
+"""Carry one shared scrollbar position across every scene, after layout."""
 
 
 class PromptScrollMemory:
@@ -8,7 +8,6 @@ class PromptScrollMemory:
         self.pending = None
 
     def remember(self, widget):
-        # A rapid second switch must retain the position still awaiting apply.
         if self.pending is None:
             first, last = widget.yview()
             travel = 1.0 - (last - first)
@@ -23,10 +22,26 @@ class PromptScrollMemory:
 
     def restore(self, widget):
         self.cancel()
+
         def apply():
+            # A newly shown Text can still report the hidden panel's dimensions
+            # during the first idle callback. Flush geometry and wrapping first.
+            if not widget.winfo_exists():
+                self.pending = None
+                return
+            widget.update_idletasks()
+            if not widget.winfo_ismapped():
+                self.pending = None
+                return
+            # Ask Text for its actual bottom limit rather than estimating it
+            # from the visible fraction of a previously hidden viewport.
+            widget.yview_moveto(1.0)
+            bottom = widget.yview()[0]
+            widget.yview_moveto(self.position * bottom)
             self.pending = None
-            if widget.winfo_exists() and widget.winfo_ismapped():
-                first, last = widget.yview()
-                travel = max(0.0, 1.0 - (last - first))
-                widget.yview_moveto(self.position * travel)
-        self.pending = self.scheduler.after_idle(apply)
+
+        def settled():
+            # Run after map/geometry idle handlers, on the next event-loop turn.
+            self.pending = self.scheduler.after(1, apply)
+
+        self.pending = self.scheduler.after_idle(settled)

@@ -16,13 +16,17 @@ class Scheduler:
         self.jobs[self.counter] = callback
         return self.counter
 
+    def after(self, delay, callback):
+        return self.after_idle(callback)
+
     def after_cancel(self, token):
         self.jobs.pop(token, None)
 
     def run(self):
-        jobs, self.jobs = self.jobs, {}
-        for callback in jobs.values():
-            callback()
+        while self.jobs:
+            jobs, self.jobs = self.jobs, {}
+            for callback in jobs.values():
+                callback()
 
 
 class TextView:
@@ -34,7 +38,10 @@ class TextView:
         return self.first, self.first + self.visible
 
     def yview_moveto(self, first):
-        self.first = first
+        self.first = min(first, 1.0 - self.visible)
+
+    def update_idletasks(self):
+        pass
 
     def winfo_exists(self):
         return True
@@ -79,6 +86,16 @@ class ScrollTests(unittest.TestCase):
         self.memory.restore(target)
         self.scheduler.run()
         self.assertEqual(intermediate.first, 0)
+        self.assertAlmostEqual(target.first, .3)
+
+    def test_new_panel_geometry_is_settled_before_positioning(self):
+        self.memory.remember(TextView(.4, .2))
+        target = TextView(0, 1)
+        def layout():
+            target.visible = .4
+        target.update_idletasks = layout
+        self.memory.restore(target)
+        self.scheduler.run()
         self.assertAlmostEqual(target.first, .3)
 
     def test_short_document_preserves_shared_scroll_progress(self):
