@@ -16,6 +16,7 @@ from .jobs import Jobs
 from .results import TicketPanel
 from .statistics import StatisticsPage
 from .structure_weights import StructureWeightsPage
+from .cross_link import CrossWeightLink
 
 
 class LotteryApp:
@@ -71,6 +72,7 @@ class LotteryApp:
         self.tabs.add(self.statistics, text="  统计分析  ")
         self.structure_weights = StructureWeightsPage(self.tabs, self.error)
         self.tabs.add(self.structure_weights, text="  结构权重  ")
+        self.cross_link = CrossWeightLink(self.controls, self.structure_weights, self.error)
         footer = ttk.Frame(outer)
         footer.pack(fill="x", pady=(10, 0))
         self.status = tk.StringVar(value="就绪")
@@ -86,7 +88,7 @@ class LotteryApp:
 
     def set_busy(self, busy):
         self.structure_weights.set_busy(busy)
-        for button in (self.import_button, self.update_button, self.controls.generate_button, self.history.search_button):
+        for button in (self.import_button, self.update_button, self.controls.generate_button, self.controls.fill_button, self.controls.cross_period_box, self.history.search_button):
             button.configure(state="disabled" if busy else "normal")
         self.cancel_button.configure(state="normal" if busy else "disabled")
 

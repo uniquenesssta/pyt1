@@ -10,6 +10,7 @@ class StructureWeightsPage(ttk.Frame):
     def __init__(self, parent, error):
         super().__init__(parent, padding=10)
         self.error, self.draws, self.profile = error, [], None
+        self.on_change = lambda profile: None
         top = ttk.Frame(self); top.pack(fill='x')
         ttk.Label(top, text='统计最近期数').pack(side='left')
         self.period = tk.StringVar(value='50')
@@ -62,9 +63,14 @@ class StructureWeightsPage(ttk.Frame):
         except ValueError as exc:
             self.error(exc); return
         self.profile = profile
+        self.describe()
+        self.render()
+        self.on_change(profile)
+
+    def describe(self):
+        profile = self.profile
         first, last = profile.draws[0], profile.draws[-1]
         self.summary.set(f'请求 {profile.requested or "全部"} 期 · 实际 {len(profile.draws)} 期 · {first.issue or first.line} → {last.issue or last.line} · {profile.order}；重新统计会恢复建议权重')
-        self.render()
 
     def render(self):
         if not self.profile: return
@@ -87,7 +93,7 @@ class StructureWeightsPage(ttk.Frame):
             new = deepcopy(self.profile)
             new.strengths[self.group.get()] = float(self.strength.get())
             new.validate()
-            self.profile = new; self.render()
+            self.profile = new; self.render(); self.on_change(new)
         except ValueError as exc: self.error(exc)
 
     def apply_weight(self):
@@ -99,7 +105,7 @@ class StructureWeightsPage(ttk.Frame):
             keys = {str(k): k for k in domains()[name]}
             for row in selected: new.weights[name][keys[row[0]]] = float(self.edit.get())
             new.validate()
-            self.profile = new; self.render()
+            self.profile = new; self.render(); self.on_change(new)
         except ValueError as exc: self.error(exc)
 
     def snapshot(self):

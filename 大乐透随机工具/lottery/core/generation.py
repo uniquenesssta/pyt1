@@ -67,6 +67,8 @@ def unrank_combination(pool, count, rank):
 
 def generate(config, stats=None, cancel=None, progress=None, rng=None):
     config.validate()
+    from .cross_weights import resolve_cross_overrides
+    config = resolve_cross_overrides(config)
     if config.structure_profile is not None and config.mode != MODES[0]:
         config.structure_profile.validate()
         stats = config.structure_profile.stats

@@ -38,9 +38,22 @@ class GenerationControls(ttk.Frame):
         self.custom_button = ttk.Checkbutton(row, text="自定义跨区权重", variable=self.custom, command=self.update_mode)
         self.custom_button.pack(side="right")
         self.advanced = ttk.Frame(self)
+        fill_row = ttk.Frame(self.advanced)
+        fill_row.pack(fill="x", pady=(0, 6))
+        ttk.Label(fill_row, text="权重来源 / 期数").pack(side="left")
+        self.cross_period = tk.StringVar(value="跟随结构权重页")
+        self.cross_period_box = ttk.Combobox(fill_row, textvariable=self.cross_period,
+                                            values=("跟随结构权重页", "50", "100", "全部"), width=18)
+        self.cross_period_box.pack(side="left", padx=8)
+        self.fill_button = ttk.Button(fill_row, text="一键填入")
+        self.fill_button.pack(side="left")
+        self.cross_source = tk.StringVar(value="可直接输入自定义期数；重新选期会重算结构页全部指标")
+        ttk.Label(fill_row, textvariable=self.cross_source, wraplength=600).pack(side="left", padx=8)
+        weights_row = ttk.Frame(self.advanced)
+        weights_row.pack(fill="x")
         self.weight_vars = []
         for label in ("最大跨区", "起始跨区"):
-            group = ttk.Frame(self.advanced)
+            group = ttk.Frame(weights_row)
             group.pack(side="left", padx=(0, 22))
             ttk.Label(group, text=label).pack(side="left", padx=(0, 8))
             variables = []
@@ -65,7 +78,7 @@ class GenerationControls(ttk.Frame):
         hints = {
             MODES[0]: "系统随机源 · 合法组合等概率；固定或排除后，在剩余组合中等概率抽取。",
             MODES[1]: "使用结构权重页所选期数的号码次数 + 1 作为权重；历史频率不代表下期中奖概率。",
-            MODES[2]: "前区限5个。到“结构权重”页选择50/100/自定义期数，分别调整差值、连号、空区与跨区。此处自定义跨区为额外乘数，0排除。",
+            MODES[2]: "前区限5个。到“结构权重”页选择50/100/自定义期数，分别调整差值、连号、空区与跨区。自定义跨区可一键填入并联动；使用同一份权重，0排除，不重复叠加。",
         }
         self.hint.configure(text=hints[self.mode.get()])
 
