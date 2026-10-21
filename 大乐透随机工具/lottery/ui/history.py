@@ -7,7 +7,7 @@ from .table import DataTable
 
 
 class HistoryPage(ttk.Frame):
-    HEADINGS = ("期号", "前区号码", "后区号码", "匹配位置", "原始行号")
+    HEADINGS = ("期号", "前区号码", "后区号码", "匹配位置", "原始行号", "工作表")
 
     def __init__(self, parent, search, status, error):
         super().__init__(parent, padding=10)
@@ -31,7 +31,7 @@ class HistoryPage(ttk.Frame):
         ttk.Button(toolbar, text="复制选中", command=self.copy).pack(side="left", padx=(8, 0))
         kind.bind("<<ComboboxSelected>>", lambda _: self.update_kind())
         ttk.Label(self, text="留空可查看全部记录；连续位置匹配不跨越前后区。号码按升序展示。", style="Muted.TLabel").pack(anchor="w", pady=(0, 8))
-        self.table = DataTable(self, self.HEADINGS, (100, 230, 130, 340, 90))
+        self.table = DataTable(self, self.HEADINGS, (100, 230, 130, 280, 90, 120))
         self.table.pack(fill="both", expand=True)
         self.caption = ttk.Label(self)
         self.caption.pack(anchor="w", pady=(8, 0))

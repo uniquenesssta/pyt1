@@ -53,6 +53,7 @@ class Draw:
     ticket: Ticket
     issue: str = ""
     line: int = 0
+    sheet: str = ""
 
     def __post_init__(self):
         if len(self.ticket.front) != 5 or len(self.ticket.back) != 2:

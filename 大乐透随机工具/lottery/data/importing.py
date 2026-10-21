@@ -65,6 +65,13 @@ def parse_text(text, cancel=None, progress=None):
 
 
 def load_dataset(path, cancel=None, progress=None):
+    if Path(path).suffix.lower() in {".xls", ".xlsx", ".xlxs"}:
+        from .excel import load_excel
+        result = load_excel(path, cancel, progress)
+        if not result.draws:
+            detail = result.issues[0].reason if result.issues else "工作簿为空"
+            raise ValueError(f"没有有效的 5+2 记录：{detail}")
+        return result
     raw = Path(path).read_bytes()
     check_cancel(cancel)
     encodings = ["utf-16"] if raw.startswith((b"\xff\xfe", b"\xfe\xff")) else ["utf-8-sig", "gb18030"]

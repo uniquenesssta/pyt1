@@ -41,7 +41,7 @@ class LotteryApp:
         header = ttk.Frame(outer)
         header.pack(fill="x", pady=(0, 10))
         ttk.Label(header, text="大乐透随机工具", style="Section.TLabel").pack(side="left")
-        self.import_button = ttk.Button(header, text="导入历史 TXT / CSV", command=self.import_file)
+        self.import_button = ttk.Button(header, text="导入历史 TXT / CSV / Excel", command=self.import_file)
         self.import_button.pack(side="right")
         self.issue_button = ttk.Button(header, text="校验明细", command=self.show_issues)
         self.issue_button.pack(side="right", padx=8)
@@ -101,7 +101,7 @@ class LotteryApp:
         self.jobs.start(lambda cancel, progress: generate(config, stats, cancel, progress), done, self.error)
 
     def import_file(self):
-        path = filedialog.askopenfilename(parent=self.root, filetypes=[("历史文本", "*.txt *.csv *.tsv"), ("所有文件", "*.*")])
+        path = filedialog.askopenfilename(parent=self.root, filetypes=[("历史数据", "*.txt *.csv *.tsv *.xls *.xlsx *.xlxs"), ("Excel 工作簿", "*.xls *.xlsx *.xlxs"), ("所有文件", "*.*")])
         if path:
             self.load_path(path)
 

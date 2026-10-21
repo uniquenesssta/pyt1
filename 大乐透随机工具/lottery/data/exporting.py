@@ -20,5 +20,5 @@ def export_csv(path, headings, rows):
 
 
 def draw_rows(results):
-    return [(draw.issue, format_numbers(draw.ticket.front), format_numbers(draw.ticket.back), detail, draw.line)
+    return [(draw.issue, format_numbers(draw.ticket.front), format_numbers(draw.ticket.back), detail, draw.line, draw.sheet)
             for draw, detail in results]

@@ -5,3 +5,5 @@ user_data/
 dist/
 build/
 *.spec
+
+dependency-install.log
