@@ -6,6 +6,7 @@ from .planning import iter_font_files, build_rename_plan
 from .font_comparison import read_comparison
 from .same_names import group_same_names
 from .duplicates import fingerprint, Duplicate
+from .parallel import parallel_read
 
 
 @dataclass
@@ -20,20 +21,25 @@ def scan_session(config, progress=None):
     paths = iter_font_files(config['folder'],config['extensions'],config['recursive'])
     lookup, entries, errors = {}, [], []
     identities = set()
-    for index,path in enumerate(paths):
-        try:
-            if Path(path).is_symlink(): raise ValueError('跳过符号链接')
-            info = read_comparison(path, config['name_ids'], config['lang_ids'], hash_content=False)
-            lookup[path] = info
-            stat = Path(path).stat()
-            identity = (stat.st_dev,stat.st_ino)
-            if not stat.st_ino or identity not in identities: entries.append(info)
-            identities.add(identity)
-            if info.error: errors.append(f'{path}: {info.error}')
-        except Exception as exc:
-            lookup[path] = exc; errors.append(f'{path}: {exc}')
-        if progress and (index % 50 == 0 or index+1 == len(paths)):
-            progress(f'读取字体信息 {index+1}/{len(paths)}')
+    def read_one(path):
+        if Path(path).is_symlink(): raise ValueError('跳过符号链接')
+        info = read_comparison(path, config['name_ids'], config['lang_ids'], hash_content=False)
+        stat = Path(path).stat()
+        return info, (stat.st_dev, stat.st_ino)
+    def report(completed, total):
+        if progress: progress(f'读取字体信息（10线程） {completed}/{total}')
+    results = parallel_read(paths, read_one, report)
+    # 统一按原始路径顺序归并，避免线程完成顺序影响重名后缀和保留项。
+    for path, (result, error) in zip(paths, results):
+        if error is not None:
+            lookup[path] = error
+            errors.append(f'{path}: {error}')
+            continue
+        info, identity = result
+        lookup[path] = info
+        if not identity[1] or identity not in identities: entries.append(info)
+        identities.add(identity)
+        if info.error: errors.append(f'{path}: {info.error}')
     groups = group_same_names(entries)
     named = {m.path for g in groups for m in g.members}
     counts = Counter(m.size for m in entries)

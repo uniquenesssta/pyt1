@@ -20,6 +20,16 @@ class SharedScanTests(unittest.TestCase):
                 self.assertEqual(enumerate_files.call_count,1)
                 self.assertEqual(read.call_count,3)
                 self.assertEqual(hash_file.call_count,3)
+            from dataclasses import asdict
+            def serial(items, reader, progress=None):
+                results = []
+                for item in items:
+                    try: results.append((reader(item), None))
+                    except Exception as exc: results.append((None, exc))
+                return results
+            with patch.object(module, 'parallel_read', side_effect=serial):
+                sequential = scan_session(config)
+            self.assertEqual(asdict(session), asdict(sequential))
             self.assertEqual(len(session.plans),3)
             self.assertEqual(len(session.duplicates),1)
             self.assertEqual(len(session.name_groups),1)
