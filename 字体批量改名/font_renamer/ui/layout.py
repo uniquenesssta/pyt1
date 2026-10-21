@@ -65,8 +65,19 @@ class LayoutMixin:
         # 预览表格
         preview_frame = ttk.LabelFrame(root, text="3. 预览结果", padding=8)
         preview_frame.pack(fill=tk.BOTH, expand=True, pady=(10, 0))
-        preview_frame.rowconfigure(0, weight=1)
+        preview_frame.rowconfigure(1, weight=1)
         preview_frame.columnconfigure(0, weight=1)
+
+        filter_bar = ttk.Frame(preview_frame)
+        filter_bar.grid(row=0, column=0, columnspan=2, sticky="ew", pady=(0, 6))
+        ttk.Label(filter_bar, text="状态：").pack(side=tk.LEFT)
+        self.preview_filter = ttk.Combobox(
+            filter_bar, textvariable=self.preview_filter_var,
+            values=("全部", "跳过", "将重命名"), state="readonly", width=12,
+        )
+        self.preview_filter.pack(side=tk.LEFT)
+        self.preview_filter.bind("<<ComboboxSelected>>", self._on_preview_filter_changed)
+        ttk.Label(filter_bar, textvariable=self.preview_count_var).pack(side=tk.RIGHT)
 
         columns = ("status", "old", "new", "font", "name_id", "lang", "reason")
         self.tree = ttk.Treeview(preview_frame, columns=columns, show="headings", height=12)
@@ -89,9 +100,9 @@ class LayoutMixin:
         ybar = ttk.Scrollbar(preview_frame, orient=tk.VERTICAL, command=self.tree.yview)
         xbar = ttk.Scrollbar(preview_frame, orient=tk.HORIZONTAL, command=self.tree.xview)
         self.tree.configure(yscrollcommand=ybar.set, xscrollcommand=xbar.set)
-        self.tree.grid(row=0, column=0, sticky="nsew")
-        ybar.grid(row=0, column=1, sticky="ns")
-        xbar.grid(row=1, column=0, sticky="ew")
+        self.tree.grid(row=1, column=0, sticky="nsew")
+        ybar.grid(row=1, column=1, sticky="ns")
+        xbar.grid(row=2, column=0, sticky="ew")
 
         # 日志
         log_frame = ttk.LabelFrame(root, text="日志", padding=8)

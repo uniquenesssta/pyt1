@@ -15,8 +15,9 @@ from ..core.planning import build_rename_plan
 from ..core.execution import execute_rename_plans
 from ..storage.csv_log import write_csv_log
 from .layout import LayoutMixin
+from .preview import PreviewMixin
 
-class FontRenamerApp(LayoutMixin, tk.Tk):
+class FontRenamerApp(PreviewMixin, LayoutMixin, tk.Tk):
     def __init__(self) -> None:
         super().__init__()
         self.title("字体批量改名工具")
@@ -31,6 +32,8 @@ class FontRenamerApp(LayoutMixin, tk.Tk):
         self.plans: list[RenamePlan] = []
         self.last_log_path: Optional[str] = None
 
+        self.preview_filter_var = tk.StringVar(value="全部")
+        self.preview_count_var = tk.StringVar(value="显示 0 / 共 0 项")
         self.folder_var = tk.StringVar()
         self.recursive_var = tk.BooleanVar(value=False)
         self.lower_ext_var = tk.BooleanVar(value=True)
@@ -63,8 +66,7 @@ class FontRenamerApp(LayoutMixin, tk.Tk):
             return
         self.plans = []
         self.last_log_path = None
-        for item in self.tree.get_children():
-            self.tree.delete(item)
+        self._insert_plan_rows()
         self.log_text.delete("1.0", tk.END)
         self.rename_btn.configure(state=tk.DISABLED)
         self.export_btn.configure(state=tk.DISABLED)
@@ -106,9 +108,10 @@ class FontRenamerApp(LayoutMixin, tk.Tk):
     def set_busy(self, busy: bool) -> None:
         self.busy = busy
         state = tk.DISABLED if busy else tk.NORMAL
+        self.preview_filter.configure(state="disabled" if busy else "readonly")
         self.scan_btn.configure(state=state)
         self.export_btn.configure(state=(tk.DISABLED if busy or not self.plans else tk.NORMAL))
-        can_rename = any(p.status == STATUS_RENAME for p in self.plans)
+        can_rename = any(p.status == STATUS_RENAME for p in self._visible_plans())
         self.rename_btn.configure(state=(tk.DISABLED if busy or not can_rename else tk.NORMAL))
         if busy:
             self.progress.start(12)
@@ -143,20 +146,20 @@ class FontRenamerApp(LayoutMixin, tk.Tk):
     def rename_files(self) -> None:
         if self.busy:
             return
-        todo_count = sum(1 for p in self.plans if p.status == STATUS_RENAME)
+        plans = [p for p in self._visible_plans() if p.status == STATUS_RENAME]
+        todo_count = len(plans)
         if todo_count == 0:
             messagebox.showinfo("没有可改名文件", "当前预览中没有需要改名的文件。")
             return
 
         answer = messagebox.askyesno(
             "确认执行改名",
-            f"即将重命名 {todo_count} 个字体文件。\n\n建议确认预览结果无误后再继续。是否执行？",
+            f"当前筛选：{self.preview_filter_var.get()}\n即将重命名 {todo_count} 个字体文件。\n\n建议确认预览结果无误后再继续。是否执行？",
         )
         if not answer:
             return
 
         folder = self.scan_folder
-        plans = list(self.plans)
         self.set_busy(True)
         self.log(f"开始执行改名，共 {todo_count} 个文件。")
 
@@ -189,26 +192,6 @@ class FontRenamerApp(LayoutMixin, tk.Tk):
             messagebox.showinfo("导出完成", f"已导出：\n{log_path}")
         except Exception as exc:
             messagebox.showerror("导出失败", str(exc))
-
-    def _insert_plan_rows(self) -> None:
-        for item in self.tree.get_children():
-            self.tree.delete(item)
-
-        for plan in self.plans:
-            lang = f"0x{plan.lang_id:04X}" if isinstance(plan.lang_id, int) else ""
-            self.tree.insert(
-                "",
-                tk.END,
-                values=(
-                    plan.status,
-                    plan.old_name,
-                    plan.new_name,
-                    plan.font_name,
-                    plan.name_id if plan.name_id is not None else "",
-                    lang,
-                    plan.reason,
-                ),
-            )
 
     def _summarize(self) -> tuple[int, int, int, int]:
         rename_count = sum(1 for p in self.plans if p.status == STATUS_RENAME)
