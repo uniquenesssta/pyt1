@@ -17,8 +17,9 @@ from ..storage.csv_log import write_csv_log
 from ..core.scan_session import scan_session
 from .layout import LayoutMixin
 from .preview import PreviewMixin
+from .preview_actions import PreviewActionsMixin
 
-class FontRenamerApp(PreviewMixin, LayoutMixin, tk.Tk):
+class FontRenamerApp(PreviewActionsMixin, PreviewMixin, LayoutMixin, tk.Tk):
     def __init__(self) -> None:
         super().__init__()
         self.title("字体批量改名工具")
@@ -45,7 +46,9 @@ class FontRenamerApp(PreviewMixin, LayoutMixin, tk.Tk):
         self.lang_ids_var = tk.StringVar(value="0x0804,0x0404,0x0C04,0x0409,0")
         self.ext_vars = {ext: tk.BooleanVar(value=True) for ext in DEFAULT_EXTENSIONS}
 
+        self._preview_rows = {}
         self._create_widgets()
+        self.create_preview_menu()
         self.after(100, self._drain_queue)
 
         if TTFont is None:
@@ -257,6 +260,9 @@ class FontRenamerApp(PreviewMixin, LayoutMixin, tk.Tk):
                         "处理完成",
                         f"成功改名：{success} 个\n失败：{failed} 个\n跳过：{skip_count} 个\n错误：{error_count} 个\n\n日志：\n{log_path or '保存失败，请重新导出预览 CSV'}",
                     )
+
+                elif kind == "delete_done":
+                    self.finish_preview_delete(item[1], item[2])
 
                 elif kind == "error":
                     self.log(item[1])

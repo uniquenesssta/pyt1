@@ -15,11 +15,12 @@ class PreviewMixin:
         for item in self.tree.get_children():
             self.tree.delete(item)
 
+        self._preview_rows = {}
         visible = self._visible_plans()
         self.preview_count_var.set(f"显示 {len(visible)} / 共 {len(self.plans)} 项")
         for plan in visible:
             lang = f"0x{plan.lang_id:04X}" if isinstance(plan.lang_id, int) else ""
-            self.tree.insert(
+            row = self.tree.insert(
                 "",
                 tk.END,
                 values=(
@@ -33,3 +34,4 @@ class PreviewMixin:
                 ),
             )
 
+            self._preview_rows[row] = plan

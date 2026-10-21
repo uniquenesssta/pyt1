@@ -65,7 +65,7 @@ def scan_session(config, progress=None):
     def name_lookup(path):
         value=lookup[path]
         if isinstance(value,Exception): raise value
-        if value.error and not value.rename_name: raise ValueError(value.error)
+        if value.error: raise ValueError(value.error)
         return value.rename_name
     plans=build_rename_plan(**config,font_files=paths,name_lookup=name_lookup)
     return ScanSession(plans,duplicates,groups,errors)

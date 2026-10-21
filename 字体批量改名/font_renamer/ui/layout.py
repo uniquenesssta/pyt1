@@ -77,7 +77,7 @@ class LayoutMixin:
         ttk.Label(filter_bar, text="状态：").pack(side=tk.LEFT)
         self.preview_filter = ttk.Combobox(
             filter_bar, textvariable=self.preview_filter_var,
-            values=("全部", "跳过", "将重命名"), state="readonly", width=12,
+            values=("全部", "跳过", "将重命名", "错误"), state="readonly", width=12,
         )
         self.preview_filter.pack(side=tk.LEFT)
         self.preview_filter.bind("<<ComboboxSelected>>", self._on_preview_filter_changed)
