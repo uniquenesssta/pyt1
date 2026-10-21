@@ -1,9 +1,10 @@
 """窗口组装和任务协调，算法、文件操作与页面各自独立。"""
 import logging
+from dataclasses import replace
 from pathlib import Path
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
-from ..core.generation import generate
+from ..core.generation import generate, MODES
 from ..core.querying import search
 from ..data.history_store import HistoryStore
 from .history_actions import import_history, update_history, restore_history
@@ -14,6 +15,7 @@ from .import_issues import show_import_issues
 from .jobs import Jobs
 from .results import TicketPanel
 from .statistics import StatisticsPage
+from .structure_weights import StructureWeightsPage
 
 
 class LotteryApp:
@@ -67,6 +69,8 @@ class LotteryApp:
         self.statistics = StatisticsPage(self.tabs, self.set_status, self.error)
         self.tabs.add(self.history, text="  历史查询  ")
         self.tabs.add(self.statistics, text="  统计分析  ")
+        self.structure_weights = StructureWeightsPage(self.tabs, self.error)
+        self.tabs.add(self.structure_weights, text="  结构权重  ")
         footer = ttk.Frame(outer)
         footer.pack(fill="x", pady=(10, 0))
         self.status = tk.StringVar(value="就绪")
@@ -81,6 +85,7 @@ class LotteryApp:
         self.status.set(text)
 
     def set_busy(self, busy):
+        self.structure_weights.set_busy(busy)
         for button in (self.import_button, self.update_button, self.controls.generate_button, self.history.search_button):
             button.configure(state="disabled" if busy else "normal")
         self.cancel_button.configure(state="normal" if busy else "disabled")
@@ -93,6 +98,8 @@ class LotteryApp:
     def generate(self):
         try:
             config = self.controls.snapshot()
+            if config.mode != MODES[0]:
+                config = replace(config, structure_profile=self.structure_weights.snapshot())
         except ValueError as error:
             self.error(error)
             return
@@ -100,7 +107,7 @@ class LotteryApp:
 
         def done(tickets):
             self.generated.set_tickets(tickets)
-            self.set_status(f"已生成 {len(tickets):,} 组 · {config.mode}")
+            self.set_status(f"已生成 {len(tickets):,} 组 · {config.mode}" + (f" · 实际使用最近 {len(config.structure_profile.draws)} 期" if config.structure_profile else ""))
         self.set_status("正在生成…")
         self.jobs.start(lambda cancel, progress: generate(config, stats, cancel, progress), done, self.error)
 

@@ -35,6 +35,8 @@ class StructurePool:
         # 平滑各历史类别，避免小样本中未出现过的结构被永久禁止。
         max_weights = config.max_span_weights or tuple(stats.max_span[i] + 1 for i in range(5))
         start_weights = config.start_span_weights or tuple(stats.start_span[i] + 1 for i in range(5))
+        from .structure_scoring import StructureScorer
+        scorer = StructureScorer(config.structure_profile) if config.structure_profile is not None else None
         total = 0.0
         for i, rest in enumerate(combinations(pool, 5 - len(config.front_fixed))):
             if i % 1024 == 0:
@@ -44,6 +46,18 @@ class StructurePool:
             front = tuple(sorted(config.front_fixed + rest))
             f = features(front)
             if max_weights[f.max_span] == 0 or start_weights[f.start_span] == 0:
+                continue
+            if scorer is not None:
+                weight = scorer.weight(front)
+                if config.max_span_weights:
+                    weight *= config.max_span_weights[f.max_span]
+                if config.start_span_weights:
+                    weight *= config.start_span_weights[f.start_span]
+                if weight <= 0:
+                    continue
+                total += weight
+                self.fronts.append(front)
+                self.cumulative.append(total)
                 continue
             # 各维度为相对权重而非承诺的最终边际概率。几何平均抑制重复放大。
             factors = [stats.front[n] + 1 for n in front]

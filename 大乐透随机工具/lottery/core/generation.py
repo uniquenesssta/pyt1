@@ -22,6 +22,7 @@ class GenerationConfig:
     unique: bool = True
     max_span_weights: tuple = ()
     start_span_weights: tuple = ()
+    structure_profile: object = None
 
     def validate(self):
         if type(self.count) is not int or not 1 <= self.count <= 10000:
@@ -66,6 +67,9 @@ def unrank_combination(pool, count, rank):
 
 def generate(config, stats=None, cancel=None, progress=None, rng=None):
     config.validate()
+    if config.structure_profile is not None and config.mode != MODES[0]:
+        config.structure_profile.validate()
+        stats = config.structure_profile.stats
     check_cancel(cancel)
     rng = rng if rng is not None else SystemRandom()
     front_pool = tuple(n for n in range(1, 36) if n not in config.front_fixed and n not in config.front_excluded)

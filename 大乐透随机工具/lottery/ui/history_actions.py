@@ -19,6 +19,7 @@ def apply_history(app, value, message, persist=True):
     app.history.text.set('')
     app.history.set_results([(d, '') for d in dataset.draws], len(dataset.draws))
     app.statistics.set_statistics(stats)
+    app.structure_weights.set_history(dataset.draws)
     app.set_status(message)
 
 
