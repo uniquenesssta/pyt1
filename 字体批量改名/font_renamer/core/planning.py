@@ -34,8 +34,11 @@ def build_rename_plan(
     duplicate_mode: str,
     lower_extension: bool,
     use_underscore: bool,
+    font_files=None,
+    name_lookup=None,
 ) -> list[RenamePlan]:
-    font_files = iter_font_files(folder, extensions, recursive)
+    if font_files is None:
+        font_files = iter_font_files(folder, extensions, recursive)
     plans: list[RenamePlan] = []
 
     # 记录已存在路径与本轮已占用目标路径，避免重名。
@@ -48,7 +51,7 @@ def build_rename_plan(
         new_ext = old_ext.lower() if lower_extension else old_ext
 
         try:
-            font_name = get_font_name(old_path, name_ids, lang_ids)
+            font_name = name_lookup(old_path) if name_lookup else get_font_name(old_path, name_ids, lang_ids)
             if not font_name:
                 plans.append(RenamePlan(old_path, "", "", None, None, STATUS_SKIP, "无法从字体 name 表读取有效名称"))
                 continue

@@ -48,38 +48,42 @@ def get_font_name(font_path: str, name_ids: Iterable[int], lang_ids: Iterable[in
             if not name_table:
                 return None
 
-            records = sorted(name_table.names, key=platform_score)
-            name_ids = list(name_ids)
-            lang_ids = list(lang_ids)
-
-            # 第一阶段：按用户语言优先级精确查找。
-            for name_id in name_ids:
-                for lang_id in lang_ids:
-                    for record in records:
-                        if record.nameID == name_id and record.langID == lang_id:
-                            value = decode_name_record(record)
-                            if value:
-                                return FontName(value, name_id, lang_id, record.platformID)
-
-            # 第二阶段：优先英文兜底。
-            for fallback_lang_id in (0x0409, 0):
-                for name_id in name_ids:
-                    for record in records:
-                        if record.nameID == name_id and record.langID == fallback_lang_id:
-                            value = decode_name_record(record)
-                            if value:
-                                return FontName(value, name_id, fallback_lang_id, record.platformID)
-
-            # 第三阶段：任何可解码名称兜底。
-            for name_id in name_ids:
-                for record in records:
-                    if record.nameID == name_id:
-                        value = decode_name_record(record)
-                        if value:
-                            return FontName(value, name_id, record.langID, record.platformID)
-
-            return None
+            return select_font_name(name_table.names, name_ids, lang_ids)
     except TTLibError as exc:
         raise RuntimeError(f"字体格式不支持或文件损坏：{exc}") from exc
 
 
+
+
+def select_font_name(records, name_ids, lang_ids):
+    records = sorted(records, key=platform_score)
+    name_ids = list(name_ids)
+    lang_ids = list(lang_ids)
+
+    # 第一阶段：按用户语言优先级精确查找。
+    for name_id in name_ids:
+        for lang_id in lang_ids:
+            for record in records:
+                if record.nameID == name_id and record.langID == lang_id:
+                    value = decode_name_record(record)
+                    if value:
+                        return FontName(value, name_id, lang_id, record.platformID)
+
+    # 第二阶段：优先英文兜底。
+    for fallback_lang_id in (0x0409, 0):
+        for name_id in name_ids:
+            for record in records:
+                if record.nameID == name_id and record.langID == fallback_lang_id:
+                    value = decode_name_record(record)
+                    if value:
+                        return FontName(value, name_id, fallback_lang_id, record.platformID)
+
+    # 第三阶段：任何可解码名称兜底。
+    for name_id in name_ids:
+        for record in records:
+            if record.nameID == name_id:
+                value = decode_name_record(record)
+                if value:
+                    return FontName(value, name_id, record.langID, record.platformID)
+
+    return None

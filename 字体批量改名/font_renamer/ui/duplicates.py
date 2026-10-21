@@ -1,21 +1,22 @@
 """重复字体扫描、勾选预览和回收站清理窗口。"""
+import copy
 import queue
 import threading
 import tkinter as tk
 from tkinter import ttk, messagebox
-from ..core.duplicates import scan_duplicates, clean_duplicates
+from ..core.duplicates import clean_duplicates
 from ..storage.recycle import recycle_file
 
 
 class DuplicateWindow(tk.Toplevel):
-    def __init__(self, parent, config):
+    def __init__(self, parent, session):
         super().__init__(parent)
         self.title('重复字体清理')
         self.geometry('1080x620')
         self.minsize(780, 420)
         self.transient(parent)
         self.grab_set()
-        self.config_data = config
+        self.session = session
         self.items = []
         self.checked = set()
         self.busy = False
@@ -23,12 +24,9 @@ class DuplicateWindow(tk.Toplevel):
         self.protocol('WM_DELETE_WINDOW', self.close)
         bar = ttk.Frame(self, padding=10)
         bar.pack(fill='x')
-        self.scan = ttk.Button(bar, text='扫描重复字体', command=self.start_scan)
-        self.scan.pack(side='left')
         self.clean = ttk.Button(bar, text='移入回收站', command=self.start_clean, state='disabled')
         self.clean.pack(side='left', padx=8)
         ttk.Button(bar, text='全选 / 取消全选', command=self.toggle_all).pack(side='left')
-        ttk.Button(bar, text="同名字体对比", command=self.open_same_names).pack(side="left", padx=8)
         self.summary = tk.StringVar(value='按完整文件内容判断；每组按路径排序保留第一份。')
         ttk.Label(self, textvariable=self.summary, padding=10).pack(fill='x')
         frame = ttk.Frame(self, padding=(10, 0))
@@ -48,12 +46,10 @@ class DuplicateWindow(tk.Toplevel):
         self.details = tk.Text(self, height=5, wrap='word')
         self.details.pack(fill='x', padx=10,pady=10)
         self.after(100,self.poll)
-        self.start_scan()
-
-    def open_same_names(self):
-        if self.busy: return
-        from .name_comparison import NameComparisonWindow
-        NameComparisonWindow(self, self.config_data)
+        self.items = copy.deepcopy(session.duplicates)
+        self.checked = set(range(len(self.items)))
+        self.render()
+        self.details.insert("end", "\n".join(session.errors))
 
     def close(self):
         if self.busy:
@@ -86,19 +82,11 @@ class DuplicateWindow(tk.Toplevel):
 
     def run_task(self, function):
         self.busy = True
-        self.scan.configure(state='disabled')
         self.clean.configure(state='disabled')
         def worker():
             try: self.events.put(('done',function()))
             except Exception as exc: self.events.put(('error',str(exc)))
         threading.Thread(target=worker,daemon=False).start()
-
-    def start_scan(self):
-        if self.busy: return
-        self.items = []; self.checked = set(); self.render()
-        self.summary.set('正在扫描并校验文件内容…')
-        c = self.config_data
-        self.run_task(lambda: ('scan',scan_duplicates(c['folder'],c['extensions'],c['recursive'])))
 
     def start_clean(self):
         if self.busy or not self.checked: return
@@ -114,14 +102,8 @@ class DuplicateWindow(tk.Toplevel):
             self.after(100,self.poll)
             return
         self.busy = False
-        self.scan.configure(state='normal')
         if kind == 'error':
             self.details.insert('end',value+'\n')
-        elif value[0] == 'scan':
-            self.items, errors = value[1]
-            self.checked = set(range(len(self.items)))
-            self.details.delete('1.0','end')
-            self.details.insert('end','\n'.join(errors) if errors else '扫描完成。点击第一列可取消不想清理的文件。')
         else:
             self.checked = {i for i in self.checked if self.items[i].status == '待清理'}
             self.details.insert('end',f'\n已移入回收站 {value[1]} 项。失败原因见说明列。')

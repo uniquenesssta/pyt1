@@ -61,6 +61,8 @@ class LayoutMixin:
 
         ttk.Button(action_frame, text="重复字体清理", command=self.open_duplicates).pack(side=tk.LEFT, padx=(8, 0))
 
+        ttk.Button(action_frame, text="同名字体对比", command=self.open_same_names).pack(side=tk.LEFT, padx=(8, 0))
+
         self.progress = ttk.Progressbar(action_frame, mode="indeterminate", length=220)
         self.progress.pack(side=tk.RIGHT)
 

@@ -14,6 +14,7 @@ from ..core.reader import TTFont
 from ..core.planning import build_rename_plan
 from ..core.execution import execute_rename_plans
 from ..storage.csv_log import write_csv_log
+from ..core.scan_session import scan_session
 from .layout import LayoutMixin
 from .preview import PreviewMixin
 
@@ -26,6 +27,7 @@ class FontRenamerApp(PreviewMixin, LayoutMixin, tk.Tk):
 
         self.busy = False
         self.scan_folder = ""
+        self.scan_session = None
         self.protocol("WM_DELETE_WINDOW", self.request_close)
         self.work_queue: queue.Queue = queue.Queue()
         self.worker: Optional[threading.Thread] = None
@@ -50,13 +52,23 @@ class FontRenamerApp(PreviewMixin, LayoutMixin, tk.Tk):
             messagebox.showwarning("缺少依赖", "未检测到 fontTools。\n请先在命令行运行：pip install fonttools")
 
 
-    def open_duplicates(self):
+    def require_session(self):
         if self.busy:
-            return
-        config = self.validate_inputs()
-        if config:
+            return False
+        if self.scan_session is None:
+            messagebox.showinfo("请先扫描", "请先在主界面点击“扫描并预览”。")
+            return False
+        return True
+
+    def open_duplicates(self):
+        if self.require_session():
             from .duplicates import DuplicateWindow
-            DuplicateWindow(self, config)
+            DuplicateWindow(self, self.scan_session)
+
+    def open_same_names(self):
+        if self.require_session():
+            from .name_comparison import NameComparisonWindow
+            NameComparisonWindow(self, self.scan_session)
 
     def request_close(self) -> None:
         if self.busy:
@@ -73,6 +85,7 @@ class FontRenamerApp(PreviewMixin, LayoutMixin, tk.Tk):
         if self.busy:
             return
         self.plans = []
+        self.scan_session = None
         self.last_log_path = None
         self._insert_plan_rows()
         self.log_text.delete("1.0", tk.END)
@@ -143,8 +156,8 @@ class FontRenamerApp(PreviewMixin, LayoutMixin, tk.Tk):
 
         def worker():
             try:
-                plans = build_rename_plan(**config)
-                self.work_queue.put(("scan_done", plans, config["folder"]))
+                session = scan_session(config, lambda text: self.work_queue.put(("log", text)))
+                self.work_queue.put(("scan_done", session, config["folder"]))
             except Exception as exc:
                 self.work_queue.put(("error", f"扫描失败：{exc}\n{traceback.format_exc()}"))
 
@@ -218,8 +231,12 @@ class FontRenamerApp(PreviewMixin, LayoutMixin, tk.Tk):
                     self.log(item[1])
 
                 elif kind == "scan_done":
-                    _, plans, folder = item
+                    _, session, folder = item
+                    self.scan_session = session
+                    plans = session.plans
                     self.plans = plans
+                    for error in session.errors:
+                        self.log(error)
                     self.scan_folder = folder
                     self._insert_plan_rows()
                     rename_count, _, skip_count, error_count = self._summarize()
@@ -230,6 +247,7 @@ class FontRenamerApp(PreviewMixin, LayoutMixin, tk.Tk):
 
                 elif kind == "rename_done":
                     _, success, failed, log_path = item
+                    self.scan_session = None
                     self.last_log_path = log_path
                     self._insert_plan_rows()
                     _, done_count, skip_count, error_count = self._summarize()

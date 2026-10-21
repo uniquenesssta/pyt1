@@ -6,8 +6,6 @@ from tkinter import ttk
 class NameComparisonLayout:
     def build(self):
         toolbar = ttk.Frame(self,padding=10); toolbar.pack(fill='x')
-        self.scan_button = ttk.Button(toolbar,text='重新扫描同名',command=self.scan)
-        self.scan_button.pack(side='left')
         self.keep_button = ttk.Button(toolbar,text='保留选中的这一份',command=self.choose_keep,state='disabled')
         self.keep_button.pack(side='left',padx=8)
         self.reset_button = ttk.Button(toolbar,text='取消本组清理',command=self.reset_group)

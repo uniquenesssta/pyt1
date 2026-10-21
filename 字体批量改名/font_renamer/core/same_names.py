@@ -36,6 +36,10 @@ def scan_same_names(folder, extensions, recursive):
             if info.error: errors.append(f'{path}: {info.error}')
         except Exception as exc:
             errors.append(f'{path}: {exc}')
+    return group_same_names(entries), errors
+
+
+def group_same_names(entries):
     # 合并共享文件名或内部完整名称的候选，避免一个文件出现在多个清理组。
     parents = list(range(len(entries)))
     def root(i):
@@ -53,7 +57,7 @@ def scan_same_names(folder, extensions, recursive):
             else: seen[key] = i
     groups = {}
     for i, item in enumerate(entries): groups.setdefault(root(i),[]).append(item)
-    return [NameGroup(items) for items in groups.values() if len(items)>1], errors
+    return [NameGroup(items) for items in groups.values() if len(items)>1]
 
 
 def clean_name_groups(groups, recycle):
