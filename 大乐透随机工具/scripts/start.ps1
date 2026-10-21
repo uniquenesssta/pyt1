@@ -36,6 +36,9 @@ try {
     $pythonWindow = Join-Path (Split-Path -Parent $pythonExe) 'pythonw.exe'
     if (-not (Test-Path -LiteralPath $pythonWindow)) { throw 'pythonw.exe was not found. Repair your Python installation.' }
     $entry = Join-Path $toolRoot 'main.py'
+    $cacheDir = Join-Path $toolRoot 'user_data'
+    New-Item -ItemType Directory -Force -Path $cacheDir | Out-Null
+    @($pythonWindow, $toolRoot) | Set-Content -LiteralPath (Join-Path $cacheDir 'launcher-v1.txt') -Encoding Unicode
     Start-Process -FilePath $pythonWindow -ArgumentList @('"' + $entry + '"') -WorkingDirectory $toolRoot
 } catch {
     Add-Type -AssemblyName System.Windows.Forms

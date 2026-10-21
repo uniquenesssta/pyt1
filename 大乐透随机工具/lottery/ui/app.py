@@ -5,8 +5,8 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 from ..core.generation import generate
 from ..core.querying import search
-from ..core.statistics import analyze
-from ..data.importing import load_dataset
+from ..data.history_store import HistoryStore
+from .history_actions import import_history, update_history, restore_history
 from ..data.storage import FavoriteStore
 from .controls import GenerationControls
 from .history import HistoryPage
@@ -20,6 +20,7 @@ class LotteryApp:
     def __init__(self, root, data_dir):
         self.root = root
         self.dataset, self.stats = None, None
+        self.history_store = HistoryStore(Path(data_dir) / "history.json")
         self.store = FavoriteStore(Path(data_dir) / "favorites.json")
         self.favorites = self.store.load()
         root.title("大乐透随机工具")
@@ -43,6 +44,8 @@ class LotteryApp:
         ttk.Label(header, text="大乐透随机工具", style="Section.TLabel").pack(side="left")
         self.import_button = ttk.Button(header, text="导入历史 TXT / CSV / Excel", command=self.import_file)
         self.import_button.pack(side="right")
+        self.update_button = ttk.Button(header, text="更新开奖数据", command=lambda: update_history(self))
+        self.update_button.pack(side="right", padx=8)
         self.issue_button = ttk.Button(header, text="校验明细", command=self.show_issues)
         self.issue_button.pack(side="right", padx=8)
         self.source_text = tk.StringVar(value="尚未导入历史数据 · 可直接随机")
@@ -72,12 +75,13 @@ class LotteryApp:
         self.cancel_button.pack(side="right")
         self.jobs = Jobs(root, self.set_status, self.set_busy)
         root.protocol("WM_DELETE_WINDOW", self.close)
+        self.restore_timer = root.after(100, lambda: restore_history(self))
 
     def set_status(self, text):
         self.status.set(text)
 
     def set_busy(self, busy):
-        for button in (self.import_button, self.controls.generate_button, self.history.search_button):
+        for button in (self.import_button, self.update_button, self.controls.generate_button, self.history.search_button):
             button.configure(state="disabled" if busy else "normal")
         self.cancel_button.configure(state="normal" if busy else "disabled")
 
@@ -106,21 +110,7 @@ class LotteryApp:
             self.load_path(path)
 
     def load_path(self, path):
-        def work(cancel, progress):
-            dataset = load_dataset(path, cancel, progress)
-            progress(f"正在分析 {len(dataset.draws):,} 条有效记录")
-            return dataset, analyze(dataset.draws, cancel)
-
-        def done(value):
-            self.dataset, self.stats = value
-            d = self.dataset
-            self.source_text.set(f"{Path(d.source).name} · 有效 {len(d.draws):,} 行 · 无效 {len(d.issues):,} 行 · 重复 {d.duplicates:,} 行 · {d.encoding}")
-            self.history.text.set("")
-            self.history.set_results([(draw, "") for draw in d.draws], len(d.draws))
-            self.statistics.set_statistics(self.stats)
-            self.set_status("导入完成，选号加权、历史查询和全部统计共用本次数据")
-        self.set_status("正在读取文件…")
-        self.jobs.start(work, done, self.error)
+        import_history(self, path)
 
     def search(self):
         if self.dataset is None:
@@ -164,5 +154,6 @@ class LotteryApp:
             self.set_status(f"已移除 {len(removed)} 组收藏")
 
     def close(self):
+        self.root.after_cancel(self.restore_timer)
         self.jobs.close()
         self.root.destroy()

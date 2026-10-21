@@ -8,7 +8,7 @@ from .charts import BarChart
 
 
 class StatisticsPage(ttk.Frame):
-    HEADINGS = ("类别", "项目", "次数", "分母", "百分比")
+    HEADINGS = ("类别", "项目", "次数", "统计基数", "百分比")
 
     def __init__(self, parent, status, error):
         super().__init__(parent, padding=10)

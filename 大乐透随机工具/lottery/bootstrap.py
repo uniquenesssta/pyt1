@@ -4,12 +4,14 @@ import logging
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 import sys
+import time
 import tkinter as tk
 from tkinter import messagebox
 from .ui.app import LotteryApp
 
 
 def main():
+    started = time.perf_counter()
     if sys.platform == "win32":
         try:
             ctypes.windll.shcore.SetProcessDpiAwareness(1)
@@ -29,6 +31,7 @@ def main():
             app.error(value)
         root.report_callback_exception = report
         root.deiconify()
+        root.after_idle(lambda: logging.info("窗口初始化 %.3f 秒（不含启动器）", time.perf_counter() - started))
         root.mainloop()
     except Exception as error:
         logging.exception("启动失败")
