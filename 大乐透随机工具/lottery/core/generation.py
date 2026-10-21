@@ -65,7 +65,7 @@ def unrank_combination(pool, count, rank):
     return tuple(result)
 
 
-def generate(config, stats=None, cancel=None, progress=None, rng=None):
+def generate(config, stats=None, cancel=None, progress=None, rng=None, structure_cache=None):
     config.validate()
     from .cross_weights import resolve_cross_overrides
     config = resolve_cross_overrides(config)
@@ -98,7 +98,10 @@ def generate(config, stats=None, cancel=None, progress=None, rng=None):
         raise ValueError("历史加权需要先导入有效历史数据")
     front_weights = {n: stats.front[n] + 1 for n in range(1, 36)}
     back_weights = {n: stats.back[n] + 1 for n in range(1, 13)}
-    structure = StructurePool(config, stats, cancel, progress) if config.mode == MODES[2] else None
+    structure = None
+    if config.mode == MODES[2]:
+        structure = (structure_cache.get(config, stats, cancel, progress) if structure_cache is not None
+                     else StructurePool(config, stats, cancel, progress))
     if structure:
         capacity = len(structure.fronts) * back_size
         if config.unique and config.count > capacity:

@@ -5,6 +5,7 @@ from pathlib import Path
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 from ..core.generation import generate, MODES
+from ..core.structure_cache import StructureCache
 from ..core.querying import search
 from ..data.history_store import HistoryStore
 from .history_actions import import_history, update_history, restore_history
@@ -23,6 +24,7 @@ class LotteryApp:
     def __init__(self, root, data_dir):
         self.root = root
         self.dataset, self.stats = None, None
+        self.structure_cache = StructureCache()
         self.history_store = HistoryStore(Path(data_dir) / "history.json")
         self.store = FavoriteStore(Path(data_dir) / "favorites.json")
         self.favorites = self.store.load()
@@ -106,12 +108,13 @@ class LotteryApp:
             self.error(error)
             return
         stats = self.stats
+        cache_hits_before = self.structure_cache.hits
 
         def done(tickets):
             self.generated.set_tickets(tickets)
-            self.set_status(f"已生成 {len(tickets):,} 组 · {config.mode}" + (f" · 实际使用最近 {len(config.structure_profile.draws)} 期" if config.structure_profile else ""))
+            self.set_status(f"已生成 {len(tickets):,} 组 · {config.mode}" + (f" · 实际使用最近 {len(config.structure_profile.draws)} 期" if config.structure_profile else "") + (" · 已复用候选缓存" if self.structure_cache.hits > cache_hits_before else ""))
         self.set_status("正在生成…")
-        self.jobs.start(lambda cancel, progress: generate(config, stats, cancel, progress), done, self.error)
+        self.jobs.start(lambda cancel, progress: generate(config, stats, cancel, progress, structure_cache=self.structure_cache), done, self.error)
 
     def import_file(self):
         path = filedialog.askopenfilename(parent=self.root, filetypes=[("历史数据", "*.txt *.csv *.tsv *.xls *.xlsx *.xlxs"), ("Excel 工作簿", "*.xls *.xlsx *.xlxs"), ("所有文件", "*.*")])
@@ -165,4 +168,5 @@ class LotteryApp:
     def close(self):
         self.root.after_cancel(self.restore_timer)
         self.jobs.close()
+        self.structure_cache.clear()
         self.root.destroy()
