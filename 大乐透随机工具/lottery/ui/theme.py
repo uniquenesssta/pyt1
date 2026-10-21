@@ -1,55 +1,37 @@
-"""桌面视觉规范：颜色、字号与间距统一在这里维护。"""
+"""保留 Windows 原生控件，仅统一文字尺寸与可读性。"""
 from tkinter import ttk, font
 
 COLORS = {
-    'background': '#f4f6fa', 'surface': '#ffffff', 'text': '#172b4d',
-    'muted': '#596b84', 'border': '#dce3ed', 'accent': '#255ac4',
-    'tint': '#edf3ff', 'hot': '#b42318', 'cold': '#175cd3',
+    'background': '#f0f0f0', 'surface': '#ffffff', 'text': '#202020',
+    'muted': '#606060', 'border': '#d8d8d8', 'accent': '#3478c5',
+    'tint': '#f4f4f4', 'hot': '#b42318', 'cold': '#175cd3',
 }
 
 
 def apply_theme(root):
+    style = ttk.Style(root)
+    # Retain platform controls, including their button borders and selected tabs.
+    style.theme_use('vista' if 'vista' in style.theme_names() else 'default')
     families = set(font.families(root))
-    family = next((name for name in ('Microsoft YaHei UI', 'Noto Sans CJK SC', 'Noto Sans SC')
-                   if name in families), font.nametofont('TkDefaultFont').actual('family'))
-    font.nametofont('TkDefaultFont').configure(size=10)
+    default_font = font.nametofont('TkDefaultFont')
+    family = 'Microsoft YaHei UI' if 'Microsoft YaHei UI' in families else default_font.actual('family')
+    default_font.configure(family=family, size=10)
     face = (family, 10)
     root.option_add('*Font', face)
-    root.configure(background=COLORS['background'])
-    style = ttk.Style(root)
-    # clam allows consistent colors on Windows as well as Linux.
-    style.theme_use('clam')
-    style.configure('.', font=face, background=COLORS['surface'], foreground=COLORS['text'])
-    style.configure('TFrame', background=COLORS['surface'])
-    style.configure('Workspace.TFrame', background=COLORS['background'])
-    style.configure('TLabel', padding=0)
+    style.configure('.', font=face)
+    background = style.lookup('TFrame', 'background') or root.cget('background')
+    root.configure(background=background)
+    style.configure('Workspace.TFrame', background=background)
+    style.configure('Workspace.TLabel', background=background, foreground=COLORS['muted'])
     style.configure('Muted.TLabel', foreground=COLORS['muted'])
-    style.configure('Workspace.TLabel', background=COLORS['background'], foreground=COLORS['muted'])
-    style.configure('Title.TLabel', font=(family, 16, 'bold'), background=COLORS['background'])
-    style.configure('Section.TLabel', font=(family, 12, 'bold'))
-    style.configure('TButton', padding=(12, 7), borderwidth=1, relief='flat',
-                    bordercolor=COLORS['border'], focusthickness=1, focuscolor=COLORS['accent'])
-    style.map('TButton', background=[('active', COLORS['tint'])],
-              foreground=[('disabled', COLORS['muted'])])
-    style.configure('Primary.TButton', background=COLORS['accent'], foreground='white',
-                    font=(family, 10, 'bold'), bordercolor=COLORS['accent'])
-    style.map('Primary.TButton', background=[('disabled', '#d9e2f4'), ('active', '#17479f')],
-              foreground=[('disabled', COLORS['muted']), ('!disabled', 'white')])
-    style.configure('TEntry', padding=6, fieldbackground='white', bordercolor=COLORS['border'])
-    style.configure('TCombobox', padding=5, arrowsize=14, bordercolor=COLORS['border'])
-    style.map('TCombobox', fieldbackground=[('readonly', 'white')],
-              selectbackground=[('readonly', COLORS['tint'])],
-              selectforeground=[('readonly', COLORS['text'])])
-    style.configure('TNotebook', background=COLORS['background'], borderwidth=0, tabmargins=(0, 0, 0, 8))
-    style.configure('TNotebook.Tab', padding=(18, 9), background=COLORS['surface'], borderwidth=0)
-    style.map('TNotebook.Tab', background=[('selected', COLORS['accent']), ('active', COLORS['tint'])],
-              foreground=[('selected', 'white')])
-    style.configure('Treeview', rowheight=32, font=face, background='white', fieldbackground='white',
-                    borderwidth=0, lightcolor=COLORS['border'], darkcolor=COLORS['border'])
-    style.configure('Treeview.Heading', font=(family, 10, 'bold'), padding=(8, 8),
-                    background=COLORS['tint'], relief='flat', borderwidth=0)
-    style.map('Treeview', background=[('selected', '#dce8ff')], foreground=[('selected', '#12346c')])
-    style.configure('TLabelframe', bordercolor=COLORS['border'], relief='solid')
-    style.configure('TLabelframe.Label', foreground=COLORS['muted'])
-    style.configure('TPanedwindow', background=COLORS['background'], sashwidth=8)
+    style.configure('Title.TLabel', font=(family, 12, 'bold'), background=background)
+    style.configure('Section.TLabel', font=(family, 11, 'bold'))
+    style.configure('TButton', padding=(8, 3))
+    style.configure('Primary.TButton', font=(family, 10, 'bold'), padding=(10, 3))
+    style.configure('TEntry', padding=3)
+    style.configure('TCombobox', padding=3)
+    style.configure('TNotebook.Tab', padding=(10, 4))
+    style.map('TNotebook.Tab', padding=[('selected', (10, 4)), ('!selected', (10, 4))])
+    style.configure('Treeview', rowheight=max(26, default_font.metrics('linespace') + 8), font=face)
+    style.configure('Treeview.Heading', font=(family, 10, 'bold'), padding=(4, 3))
     return style

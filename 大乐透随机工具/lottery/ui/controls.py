@@ -8,22 +8,23 @@ from .widgets import field, wrapped_label, Disclosure
 
 class GenerationControls(ttk.Frame):
     def __init__(self, parent, generate):
-        super().__init__(parent, padding=16)
+        super().__init__(parent, padding=10)
         self.values = {}
         self.on_structure = lambda: None
         row = ttk.Frame(self)
         row.pack(fill="x")
         self.mode = tk.StringVar(value=MODES[0])
-        self.mode_box = ttk.Combobox(field(row, "随机模式", 0, 1), textvariable=self.mode,
-                                     values=MODES, state="readonly", width=20)
+        self.mode_box = ttk.Combobox(field(row, "随机模式", 0), textvariable=self.mode,
+                                     values=MODES, state="readonly", width=18)
         self.mode_box.pack(fill="x")
         for i, (name, default) in enumerate((("组数", "1"), ("前区数量", "5"), ("后区数量", "2")), 1):
             self.values[name] = tk.StringVar(value=default)
             ttk.Entry(field(row, name, i), textvariable=self.values[name], width=8).pack(fill="x")
         self.generate_button = ttk.Button(row, text="生成号码", command=generate, style="Primary.TButton")
-        self.generate_button.grid(row=0, column=4, sticky="s")
+        row.columnconfigure(4, weight=1)
+        self.generate_button.grid(row=0, column=4, sticky="se")
         actions = ttk.Frame(self)
-        actions.pack(fill="x", pady=(12, 0))
+        actions.pack(fill="x", pady=(6, 0))
         self.unique = tk.BooleanVar(value=True)
         ttk.Checkbutton(actions, text="本批组合不重复", variable=self.unique).pack(side="left")
         self.structure_button = ttk.Button(actions, text="结构权重设置", command=lambda: self.on_structure())
@@ -31,14 +32,14 @@ class GenerationControls(ttk.Frame):
         self.custom = tk.BooleanVar(value=False)
         self.custom_button = ttk.Checkbutton(actions, text="自定义跨区权重", variable=self.custom, command=self.update_mode)
         self.custom_button.pack(side="right", padx=16)
-        self.constraints = Disclosure(self, "固定 / 排除")
-        self.constraints.pack(fill="x", pady=(8, 0))
+        self.constraints = Disclosure(self, "固定 / 排除", toolbar=actions)
+        self.constraints.pack(fill="x")
         for i, name in enumerate(("前区固定", "后区固定", "前区排除", "后区排除")):
             self.values[name] = tk.StringVar(value="")
             ttk.Entry(field(self.constraints.body, name, i, 1), textvariable=self.values[name], width=13).pack(fill="x")
             self.values[name].trace_add("write", self.describe_constraints)
         self.constraint_summary = tk.StringVar(value="不限制号码；多个号码可用空格或逗号分隔")
-        wrapped_label(self, textvariable=self.constraint_summary, style="Muted.TLabel").pack(fill="x", pady=(6, 0))
+        wrapped_label(self, textvariable=self.constraint_summary, style="Muted.TLabel").pack(fill="x", pady=(4, 0))
         self.advanced = ttk.Frame(self, padding=(0, 10, 0, 0))
         fill_row = ttk.Frame(self.advanced)
         fill_row.pack(fill="x", pady=(0, 8))
@@ -66,7 +67,7 @@ class GenerationControls(ttk.Frame):
                 variables.append(var)
             self.weight_vars.append(variables)
         self.hint = wrapped_label(self, text="", style="Muted.TLabel")
-        self.hint.pack(fill="x", pady=(8, 0))
+        self.hint.pack(fill="x", pady=(4, 0))
         self.mode_box.bind("<<ComboboxSelected>>", lambda _: self.update_mode())
         self.update_mode()
 

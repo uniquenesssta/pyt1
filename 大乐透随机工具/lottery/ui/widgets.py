@@ -1,14 +1,13 @@
 """页面共用的表单布局与可展开说明。"""
 import tkinter as tk
 from tkinter import ttk
-from .theme import COLORS
 
 
 def field(parent, label, column, weight=0):
     frame = ttk.Frame(parent)
-    frame.grid(row=0, column=column, sticky='ew', padx=(0, 16))
+    frame.grid(row=0, column=column, sticky='ew', padx=(0, 8))
     parent.columnconfigure(column, weight=weight)
-    ttk.Label(frame, text=label, style='Muted.TLabel').pack(anchor='w', pady=(0, 5))
+    ttk.Label(frame, text=label, style='Muted.TLabel').pack(anchor='w', pady=(0, 3))
     return frame
 
 
@@ -20,11 +19,15 @@ def wrapped_label(parent, **kwargs):
 
 
 class Disclosure(ttk.Frame):
-    def __init__(self, parent, title):
+    def __init__(self, parent, title, toolbar=None):
         super().__init__(parent)
         self.title, self.opened = title, False
-        self.button = ttk.Button(self, text='展开' + title, command=self.toggle)
-        self.button.pack(anchor='w')
+        self.toolbar = toolbar
+        self.button = ttk.Button(toolbar if toolbar is not None else self, text='展开' + title, command=self.toggle)
+        if toolbar is None:
+            self.button.pack(anchor='w')
+        else:
+            self.button.pack(side='left', padx=(12, 0))
         self.body = ttk.Frame(self, padding=(0, 8, 0, 0))
 
     def toggle(self):
@@ -33,6 +36,8 @@ class Disclosure(ttk.Frame):
             self.body.pack(fill='x')
         else:
             self.body.pack_forget()
+            if self.toolbar is not None:
+                self.configure(height=1)
         self.button.configure(text=('收起' if self.opened else '展开') + self.title)
 
 
@@ -40,7 +45,7 @@ class FormViewport(ttk.Frame):
     """Cap long parameter forms so expanded options never push results off-screen."""
     def __init__(self, parent):
         super().__init__(parent)
-        self.canvas = tk.Canvas(self, background=COLORS['surface'], highlightthickness=0, height=240)
+        self.canvas = tk.Canvas(self, background=ttk.Style(self).lookup('TFrame', 'background'), highlightthickness=0, height=240)
         self.scrollbar = ttk.Scrollbar(self, orient='vertical', command=self.canvas.yview)
         self.canvas.configure(yscrollcommand=self.scrollbar.set)
         self.canvas.grid(row=0, column=0, sticky='nsew')
@@ -97,3 +102,13 @@ class FormViewport(ttk.Frame):
             self.canvas.yview_moveto(max(0, top - 8) / height)
         elif bottom > visible_bottom:
             self.canvas.yview_moveto((bottom + 8 - self.canvas.winfo_height()) / height)
+
+
+def initialize_split(panes, fraction):
+    """Set the initial division from available space, then leave it user-adjustable."""
+    def configure(event):
+        if event.height < 100:
+            return
+        panes.sashpos(0, round(event.height * fraction))
+        panes.unbind('<Configure>', binding)
+    binding = panes.bind('<Configure>', configure, add='+')

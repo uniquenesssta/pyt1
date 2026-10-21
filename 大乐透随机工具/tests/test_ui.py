@@ -174,3 +174,49 @@ class UITests(unittest.TestCase):
         page.text.set('03')
         page.clear_filters()
         self.assertEqual((page.period.get(), page.text.get()), ('全部', ''))
+
+    def assert_visible_inside(self, widget, container):
+        self.assertTrue(widget.winfo_ismapped(), str(widget))
+        self.assertGreater(widget.winfo_width(), 1)
+        self.assertGreaterEqual(widget.winfo_rootx(), container.winfo_rootx())
+        self.assertGreaterEqual(widget.winfo_rooty(), container.winfo_rooty())
+        self.assertLessEqual(widget.winfo_rootx() + widget.winfo_width(), container.winfo_rootx() + container.winfo_width())
+        self.assertLessEqual(widget.winfo_rooty() + widget.winfo_height(), container.winfo_rooty() + container.winfo_height())
+
+    def test_small_window_keeps_bottom_actions_visible(self):
+        self.root.geometry('1040x740')
+        for page in (self.app.generation, self.app.history, self.app.statistics, self.app.structure_weights):
+            self.app.tabs.select(page)
+            self.root.update()
+            self.assert_visible_inside(self.app.cancel_button, self.root)
+        page = self.app.structure_weights
+        for widget in (page.edit_entry, page.edit_button, page.restore_button):
+            self.assert_visible_inside(widget, page)
+        self.app.tabs.select(self.app.history)
+        self.root.update()
+        self.assert_visible_inside(self.app.history.copy_button, self.app.history)
+        self.app.tabs.select(self.app.generation)
+        self.root.update()
+        self.assert_visible_inside(self.app.generated.summary, self.app.generated)
+        self.assertEqual(self.errors, [])
+
+    def test_statistics_tables_have_room_and_manual_split_is_preserved(self):
+        page = self.app.statistics
+        draws = [Draw(Ticket((1, 2, 3, 4, 5), (1, 2)), str(26001 + i)) for i in range(120)]
+        page.set_history(draws)
+        self.app.tabs.select(page)
+        self.root.update()
+        # Actual visible rows, rather than requested widget heights.
+        for table in (page.table, *page.hot_cold.tables.values()):
+            tree = table.tree
+            visible = [tree.bbox(item) for item in tree.get_children()]
+            complete = [box for box in visible if box and box[1] + box[3] <= tree.winfo_height()]
+            self.assertGreaterEqual(len(complete), 4)
+        position = round(page.panes.winfo_height() * .6)
+        page.panes.sashpos(0, position)
+        self.root.update()
+        self.app.tabs.select(self.app.history)
+        self.app.tabs.select(page)
+        self.root.update()
+        self.assertAlmostEqual(page.panes.sashpos(0), position, delta=3)
+        self.assertEqual(self.errors, [])

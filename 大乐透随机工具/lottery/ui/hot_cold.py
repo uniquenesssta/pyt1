@@ -16,7 +16,7 @@ class HotColdTable(DataTable):
 
 class HotColdPanel(ttk.Frame):
     def __init__(self, parent):
-        super().__init__(parent, padding=12)
+        super().__init__(parent, padding=6)
         self.draws = []
         self.report = None
         self.on_open = lambda area, number, periods: None
@@ -31,12 +31,12 @@ class HotColdPanel(ttk.Frame):
         self.summary = tk.StringVar(value='导入或更新历史后显示冷热号')
         wrapped_label(toolbar, textvariable=self.summary, style='Muted.TLabel').pack(side='left',fill='x',expand=True,padx=10)
         self.rule = tk.StringVar(value='按各区平均出现次数区分冷热；双击号码可回查。')
-        wrapped_label(self, textvariable=self.rule, style='Muted.TLabel').pack(fill='x',pady=(6, 8))
+        wrapped_label(self, textvariable=self.rule, style='Muted.TLabel').pack(fill='x',pady=(4, 4))
         columns = ttk.Frame(self); columns.pack(fill='both',expand=True)
         columns.columnconfigure(0,weight=1);columns.columnconfigure(1,weight=1);columns.rowconfigure(0,weight=1)
         self.tables = {}
         for col,area in enumerate(('前区','后区')):
-            frame = ttk.LabelFrame(columns,text=area,padding=4)
+            frame = ttk.LabelFrame(columns,text=area,padding=2)
             frame.grid(row=0,column=col,sticky='nsew',padx=3)
             table = HotColdTable(frame,('号码','次数','期数占比','冷热'),(70,75,100,70))
             table.tree.configure(height=5)

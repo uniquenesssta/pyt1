@@ -11,13 +11,13 @@ class HistoryPage(ttk.Frame):
     HEADINGS = ("期号", "前区号码", "后区号码", "匹配位置", "原始行号", "工作表")
 
     def __init__(self, parent, search, status, error):
-        super().__init__(parent, padding=16)
+        super().__init__(parent, padding=10)
         self.status, self.error = status, error
         self.statistic = None
         self.search_command = search
         self.on_return = lambda: None
         scope = ttk.Frame(self)
-        scope.pack(fill="x", pady=(0, 12))
+        scope.pack(fill="x", pady=(0, 8))
         ttk.Label(scope, text="最近期数").pack(side="left")
         self.period = tk.StringVar(value="全部")
         self.period_box = ttk.Combobox(scope, textvariable=self.period, values=("全部", "50", "100"), width=10)
@@ -29,7 +29,7 @@ class HistoryPage(ttk.Frame):
         self.reset_button = ttk.Button(scope, text="清空筛选", command=self.clear_filters)
         self.reset_button.pack(side="right", padx=8)
         toolbar = ttk.Frame(self)
-        toolbar.pack(fill="x", pady=(0, 12))
+        toolbar.pack(fill="x", pady=(0, 8))
         self.kind, self.area, self.mode = tk.StringVar(value="号码"), tk.StringVar(value="全部"), tk.StringVar(value="包含全部")
         kind = ttk.Combobox(field(toolbar, "查询类型", 0), textvariable=self.kind, values=("号码", "期号"), width=8, state="readonly")
         kind.pack(fill="x")
@@ -45,7 +45,7 @@ class HistoryPage(ttk.Frame):
         self.search_button.grid(row=0, column=4, sticky="s")
         kind.bind("<<ComboboxSelected>>", lambda _: self.update_kind())
         condition_row = ttk.Frame(self)
-        condition_row.pack(fill="x", pady=(0, 12))
+        condition_row.pack(fill="x", pady=(0, 8))
         self.condition = tk.StringVar(value="未设置统计条件")
         self.clear_button = ttk.Button(condition_row, text="清除统计条件", command=self.clear_statistic)
         self.clear_button.pack(side="right")
@@ -57,12 +57,13 @@ class HistoryPage(ttk.Frame):
                                empty_text="暂无匹配结果；可清空筛选，或导入 / 更新历史数据")
         self.table.pack(fill="both", expand=True)
         bottom = ttk.Frame(self)
-        bottom.pack(fill="x", pady=(10, 0))
+        bottom.pack(side="bottom", before=self.table, fill="x", pady=(6, 0))
         self.caption = wrapped_label(bottom, style="Muted.TLabel")
         self.caption.pack(side="left", fill="x", expand=True)
         self.show_source = tk.BooleanVar(value=False)
-        ttk.Checkbutton(bottom, text="显示来源列", variable=self.show_source, command=self.toggle_source).pack(side="left", padx=12)
-        ttk.Button(bottom, text="复制选中", command=self.copy).pack(side="right")
+        ttk.Checkbutton(bottom, text="显示来源列", variable=self.show_source, command=self.toggle_source).pack(side="right", before=self.caption, padx=8)
+        self.copy_button = ttk.Button(bottom, text="复制选中", command=self.copy)
+        self.copy_button.pack(side="right", before=self.caption)
         self.table.tree.bind("<Control-c>", lambda _: self.copy())
         self.results = []
         self.toggle_source()

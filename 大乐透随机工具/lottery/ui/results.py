@@ -8,7 +8,7 @@ from .widgets import wrapped_label
 
 class TicketPanel(ttk.Frame):
     def __init__(self, parent, title, status, error, action, action_text):
-        super().__init__(parent, padding=16)
+        super().__init__(parent, padding=10)
         self.status, self.error = status, error
         toolbar = ttk.Frame(self)
         toolbar.pack(fill="x", pady=(0, 8))
@@ -19,7 +19,7 @@ class TicketPanel(ttk.Frame):
         self.table = DataTable(self, ("序号", "前区号码", "后区号码"), (80, 640, 300), empty_text=empty)
         self.table.pack(fill="both", expand=True)
         self.summary = wrapped_label(self, style="Muted.TLabel")
-        self.summary.pack(fill="x", pady=(8, 0))
+        self.summary.pack(side="bottom", before=self.table, fill="x", pady=(6, 0))
         self.table.tree.bind("<Control-c>", lambda _: self.copy())
         # Double-click affects the clicked row only, never unrelated multi-selection.
         self.table.bind_open(lambda row: action([Ticket(parse_numbers(row[1], 35), parse_numbers(row[2], 12))]))

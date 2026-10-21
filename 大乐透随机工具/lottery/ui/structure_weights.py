@@ -18,7 +18,7 @@ GROUPS = {
 
 class StructureWeightsPage(ttk.Frame):
     def __init__(self, parent, error):
-        super().__init__(parent, padding=16)
+        super().__init__(parent, padding=10)
         self.error, self.draws, self.profile = error, [], None
         self.on_change = lambda profile: None
         self.on_generate = lambda: None
@@ -33,10 +33,10 @@ class StructureWeightsPage(ttk.Frame):
         ttk.Button(top, text='去随机选号', command=lambda: self.on_generate()).pack(side='right')
         self.period_box.bind('<Return>', lambda _: self.rebuild())
         self.pending = tk.StringVar(value='可输入自定义期数；重算会重置所有手动权重')
-        wrapped_label(self, textvariable=self.pending, style='Muted.TLabel').pack(fill='x', pady=(8, 0))
+        wrapped_label(self, textvariable=self.pending, style='Muted.TLabel').pack(fill='x', pady=(4, 0))
         self.period.trace_add('write', lambda *_: self.describe_pending())
         self.summary = tk.StringVar(value='请先导入或更新历史数据')
-        wrapped_label(self, textvariable=self.summary, style='Muted.TLabel').pack(fill='x', pady=(6, 16))
+        wrapped_label(self, textvariable=self.summary, style='Muted.TLabel').pack(fill='x', pady=(4, 8))
         row = ttk.Frame(self)
         row.pack(fill='x')
         self.family = tk.StringVar(value='差值')
@@ -44,7 +44,7 @@ class StructureWeightsPage(ttk.Frame):
         self.family_box.pack(fill='x')
         self.family_box.bind('<<ComboboxSelected>>', lambda _: self.select_family())
         self.group = tk.StringVar(value='C1差值')
-        self.group_box = ttk.Combobox(field(row, '细分指标', 1, 1), textvariable=self.group, values=GROUPS['差值'], state='readonly', width=25)
+        self.group_box = ttk.Combobox(field(row, '细分指标', 1), textvariable=self.group, values=GROUPS['差值'], state='readonly', width=22)
         self.group_box.pack(fill='x')
         self.group_box.bind('<<ComboboxSelected>>', lambda _: self.render())
         self.strength = tk.StringVar(value='1')
@@ -52,13 +52,14 @@ class StructureWeightsPage(ttk.Frame):
         self.strength_entry.pack(fill='x')
         self.strength_entry.bind('<Return>', lambda _: self.apply_strength())
         self.strength_button = ttk.Button(row, text='应用强度', command=self.apply_strength)
-        self.strength_button.grid(row=0, column=3, sticky='s')
+        row.columnconfigure(3, weight=1)
+        self.strength_button.grid(row=0, column=3, sticky='sw')
         self.mean = tk.StringVar(value='选择指标查看历史分布；双击次数回查开奖记录')
-        wrapped_label(self, textvariable=self.mean, style='Muted.TLabel').pack(fill='x', pady=12)
+        wrapped_label(self, textvariable=self.mean, style='Muted.TLabel').pack(fill='x', pady=6)
         self.table = DataTable(self, ('类别','历史次数','实际期数','历史占比','建议权重','当前权重'), (150,120,120,140,140,140))
         self.table.pack(fill='both', expand=True)
         row = ttk.Frame(self)
-        row.pack(fill='x', pady=12)
+        row.pack(side='bottom', before=self.table, fill='x', pady=6)
         ttk.Label(row, text='选中类别的权重（0=排除）').pack(side='left')
         self.edit = tk.StringVar(value='1')
         self.edit_entry = ttk.Entry(row, textvariable=self.edit, width=9)
@@ -70,7 +71,7 @@ class StructureWeightsPage(ttk.Frame):
         self.restore_button.pack(side='right')
         self.table.tree.bind('<<TreeviewSelect>>', lambda _: self.describe_selection(), add='+')
         help_box = Disclosure(self, '权重说明')
-        help_box.pack(fill='x')
+        help_box.pack(side='bottom', before=row, fill='x')
         wrapped_label(help_box.body, text='历史次数与占比保留实际数据；建议权重加1平滑，避免近期未出现的类别被直接排除。均值只供参考，生成使用完整分布与指标强度。最长连号与连号形态、空区数量与各区空区有重叠，所以最长连号和空区数量的强度默认关闭。权重是相对偏好，不是最终生成比例或中奖概率。', style='Muted.TLabel').pack(fill='x')
 
     def select_family(self):
