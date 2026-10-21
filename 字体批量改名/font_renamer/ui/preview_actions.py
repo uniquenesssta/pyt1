@@ -14,13 +14,18 @@ class PreviewActionsMixin:
         self._context_plan = None
 
     def open_preview_menu(self, event):
+        self.preview_menu.unpost()
+        self._context_plan = None
         if self.busy:
             return
+        if self.tree.identify_region(event.x, event.y) not in ('cell', 'tree'):
+            return
         row = self.tree.identify_row(event.y)
+        if not row or row not in self.tree.selection():
+            return
         self._context_plan = self._preview_rows.get(row)
         if self._context_plan is None:
             return
-        self.tree.selection_set(row)
         self.tree.focus(row)
         try:
             self.preview_menu.tk_popup(event.x_root, event.y_root)
@@ -29,7 +34,8 @@ class PreviewActionsMixin:
 
     def delete_preview_row(self):
         plan = self._context_plan
-        if self.busy or plan is None or not any(p is plan for p in self.plans):
+        selected = [self._preview_rows.get(row) for row in self.tree.selection()]
+        if self.busy or plan is None or not any(p is plan for p in selected) or not any(p is plan for p in self.plans):
             return
         try:
             path = preview_file_path(plan)
