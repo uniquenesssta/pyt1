@@ -84,7 +84,7 @@ class LayoutMixin:
         ttk.Label(filter_bar, textvariable=self.preview_count_var).pack(side=tk.RIGHT)
 
         columns = ("status", "old", "new", "font", "name_id", "lang", "reason")
-        self.tree = ttk.Treeview(preview_frame, columns=columns, show="headings", height=12)
+        self.tree = ttk.Treeview(preview_frame, columns=columns, show="headings", height=12, selectmode="extended")
         self.tree.heading("status", text="状态")
         self.tree.heading("old", text="原文件名")
         self.tree.heading("new", text="新文件名")

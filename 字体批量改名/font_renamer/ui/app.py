@@ -261,8 +261,8 @@ class FontRenamerApp(PreviewActionsMixin, PreviewMixin, LayoutMixin, tk.Tk):
                         f"成功改名：{success} 个\n失败：{failed} 个\n跳过：{skip_count} 个\n错误：{error_count} 个\n\n日志：\n{log_path or '保存失败，请重新导出预览 CSV'}",
                     )
 
-                elif kind == "delete_done":
-                    self.finish_preview_delete(item[1], item[2])
+                elif kind == "delete_batch_done":
+                    self.finish_preview_batch_delete(item[1], item[2])
 
                 elif kind == "error":
                     self.log(item[1])

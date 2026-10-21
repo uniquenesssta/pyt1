@@ -17,3 +17,15 @@ def delete_preview_file(plan, recycle):
         raise ValueError('文件不存在、不是普通文件或为符号链接，请重新扫描')
     recycle(path)
     return path
+
+
+def delete_preview_files(plans, recycle):
+    """逐项处理，单项失败不阻止其他文件；返回成功项及失败原因。"""
+    succeeded, failed = [], []
+    for plan in plans:
+        try:
+            path = delete_preview_file(plan, recycle)
+            succeeded.append((plan, path))
+        except Exception as exc:
+            failed.append((plan, str(exc)))
+    return succeeded, failed
