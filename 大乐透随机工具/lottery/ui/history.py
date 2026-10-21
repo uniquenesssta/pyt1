@@ -12,6 +12,8 @@ class HistoryPage(ttk.Frame):
     def __init__(self, parent, search, status, error):
         super().__init__(parent, padding=10)
         self.status, self.error = status, error
+        self.statistic = None
+        self.search_command = search
         toolbar = ttk.Frame(self)
         toolbar.pack(fill="x", pady=(0, 10))
         self.kind, self.area, self.mode = tk.StringVar(value="号码"), tk.StringVar(value="全部"), tk.StringVar(value="包含全部")
@@ -30,12 +32,42 @@ class HistoryPage(ttk.Frame):
         ttk.Button(toolbar, text="导出全部匹配", command=self.export).pack(side="left", padx=(8, 0))
         ttk.Button(toolbar, text="复制选中", command=self.copy).pack(side="left", padx=(8, 0))
         kind.bind("<<ComboboxSelected>>", lambda _: self.update_kind())
-        ttk.Label(self, text="留空可查看全部记录；连续位置匹配不跨越前后区。号码按升序展示。", style="Muted.TLabel").pack(anchor="w", pady=(0, 8))
+        scope = ttk.Frame(self)
+        scope.pack(fill="x", pady=(0, 6))
+        ttk.Label(scope, text="最近期数").pack(side="left")
+        self.period = tk.StringVar(value="全部")
+        self.period_box = ttk.Combobox(scope, textvariable=self.period, values=("全部", "50", "100"), width=10)
+        self.period_box.pack(side="left", padx=8)
+        self.period_box.bind("<<ComboboxSelected>>", lambda _: search())
+        self.period_box.bind("<Return>", lambda _: search())
+        self.condition = tk.StringVar(value="未设置统计条件")
+        ttk.Label(scope, textvariable=self.condition, wraplength=650).pack(side="left", padx=8)
+        self.clear_button = ttk.Button(scope, text="清除统计条件", command=self.clear_statistic)
+        self.clear_button.pack(side="right")
+        ttk.Label(self, text="留空查看所选期数和统计条件内的记录；连续位置匹配不跨越前后区。号码按升序展示。", style="Muted.TLabel").pack(anchor="w", pady=(0, 8))
         self.table = DataTable(self, self.HEADINGS, (100, 230, 130, 280, 90, 120))
         self.table.pack(fill="both", expand=True)
         self.caption = ttk.Label(self)
         self.caption.pack(anchor="w", pady=(8, 0))
         self.results = []
+
+    def periods(self):
+        value = self.period.get().strip()
+        if value == "全部": return 0
+        try: result = int(value)
+        except ValueError as exc: raise ValueError("期数请输入正整数，或选择全部") from exc
+        if result <= 0: raise ValueError("期数须大于0")
+        return result
+
+    def clear_statistic(self):
+        self.statistic = None
+        self.condition.set("未设置统计条件")
+        self.search_command()
+
+    def reset_context(self):
+        self.statistic = None
+        self.condition.set("未设置统计条件")
+        self.period.set("全部")
 
     def update_kind(self):
         modes = ("包含全部", "包含任意", "连续位置") if self.kind.get() == "号码" else ("完全一致", "前缀", "后三位")

@@ -75,3 +75,12 @@ class DataTable(ttk.Frame):
         self.rows.sort(key=key, reverse=reverse)
         self.page = 0
         self.render()
+
+    def bind_open(self, callback):
+        def open_row(event):
+            if self.tree.identify_region(event.x, event.y) not in ('cell', 'tree'):
+                return
+            item = self.tree.identify_row(event.y)
+            if item:
+                callback(self.rows[int(item)])
+        self.tree.bind('<Double-1>', open_row)

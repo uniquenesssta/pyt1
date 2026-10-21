@@ -21,7 +21,7 @@ class StatisticsPage(ttk.Frame):
         self.categories.pack(side="left")
         self.categories.bind("<<ComboboxSelected>>", lambda _: self.filter())
         ttk.Button(toolbar, text="导出全部统计", command=self.export).pack(side="right")
-        ttk.Label(self, text="期数占比 = 出现次数 ÷ 有效记录数；号码频率 = 出现次数 ÷ 该区号码总数。", style="Muted.TLabel").pack(anchor="w", pady=(0, 8))
+        ttk.Label(self, text="双击统计行查看对应开奖记录。期数占比 = 出现次数 ÷ 有效记录数；号码频率 = 出现次数 ÷ 该区号码总数。", style="Muted.TLabel").pack(anchor="w", pady=(0, 8))
         panes = ttk.PanedWindow(self, orient="vertical")
         panes.pack(fill="both", expand=True)
         self.table = DataTable(panes, self.HEADINGS, (240, 180, 100, 100, 120))

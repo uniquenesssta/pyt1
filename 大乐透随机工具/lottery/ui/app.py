@@ -6,12 +6,12 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 from ..core.generation import generate, MODES
 from ..core.structure_cache import StructureCache
-from ..core.querying import search
 from ..data.history_store import HistoryStore
 from .history_actions import import_history, update_history, restore_history
 from ..data.storage import FavoriteStore
 from .controls import GenerationControls
 from .history import HistoryPage
+from .history_navigation import search_history, open_statistic
 from .import_issues import show_import_issues
 from .jobs import Jobs
 from .results import TicketPanel
@@ -74,6 +74,8 @@ class LotteryApp:
         self.tabs.add(self.statistics, text="  统计分析  ")
         self.structure_weights = StructureWeightsPage(self.tabs, self.error)
         self.tabs.add(self.structure_weights, text="  结构权重  ")
+        self.statistics.table.bind_open(lambda row: open_statistic(self, "统计分析", row[0], row[1]))
+        self.structure_weights.table.bind_open(lambda row: open_statistic(self, "结构权重", self.structure_weights.group.get(), row[0]))
         self.cross_link = CrossWeightLink(self.controls, self.structure_weights, self.error)
         footer = ttk.Frame(outer)
         footer.pack(fill="x", pady=(10, 0))
@@ -90,7 +92,7 @@ class LotteryApp:
 
     def set_busy(self, busy):
         self.structure_weights.set_busy(busy)
-        for button in (self.import_button, self.update_button, self.controls.generate_button, self.controls.fill_button, self.controls.cross_period_box, self.history.search_button):
+        for button in (self.import_button, self.update_button, self.controls.generate_button, self.controls.fill_button, self.controls.cross_period_box, self.history.search_button, self.history.period_box, self.history.clear_button):
             button.configure(state="disabled" if busy else "normal")
         self.cancel_button.configure(state="normal" if busy else "disabled")
 
@@ -125,12 +127,7 @@ class LotteryApp:
         import_history(self, path)
 
     def search(self):
-        if self.dataset is None:
-            self.set_status("请先导入历史数据")
-            return
-        query, draws = self.history.snapshot(), self.dataset.draws
-        self.jobs.start(lambda cancel, progress: search(draws, query, cancel),
-                        lambda rows: (self.history.set_results(rows, len(draws)), self.set_status(f"查询完成，匹配 {len(rows):,} 条")), self.error)
+        search_history(self)
 
     def show_issues(self):
         if self.dataset is None:

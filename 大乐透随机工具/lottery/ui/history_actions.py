@@ -16,6 +16,7 @@ def apply_history(app, value, message, persist=True):
     app.dataset, app.stats = dataset, stats
     latest = max((d.issue for d in dataset.draws if d.issue), key=int, default='—')
     app.source_text.set(f'{Path(dataset.source).name} · 有效 {len(dataset.draws):,} 行 · 最新期号 {latest} · 无效 {len(dataset.issues):,} 行 · 重复 {dataset.duplicates:,} 行')
+    app.history.reset_context()
     app.history.text.set('')
     app.history.set_results([(d, '') for d in dataset.draws], len(dataset.draws))
     app.statistics.set_statistics(stats)

@@ -42,7 +42,7 @@ class StructureWeightsPage(ttk.Frame):
         ttk.Entry(row, textvariable=self.edit, width=10).pack(side='left', padx=8)
         self.edit_button = ttk.Button(row, text='应用到选中类别', command=self.apply_weight)
         self.edit_button.pack(side='left')
-        ttk.Label(self, text='历史占比保留原始数据；建议权重加1平滑后自动填入，避免50期中未出现的类别被直接排除。\n均值仅供参考；实际生成使用完整分布与指标强度。权重是相对偏好，不是最终生成比例或中奖概率。', wraplength=1040).pack(fill='x')
+        ttk.Label(self, text='双击类别行可跳转历史查询查看对应期号。历史占比保留原始数据；建议权重加1平滑后自动填入，避免50期中未出现的类别被直接排除。\n均值仅供参考；实际生成使用完整分布与指标强度。权重是相对偏好，不是最终生成比例或中奖概率。', wraplength=1040).pack(fill='x')
 
     def periods(self):
         value = self.period.get().strip()
