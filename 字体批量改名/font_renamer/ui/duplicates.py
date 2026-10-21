@@ -28,6 +28,7 @@ class DuplicateWindow(tk.Toplevel):
         self.clean = ttk.Button(bar, text='移入回收站', command=self.start_clean, state='disabled')
         self.clean.pack(side='left', padx=8)
         ttk.Button(bar, text='全选 / 取消全选', command=self.toggle_all).pack(side='left')
+        ttk.Button(bar, text="同名字体对比", command=self.open_same_names).pack(side="left", padx=8)
         self.summary = tk.StringVar(value='按完整文件内容判断；每组按路径排序保留第一份。')
         ttk.Label(self, textvariable=self.summary, padding=10).pack(fill='x')
         frame = ttk.Frame(self, padding=(10, 0))
@@ -48,6 +49,11 @@ class DuplicateWindow(tk.Toplevel):
         self.details.pack(fill='x', padx=10,pady=10)
         self.after(100,self.poll)
         self.start_scan()
+
+    def open_same_names(self):
+        if self.busy: return
+        from .name_comparison import NameComparisonWindow
+        NameComparisonWindow(self, self.config_data)
 
     def close(self):
         if self.busy:
