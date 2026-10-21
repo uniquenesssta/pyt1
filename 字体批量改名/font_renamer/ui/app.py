@@ -50,6 +50,14 @@ class FontRenamerApp(PreviewMixin, LayoutMixin, tk.Tk):
             messagebox.showwarning("缺少依赖", "未检测到 fontTools。\n请先在命令行运行：pip install fonttools")
 
 
+    def open_duplicates(self):
+        if self.busy:
+            return
+        config = self.validate_inputs()
+        if config:
+            from .duplicates import DuplicateWindow
+            DuplicateWindow(self, config)
+
     def request_close(self) -> None:
         if self.busy:
             messagebox.showinfo("正在处理", "请等待当前任务完成后关闭窗口。")
