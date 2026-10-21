@@ -75,7 +75,7 @@ class LotteryApp:
         self.structure_weights = StructureWeightsPage(self.tabs, self.error)
         self.tabs.add(self.structure_weights, text="  结构权重  ")
         self.statistics.hot_cold.on_open = lambda area, number, periods: open_statistic(self, "统计分析", area+"·期数占比", number, periods_override=periods)
-        self.statistics.table.bind_open(lambda row: open_statistic(self, "统计分析", row[0], row[1]))
+        self.statistics.table.bind_open(lambda row: open_statistic(self, "统计分析", row[0], row[1], periods_override=self.statistics.active_periods))
         self.structure_weights.table.bind_open(lambda row: open_statistic(self, "结构权重", self.structure_weights.group.get(), row[0]))
         self.cross_link = CrossWeightLink(self.controls, self.structure_weights, self.error)
         footer = ttk.Frame(outer)
@@ -93,6 +93,7 @@ class LotteryApp:
 
     def set_busy(self, busy):
         self.structure_weights.set_busy(busy)
+        self.statistics.set_busy(busy)
         for button in (self.import_button, self.update_button, self.controls.generate_button, self.controls.fill_button, self.controls.cross_period_box, self.history.search_button, self.history.period_box, self.history.clear_button):
             button.configure(state="disabled" if busy else "normal")
         self.cancel_button.configure(state="normal" if busy else "disabled")

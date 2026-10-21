@@ -2,6 +2,7 @@
 import tkinter as tk
 from tkinter import ttk, filedialog
 from ..core.statistics import report_rows
+from ..core.statistics_window import window_statistics
 from ..data.exporting import export_csv
 from .table import DataTable
 from .charts import BarChart
@@ -15,14 +16,23 @@ class StatisticsPage(ttk.Frame):
         super().__init__(parent, padding=10)
         self.status, self.error = status, error
         self.stats, self.rows = None, []
+        self.draws = []
+        self.active_periods = 0
         toolbar = ttk.Frame(self)
         toolbar.pack(fill="x", pady=(0, 8))
+        ttk.Label(toolbar, text="统计范围").pack(side="left")
+        self.scope = tk.StringVar(value="全部")
+        self.scope_box = ttk.Combobox(toolbar, textvariable=self.scope, values=("近50期", "近100期", "全部"), state="readonly", width=10)
+        self.scope_box.pack(side="left", padx=(6, 14))
+        self.scope_box.bind("<<ComboboxSelected>>", lambda _: self.refresh_scope())
         self.category = tk.StringVar(value="全部统计")
         self.categories = ttk.Combobox(toolbar, textvariable=self.category, values=("全部统计",), state="readonly", width=24)
         self.categories.pack(side="left")
         self.categories.bind("<<ComboboxSelected>>", lambda _: self.filter())
-        ttk.Button(toolbar, text="导出全部统计", command=self.export).pack(side="right")
+        ttk.Button(toolbar, text="导出当前范围统计", command=self.export).pack(side="right")
         ttk.Label(self, text="双击统计行查看对应开奖记录。期数占比 = 出现次数 ÷ 有效记录数；号码频率 = 出现次数 ÷ 该区号码总数。", style="Muted.TLabel").pack(anchor="w", pady=(0, 8))
+        self.scope_summary = tk.StringVar(value="范围筛选控制统计表和历史图表；冷热号独立筛选")
+        ttk.Label(self, textvariable=self.scope_summary, wraplength=1040).pack(fill="x", pady=(0, 6))
         panes = ttk.PanedWindow(self, orient="vertical")
         panes.pack(fill="both", expand=True)
         self.table = DataTable(panes, self.HEADINGS, (240, 180, 100, 100, 120))
@@ -42,6 +52,28 @@ class StatisticsPage(ttk.Frame):
         lower.add(self.hot_cold, text="近50/100期冷热号")
         lower.select(self.hot_cold)
         panes.add(lower, weight=2)
+
+    def set_history(self, draws):
+        self.draws = list(draws)
+        self.refresh_scope()
+
+    def refresh_scope(self):
+        periods = {"近50期": 50, "近100期": 100, "全部": 0}[self.scope.get()]
+        try:
+            stats, caption = window_statistics(self.draws, periods)
+        except ValueError as exc:
+            self.stats, self.rows = None, []
+            self.table.set_rows([])
+            self.chart.set_values([], [])
+            self.scope_summary.set(str(exc))
+            self.error(exc)
+            return
+        self.active_periods = periods
+        self.set_statistics(stats)
+        self.scope_summary.set(f'{self.scope.get()} · {caption}；冷热号独立筛选')
+
+    def set_busy(self, busy):
+        self.scope_box.configure(state="disabled" if busy else "readonly")
 
     def set_statistics(self, stats):
         self.stats = stats
@@ -72,10 +104,10 @@ class StatisticsPage(ttk.Frame):
         if not self.rows:
             self.status("请先导入历史数据")
             return
-        path = filedialog.asksaveasfilename(parent=self, defaultextension=".csv", filetypes=[("CSV 文件", "*.csv")])
+        path = filedialog.asksaveasfilename(parent=self, defaultextension=".csv", filetypes=[("CSV 文件", "*.csv")], initialfile=f"统计_{self.scope.get()}.csv")
         if path:
             try:
                 export_csv(path, self.HEADINGS, self.rows)
-                self.status("已导出全部统计")
+                self.status(f"已导出{self.scope.get()}范围内全部统计类别")
             except OSError as error:
                 self.error(error)
