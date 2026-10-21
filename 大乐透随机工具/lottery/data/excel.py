@@ -3,6 +3,7 @@ from dataclasses import replace
 from pathlib import Path
 from ..core.models import check_cancel
 from .importing import Dataset, ImportIssue, parse_line
+from .excel_layout import detect_columns
 
 
 def workbook_rows(path):
@@ -42,6 +43,7 @@ def workbook_rows(path):
 def load_excel(path, cancel=None, progress=None):
     result = Dataset(source=str(path), encoding='Excel')
     seen = set()
+    layouts = {}
     rows = workbook_rows(path)
     try:
         for sheet, line, values in rows:
@@ -54,11 +56,17 @@ def load_excel(path, cancel=None, progress=None):
             if not cells or not any(cells):
                 result.ignored += 1
                 continue
+            header = detect_columns(cells)
+            if header is not None:
+                layouts[sheet] = header
+                result.ignored += 1
+                continue
             text = ' | '.join(cells)
             try:
-                if any(not c for c in cells):
+                selected = layouts[sheet].extract(cells) if sheet in layouts else cells
+                if any(not c for c in selected):
                     raise ValueError('行内有空单元格，请补全号码或移除空列')
-                draw = replace(parse_line(text, line), sheet=sheet)
+                draw = replace(parse_line(" | ".join(selected), line), sheet=sheet)
                 key = (draw.issue, draw.ticket)
                 if key in seen:
                     result.duplicates += 1
