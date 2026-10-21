@@ -27,7 +27,7 @@ def search_history(app):
     app.jobs.start(work, done, app.error)
 
 
-def open_statistic(app, source, category, item):
+def open_statistic(app, source, category, item, periods_override=None):
     if app.jobs.running:
         app.set_status('请等待当前任务完成再查看统计明细'); return
     if app.dataset is None: return
@@ -37,6 +37,8 @@ def open_statistic(app, source, category, item):
         profile = app.structure_weights.profile
         if profile is None: return
         periods = profile.requested
+    if periods_override is not None:
+        periods = periods_override
     app.history.statistic = StatisticFilter(source, category, str(item))
     app.history.period.set(str(periods) if periods else '全部')
     app.history.text.set('')

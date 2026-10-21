@@ -5,6 +5,7 @@ from ..core.statistics import report_rows
 from ..data.exporting import export_csv
 from .table import DataTable
 from .charts import BarChart
+from .hot_cold import HotColdPanel
 
 
 class StatisticsPage(ttk.Frame):
@@ -26,7 +27,8 @@ class StatisticsPage(ttk.Frame):
         panes.pack(fill="both", expand=True)
         self.table = DataTable(panes, self.HEADINGS, (240, 180, 100, 100, 120))
         panes.add(self.table, weight=3)
-        charts = ttk.Frame(panes)
+        lower = ttk.Notebook(panes)
+        charts = ttk.Frame(lower)
         row = ttk.Frame(charts)
         row.pack(fill="x", pady=6)
         self.chart_kind = tk.StringVar(value="前区次数")
@@ -35,7 +37,11 @@ class StatisticsPage(ttk.Frame):
         combo.bind("<<ComboboxSelected>>", lambda _: self.draw_chart())
         self.chart = BarChart(charts)
         self.chart.pack(fill="both", expand=True)
-        panes.add(charts, weight=2)
+        lower.add(charts, text="历史图表")
+        self.hot_cold = HotColdPanel(lower)
+        lower.add(self.hot_cold, text="近50/100期冷热号")
+        lower.select(self.hot_cold)
+        panes.add(lower, weight=2)
 
     def set_statistics(self, stats):
         self.stats = stats

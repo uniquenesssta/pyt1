@@ -74,6 +74,7 @@ class LotteryApp:
         self.tabs.add(self.statistics, text="  统计分析  ")
         self.structure_weights = StructureWeightsPage(self.tabs, self.error)
         self.tabs.add(self.structure_weights, text="  结构权重  ")
+        self.statistics.hot_cold.on_open = lambda area, number, periods: open_statistic(self, "统计分析", area+"·期数占比", number, periods_override=periods)
         self.statistics.table.bind_open(lambda row: open_statistic(self, "统计分析", row[0], row[1]))
         self.structure_weights.table.bind_open(lambda row: open_statistic(self, "结构权重", self.structure_weights.group.get(), row[0]))
         self.cross_link = CrossWeightLink(self.controls, self.structure_weights, self.error)
