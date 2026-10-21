@@ -36,15 +36,16 @@ class StatisticsWindowTests(unittest.TestCase):
         self.assertEqual(window_statistics([],100)[0].total,0)
         with self.assertRaises(ValueError):window_statistics(self.draws,17)
 
-    def test_ui_scope_does_not_touch_hot_cold_or_structure(self):
+    def test_ui_scope_updates_linked_hot_cold(self):
         interp=tk.Tcl()
         page=SimpleNamespace(draws=self.draws,scope=tk.StringVar(master=interp,value='近50期'),
                              scope_summary=tk.StringVar(master=interp),set_statistics=Mock(),
-                             hot_cold=Mock(),error=Mock())
+                             hot_cold=Mock(),error=Mock(),update_scope_buttons=Mock())
         StatisticsPage.refresh_scope(page)
         self.assertEqual(page.active_periods,50)
         self.assertEqual(page.set_statistics.call_args.args[0].total,50)
-        self.assertEqual(page.hot_cold.mock_calls,[])
+        page.hot_cold.follow_scope.assert_called_once_with(50,self.draws)
         page.scope.set('近100期');StatisticsPage.refresh_scope(page)
         self.assertEqual(page.active_periods,100)
         self.assertEqual(page.set_statistics.call_args.args[0].total,100)
+        page.hot_cold.follow_scope.assert_called_with(100,self.draws)

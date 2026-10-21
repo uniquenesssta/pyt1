@@ -3,31 +3,33 @@ from tkinter import ttk, filedialog
 from ..core.models import Ticket, format_numbers, parse_numbers
 from ..data.exporting import export_tickets
 from .table import DataTable
+from .widgets import wrapped_label
 
 
 class TicketPanel(ttk.Frame):
     def __init__(self, parent, title, status, error, action, action_text):
-        super().__init__(parent, padding=8)
+        super().__init__(parent, padding=16)
         self.status, self.error = status, error
-        ttk.Label(self, text=title, style="Section.TLabel").pack(anchor="w", pady=(0, 8))
         toolbar = ttk.Frame(self)
         toolbar.pack(fill="x", pady=(0, 8))
         ttk.Button(toolbar, text="复制选中", command=self.copy).pack(side="left")
         ttk.Button(toolbar, text="导出全部", command=self.export).pack(side="left", padx=5)
         ttk.Button(toolbar, text=action_text, command=lambda: action(self.selected())).pack(side="right")
-        self.table = DataTable(self, ("序号", "前区号码", "后区号码"), (55, 280, 125))
+        empty = '设置参数后点击“生成号码”' if title == '本批号码' else '选中本批号码后点击“收藏选中”，收藏会自动保存'
+        self.table = DataTable(self, ("序号", "前区号码", "后区号码"), (80, 640, 300), empty_text=empty)
         self.table.pack(fill="both", expand=True)
-        self.summary = ttk.Label(self, style="Muted.TLabel", wraplength=460)
+        self.summary = wrapped_label(self, style="Muted.TLabel")
         self.summary.pack(fill="x", pady=(8, 0))
         self.table.tree.bind("<Control-c>", lambda _: self.copy())
-        self.table.tree.bind("<Double-1>", lambda e: action(self.selected()) if self.table.tree.identify_row(e.y) else None)
+        # Double-click affects the clicked row only, never unrelated multi-selection.
+        self.table.bind_open(lambda row: action([Ticket(parse_numbers(row[1], 35), parse_numbers(row[2], 12))]))
         self.set_tickets([])
 
     def set_tickets(self, tickets):
         self.tickets = list(tickets)
         self.table.set_rows((i, format_numbers(t.front), format_numbers(t.back)) for i, t in enumerate(tickets, 1))
         bets = sum(t.bets for t in tickets)
-        self.summary.configure(text=f"{len(tickets):,} 组 · 按普通复式合计 {bets:,} 注\n基本金额 {bets*2:,} 元；含追加 {bets*3:,} 元（仅计算，不购买）")
+        self.summary.configure(text=f"{len(tickets):,} 组 · 普通复式 {bets:,} 注 · 基本金额 {bets*2:,} 元 · 含追加 {bets*3:,} 元（仅计算）")
 
     def selected(self):
         return [Ticket(parse_numbers(row[1], 35), parse_numbers(row[2], 12)) for row in self.table.selected()]

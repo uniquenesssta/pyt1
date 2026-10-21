@@ -7,13 +7,14 @@ from ..data.exporting import export_csv
 from .table import DataTable
 from .charts import BarChart
 from .hot_cold import HotColdPanel
+from .widgets import wrapped_label
 
 
 class StatisticsPage(ttk.Frame):
     HEADINGS = ("类别", "项目", "次数", "统计基数", "百分比")
 
     def __init__(self, parent, status, error):
-        super().__init__(parent, padding=10)
+        super().__init__(parent, padding=16)
         self.status, self.error = status, error
         self.stats, self.rows = None, []
         self.draws = []
@@ -22,23 +23,26 @@ class StatisticsPage(ttk.Frame):
         toolbar.pack(fill="x", pady=(0, 8))
         ttk.Label(toolbar, text="统计范围").pack(side="left")
         self.scope = tk.StringVar(value="全部")
-        self.scope_box = ttk.Combobox(toolbar, textvariable=self.scope, values=("近50期", "近100期", "全部"), state="readonly", width=10)
-        self.scope_box.pack(side="left", padx=(6, 14))
-        self.scope_box.bind("<<ComboboxSelected>>", lambda _: self.refresh_scope())
+        self.scope_buttons = {}
+        for label in ("近50期", "近100期", "全部"):
+            button = ttk.Button(toolbar, text=label, command=lambda value=label: self.choose_scope(value))
+            button.pack(side="left", padx=(6, 0))
+            self.scope_buttons[label] = button
         self.category = tk.StringVar(value="全部统计")
         self.categories = ttk.Combobox(toolbar, textvariable=self.category, values=("全部统计",), state="readonly", width=24)
-        self.categories.pack(side="left")
+        self.categories.pack(side="left", padx=16)
         self.categories.bind("<<ComboboxSelected>>", lambda _: self.filter())
-        ttk.Button(toolbar, text="导出当前范围统计", command=self.export).pack(side="right")
-        ttk.Label(self, text="双击统计行查看对应开奖记录。期数占比 = 出现次数 ÷ 有效记录数；号码频率 = 出现次数 ÷ 该区号码总数。", style="Muted.TLabel").pack(anchor="w", pady=(0, 8))
-        self.scope_summary = tk.StringVar(value="范围筛选控制统计表和历史图表；冷热号独立筛选")
-        ttk.Label(self, textvariable=self.scope_summary, wraplength=1040).pack(fill="x", pady=(0, 6))
+        ttk.Button(toolbar, text="导出当前范围", command=self.export).pack(side="right")
+        wrapped_label(self, text="双击次数回查开奖记录 · 百分比 = 次数 ÷ 统计基数；期数占比按记录数，号码频率按该区号码总数。", style="Muted.TLabel").pack(fill="x", pady=(0, 8))
+        self.scope_summary = tk.StringVar(value="暂无历史数据 · 导入文件或在线更新后查看")
+        wrapped_label(self, textvariable=self.scope_summary, style="Muted.TLabel").pack(fill="x", pady=(0, 12))
         panes = ttk.PanedWindow(self, orient="vertical")
         panes.pack(fill="both", expand=True)
         self.table = DataTable(panes, self.HEADINGS, (240, 180, 100, 100, 120))
+        self.table.tree.configure(height=6)
         panes.add(self.table, weight=3)
-        lower = ttk.Notebook(panes)
-        charts = ttk.Frame(lower)
+        lower = self.lower_tabs = ttk.Notebook(panes)
+        charts = ttk.Frame(lower, padding=12)
         row = ttk.Frame(charts)
         row.pack(fill="x", pady=6)
         self.chart_kind = tk.StringVar(value="前区次数")
@@ -47,11 +51,20 @@ class StatisticsPage(ttk.Frame):
         combo.bind("<<ComboboxSelected>>", lambda _: self.draw_chart())
         self.chart = BarChart(charts)
         self.chart.pack(fill="both", expand=True)
-        lower.add(charts, text="历史图表")
+        lower.add(charts, text="频次图表")
         self.hot_cold = HotColdPanel(lower)
-        lower.add(self.hot_cold, text="近50/100期冷热号")
+        lower.insert(0, self.hot_cold, text="冷热号")
         lower.select(self.hot_cold)
         panes.add(lower, weight=2)
+        self.update_scope_buttons()
+
+    def choose_scope(self, value):
+        self.scope.set(value)
+        self.refresh_scope()
+
+    def update_scope_buttons(self):
+        for label, button in self.scope_buttons.items():
+            button.configure(style="Primary.TButton" if label == self.scope.get() else "TButton")
 
     def set_history(self, draws):
         self.draws = list(draws)
@@ -59,6 +72,8 @@ class StatisticsPage(ttk.Frame):
 
     def refresh_scope(self):
         periods = {"近50期": 50, "近100期": 100, "全部": 0}[self.scope.get()]
+        self.update_scope_buttons()
+        self.hot_cold.follow_scope(periods, self.draws)
         try:
             stats, caption = window_statistics(self.draws, periods)
         except ValueError as exc:
@@ -70,10 +85,12 @@ class StatisticsPage(ttk.Frame):
             return
         self.active_periods = periods
         self.set_statistics(stats)
-        self.scope_summary.set(f'{self.scope.get()} · {caption}；冷热号独立筛选')
+        self.scope_summary.set(f'{self.scope.get()} · {caption}')
 
     def set_busy(self, busy):
-        self.scope_box.configure(state="disabled" if busy else "readonly")
+        for button in self.scope_buttons.values():
+            button.configure(state="disabled" if busy else "normal")
+        self.hot_cold.set_busy(busy)
 
     def set_statistics(self, stats):
         self.stats = stats

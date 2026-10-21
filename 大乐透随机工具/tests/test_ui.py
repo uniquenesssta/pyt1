@@ -5,6 +5,8 @@ import time
 import tkinter as tk
 import unittest
 from lottery.ui.app import LotteryApp
+from lottery.core.models import Draw, Ticket
+from lottery.core.generation import MODES
 
 
 class UITests(unittest.TestCase):
@@ -106,3 +108,69 @@ class UITests(unittest.TestCase):
         self.app.jobs.cancel.set()
         self.finish()
         self.assertIs(self.app.generated.tickets, previous)
+
+    def test_statistics_scope_follow_and_comparison_widgets(self):
+        draws = [Draw(Ticket((1, 2, 3, 4, 5), (1, 2)), str(26001 + i)) for i in range(120)]
+        page = self.app.statistics
+        page.set_history(draws)
+        self.assertEqual(page.hot_cold.report.total, 120)
+        page.scope_buttons['近50期'].invoke()
+        self.assertEqual((page.stats.total, page.hot_cold.report.total), (50, 50))
+        page.hot_cold.period.set('近100期')
+        page.hot_cold.period_box.event_generate('<<ComboboxSelected>>')
+        self.root.update()
+        page.scope_buttons['全部'].invoke()
+        self.assertEqual((page.stats.total, page.hot_cold.report.total), (120, 100))
+        page.hot_cold.period.set('跟随统计范围')
+        page.hot_cold.period_box.event_generate('<<ComboboxSelected>>')
+        self.root.update()
+        self.assertEqual(page.hot_cold.report.total, 120)
+
+    def test_constraints_stay_effective_when_collapsed_and_results_switch_back(self):
+        controls = self.app.controls
+        controls.constraints.button.invoke()
+        controls.values['前区固定'].set('01 02')
+        controls.constraints.button.invoke()
+        self.assertFalse(controls.constraints.opened)
+        self.assertIn('01 02', controls.constraint_summary.get())
+        self.app.results_tabs.select(self.app.saved)
+        self.app.generate()
+        self.finish()
+        self.assertEqual(self.app.results_tabs.select(), str(self.app.generated))
+        self.assertTrue({1, 2}.issubset(self.app.generated.tickets[0].front))
+
+    def test_structure_group_restore_pending_window_and_link(self):
+        draws = [Draw(Ticket((1, 2, 8, 9, 15), (1, 2)), str(26001 + i)) for i in range(120)]
+        page = self.app.structure_weights
+        page.set_history(draws)
+        original = page.profile
+        page.period.set('100')
+        page.period_box.event_generate('<<ComboboxSelected>>')
+        self.root.update()
+        self.assertIs(page.profile, original)
+        with self.assertRaises(ValueError):
+            page.snapshot()
+        page.rebuild_button.invoke()
+        page.family.set('跨区')
+        page.family_box.event_generate('<<ComboboxSelected>>')
+        self.root.update()
+        self.assertEqual(page.group.get(), '最大跨区（差值>7）')
+        self.app.controls.fill_button.invoke()
+        self.assertEqual(self.app.controls.mode.get(), MODES[2])
+        self.app.controls.weight_vars[0][0].set('75')
+        page.restore_button.invoke()
+        self.assertAlmostEqual(float(self.app.controls.weight_vars[0][0].get()), page.profile.weights[page.group.get()][0])
+
+    def test_history_hidden_sources_remain_in_export_rows_and_reset(self):
+        page = self.app.history
+        draw = Draw(Ticket((1, 2, 3, 4, 5), (1, 2)), '26001', line=9, sheet='Sheet1')
+        page.set_results([(draw, '匹配')], 1)
+        self.assertEqual(len(page.table.tree['displaycolumns']), 4)
+        self.assertEqual(len(page.table.rows[0]), 6)
+        page.show_source.set(True)
+        page.toggle_source()
+        self.assertEqual(len(page.table.tree['displaycolumns']), 6)
+        page.period.set('50')
+        page.text.set('03')
+        page.clear_filters()
+        self.assertEqual((page.period.get(), page.text.get()), ('全部', ''))

@@ -7,13 +7,16 @@ from ..core.generation import MODES
 class CrossWeightLink:
     def __init__(self, controls, page, error):
         self.controls, self.page, self.error = controls, page, error
-        self.linked = False
+        # Both editors always represent the same profile once history is available.
+        self.linked = True
         self.syncing = False
         controls.fill_button.configure(command=self.fill)
         page.on_change = self.from_profile
         for group in controls.weight_vars:
             for var in group:
                 var.trace_add('write', self.from_entries)
+        if page.profile is not None:
+            self.from_profile(page.profile)
 
     def fill(self):
         try:

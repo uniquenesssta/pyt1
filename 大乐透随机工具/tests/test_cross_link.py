@@ -34,6 +34,12 @@ class CrossLinkTests(unittest.TestCase):
         self.assertEqual(self.controls.mode.get(),MODES[2])
         self.assertEqual(float(self.controls.weight_vars[0][0].get()),43.25)
 
+    def test_editors_share_profile_even_before_first_fill(self):
+        expected = cross_values(self.page.profile)[0][1]
+        self.assertEqual(float(self.controls.weight_vars[0][1].get()), expected)
+        self.controls.weight_vars[0][1].set('42')
+        self.assertEqual(self.page.profile.weights[CROSS_GROUPS[0]][1], 42)
+
     def test_reselect_100_custom_all(self):
         for choice,size in [('100',100),('17',17),('全部',120)]:
             self.controls.cross_period.set(choice);self.link.fill()

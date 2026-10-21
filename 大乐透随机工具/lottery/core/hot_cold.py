@@ -29,8 +29,15 @@ def number_rows(draws, area, maximum, slots):
 
 
 def analyze_hot_cold(draws, periods=50):
-    if periods not in (50,100): raise ValueError('冷热号窗口请选择50或100期')
-    selected, order = select_window(draws, periods)
+    if periods not in (0,50,100): raise ValueError('冷热号窗口请选择50、100期或全部')
+    if not draws: raise ValueError('暂无历史数据')
+    if periods:
+        selected, order = select_window(draws, periods)
+    else:
+        # Same "all" basis as ordinary statistics and drilldown; preserve duplicate rows.
+        selected, order = list(draws), '全部导入记录（保留重复行）'
     first, last = selected[0], selected[-1]
+    if all(d.issue for d in selected):
+        first, last = min(selected, key=lambda d:int(d.issue)), max(selected, key=lambda d:int(d.issue))
     return HotColdReport(periods,len(selected),first.issue or str(first.line),last.issue or str(last.line),order,
                          number_rows(selected,'front',35,5),number_rows(selected,'back',12,2))

@@ -1,54 +1,56 @@
-"""随机参数表单；生成前读取快照，后台不访问 Tk 变量。"""
+"""随机参数表单；常用参数优先，固定/排除与跨区编辑按需展开。"""
 import tkinter as tk
 from tkinter import ttk
 from ..core.generation import GenerationConfig, MODES
 from ..core.models import parse_numbers
+from .widgets import field, wrapped_label, Disclosure
 
 
 class GenerationControls(ttk.Frame):
     def __init__(self, parent, generate):
-        super().__init__(parent)
+        super().__init__(parent, padding=16)
         self.values = {}
-        defaults = {"组数": "1", "前区数量": "5", "后区数量": "2",
-                    "前区固定": "", "后区固定": "", "前区排除": "", "后区排除": ""}
+        self.on_structure = lambda: None
         row = ttk.Frame(self)
-        row.pack(fill="x", pady=3)
-        ttk.Label(row, text="随机模式").pack(side="left")
+        row.pack(fill="x")
         self.mode = tk.StringVar(value=MODES[0])
-        self.mode_box = ttk.Combobox(row, textvariable=self.mode, values=MODES, state="readonly", width=15)
-        self.mode_box.pack(side="left", padx=(8, 15))
-        for name in ("组数", "前区数量", "后区数量"):
-            ttk.Label(row, text=name).pack(side="left", padx=(0, 4))
-            self.values[name] = tk.StringVar(value=defaults[name])
-            ttk.Entry(row, textvariable=self.values[name], width=6).pack(side="left", padx=(0, 12))
-        self.generate_button = ttk.Button(row, text="重新随机", command=generate, style="Primary.TButton")
-        self.generate_button.pack(side="right")
-        row = ttk.Frame(self)
-        row.pack(fill="x", pady=6)
-        for name in ("前区固定", "后区固定", "前区排除", "后区排除"):
-            ttk.Label(row, text=name).pack(side="left", padx=(0, 4))
-            self.values[name] = tk.StringVar(value="")
-            ttk.Entry(row, textvariable=self.values[name], width=13).pack(side="left", padx=(0, 12))
-        row = ttk.Frame(self)
-        row.pack(fill="x", pady=3)
+        self.mode_box = ttk.Combobox(field(row, "随机模式", 0, 1), textvariable=self.mode,
+                                     values=MODES, state="readonly", width=20)
+        self.mode_box.pack(fill="x")
+        for i, (name, default) in enumerate((("组数", "1"), ("前区数量", "5"), ("后区数量", "2")), 1):
+            self.values[name] = tk.StringVar(value=default)
+            ttk.Entry(field(row, name, i), textvariable=self.values[name], width=8).pack(fill="x")
+        self.generate_button = ttk.Button(row, text="生成号码", command=generate, style="Primary.TButton")
+        self.generate_button.grid(row=0, column=4, sticky="s")
+        actions = ttk.Frame(self)
+        actions.pack(fill="x", pady=(12, 0))
         self.unique = tk.BooleanVar(value=True)
-        ttk.Checkbutton(row, text="本批组合不重复", variable=self.unique).pack(side="left")
-        ttk.Label(row, text="固定/排除可留空，多个号码用空格或逗号分隔。", style="Muted.TLabel").pack(side="left", padx=15)
+        ttk.Checkbutton(actions, text="本批组合不重复", variable=self.unique).pack(side="left")
+        self.structure_button = ttk.Button(actions, text="结构权重设置", command=lambda: self.on_structure())
+        self.structure_button.pack(side="right")
         self.custom = tk.BooleanVar(value=False)
-        self.custom_button = ttk.Checkbutton(row, text="自定义跨区权重", variable=self.custom, command=self.update_mode)
-        self.custom_button.pack(side="right")
-        self.advanced = ttk.Frame(self)
+        self.custom_button = ttk.Checkbutton(actions, text="自定义跨区权重", variable=self.custom, command=self.update_mode)
+        self.custom_button.pack(side="right", padx=16)
+        self.constraints = Disclosure(self, "固定 / 排除")
+        self.constraints.pack(fill="x", pady=(8, 0))
+        for i, name in enumerate(("前区固定", "后区固定", "前区排除", "后区排除")):
+            self.values[name] = tk.StringVar(value="")
+            ttk.Entry(field(self.constraints.body, name, i, 1), textvariable=self.values[name], width=13).pack(fill="x")
+            self.values[name].trace_add("write", self.describe_constraints)
+        self.constraint_summary = tk.StringVar(value="不限制号码；多个号码可用空格或逗号分隔")
+        wrapped_label(self, textvariable=self.constraint_summary, style="Muted.TLabel").pack(fill="x", pady=(6, 0))
+        self.advanced = ttk.Frame(self, padding=(0, 10, 0, 0))
         fill_row = ttk.Frame(self.advanced)
-        fill_row.pack(fill="x", pady=(0, 6))
-        ttk.Label(fill_row, text="权重来源 / 期数").pack(side="left")
+        fill_row.pack(fill="x", pady=(0, 8))
+        ttk.Label(fill_row, text="跨区权重来源").pack(side="left")
         self.cross_period = tk.StringVar(value="跟随结构权重页")
         self.cross_period_box = ttk.Combobox(fill_row, textvariable=self.cross_period,
                                             values=("跟随结构权重页", "50", "100", "全部"), width=18)
         self.cross_period_box.pack(side="left", padx=8)
         self.fill_button = ttk.Button(fill_row, text="一键填入")
         self.fill_button.pack(side="left")
-        self.cross_source = tk.StringVar(value="可直接输入自定义期数；重新选期会重算结构页全部指标")
-        ttk.Label(fill_row, textvariable=self.cross_source, wraplength=600).pack(side="left", padx=8)
+        self.cross_source = tk.StringVar(value="可输入自定义期数；与结构页共用权重")
+        wrapped_label(self.advanced, textvariable=self.cross_source, style="Muted.TLabel").pack(fill="x", pady=(0, 6))
         weights_row = ttk.Frame(self.advanced)
         weights_row.pack(fill="x")
         self.weight_vars = []
@@ -63,22 +65,27 @@ class GenerationControls(ttk.Frame):
                 ttk.Entry(group, textvariable=var, width=4).pack(side="left")
                 variables.append(var)
             self.weight_vars.append(variables)
-        self.hint = ttk.Label(self, text="", style="Muted.TLabel", wraplength=1050)
-        self.hint.pack(fill="x", pady=(5, 8))
+        self.hint = wrapped_label(self, text="", style="Muted.TLabel")
+        self.hint.pack(fill="x", pady=(8, 0))
         self.mode_box.bind("<<ComboboxSelected>>", lambda _: self.update_mode())
         self.update_mode()
+
+    def describe_constraints(self, *_):
+        names = ("前区固定", "后区固定", "前区排除", "后区排除")
+        active = [f"{name}：{self.values[name].get().strip()}" for name in names if self.values[name].get().strip()]
+        self.constraint_summary.set(" · ".join(active) if active else "不限制号码；多个号码可用空格或逗号分隔")
 
     def update_mode(self):
         structure = self.mode.get() == MODES[2]
         self.custom_button.configure(state="normal" if structure else "disabled")
         if structure and self.custom.get():
-            self.advanced.pack(fill="x", before=self.hint, pady=6)
+            self.advanced.pack(fill="x", before=self.hint)
         else:
             self.advanced.pack_forget()
         hints = {
-            MODES[0]: "系统随机源 · 合法组合等概率；固定或排除后，在剩余组合中等概率抽取。",
-            MODES[1]: "使用结构权重页所选期数的号码次数 + 1 作为权重；历史频率不代表下期中奖概率。",
-            MODES[2]: "前区限5个。到“结构权重”页选择50/100/自定义期数，分别调整差值、连号、空区与跨区。自定义跨区可一键填入并联动；使用同一份权重，0排除，不重复叠加。",
+            MODES[0]: "系统随机源 · 合法组合等概率；固定或排除后在剩余组合中抽取。",
+            MODES[1]: "使用结构权重页所选期数的号码次数 + 1 加权；历史频率不代表下期概率。",
+            MODES[2]: "前区限5个 · 使用结构页的差值、连号、空区与跨区设置；跨区权重只计算一次。",
         }
         self.hint.configure(text=hints[self.mode.get()])
 

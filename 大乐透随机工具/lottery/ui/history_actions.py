@@ -15,12 +15,11 @@ def apply_history(app, value, message, persist=True):
             return
     app.dataset, app.stats = dataset, stats
     latest = max((d.issue for d in dataset.draws if d.issue), key=int, default='—')
-    app.source_text.set(f'{Path(dataset.source).name} · 有效 {len(dataset.draws):,} 行 · 最新期号 {latest} · 无效 {len(dataset.issues):,} 行 · 重复 {dataset.duplicates:,} 行')
+    app.source_text.set(f'最新期号 {latest} · 有效记录 {len(dataset.draws):,} 条 · 无效 {len(dataset.issues):,} 条 / 重复 {dataset.duplicates:,} 条 · {Path(dataset.source).name}')
     app.history.reset_context()
     app.history.text.set('')
     app.history.set_results([(d, '') for d in dataset.draws], len(dataset.draws))
     app.statistics.set_history(dataset.draws)
-    app.statistics.hot_cold.set_history(dataset.draws)
     app.structure_weights.set_history(dataset.draws)
     app.set_status(message)
 

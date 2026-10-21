@@ -40,3 +40,16 @@ class HotColdTests(unittest.TestCase):
         with self.assertRaises(ValueError):analyze_hot_cold([])
         with self.assertRaises(ValueError):analyze_hot_cold(self.draws,17)
         with self.assertRaises(ValueError):analyze_hot_cold([self.draws[0],Draw(Ticket((2,3,4,5,6),(1,2)),'26001')])
+
+    def test_all_matches_statistics_and_drilldown_with_duplicate_rows(self):
+        from lottery.core.statistics_window import window_statistics
+        draws = self.draws[::-1] + [self.draws[0]] * 3
+        report = analyze_hot_cold(draws, 0)
+        stats, _ = window_statistics(draws, 0)
+        self.assertEqual((report.total, report.first, report.last), (103, '26001', '26100'))
+        for area, rows, counter in [('前区', report.front, stats.front), ('后区', report.back, stats.back)]:
+            for number, count, _, _ in rows:
+                self.assertEqual(count, counter[int(number)])
+                matched, total, actual, _ = query_history(draws, Query(), 0,
+                    StatisticFilter('统计分析', area + '·期数占比', number))
+                self.assertEqual((actual, len(matched), total), (count, count, 103))
