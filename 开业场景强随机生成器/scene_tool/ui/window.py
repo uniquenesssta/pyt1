@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from scene_tool.config.defaults import DIMENSIONS
+from scene_tool.domain.industry_profiles import EXTRA_DIMENSIONS, dimensions
 from scene_tool.config.render_styles import BUYER
 from scene_tool.config.product_size import FOLLOW_REFERENCE
 from scene_tool.config.paths import DATA
@@ -25,9 +26,9 @@ class App(tk.Tk):
         self.geometry('1180x800')
         self.minsize(940, 660)
         apply_theme(self)
-        self.values = {k: tk.StringVar() for k, _ in DIMENSIONS}
-        self.locks = {k: tk.BooleanVar() for k, _ in DIMENSIONS}
-        self.hidden = {k: tk.BooleanVar(value=False) for k in [*[key for key, _ in DIMENSIONS], 'copy']}
+        self.values = {k: tk.StringVar() for k, _ in (*DIMENSIONS, *EXTRA_DIMENSIONS)}
+        self.locks = {k: tk.BooleanVar() for k, _ in (*DIMENSIONS, *EXTRA_DIMENSIONS)}
+        self.hidden = {k: tk.BooleanVar(value=False) for k in [*[key for key, _ in (*DIMENSIONS, *EXTRA_DIMENSIONS)], 'copy']}
         self.product_size = tk.StringVar(value=FOLLOW_REFERENCE)
         self.render_style = tk.StringVar(value=BUYER)
         self.industry = tk.StringVar(value='美业')
@@ -55,10 +56,11 @@ class App(tk.Tk):
         self.ready = True
         for var in [*self.values.values(), self.industry, self.copyline, self.product_size]:
             var.trace_add('write', self.schedule_refresh)
-        if not all(v.get() for v in self.values.values()):
+        if not all(self.values[k].get() for k, _ in dimensions(self.render_style.get())):
             self.randomize()
         elif not self.prompt.get('1.0', 'end-1c'):
             self.refresh()
+        self.industry.trace_add('write', lambda *_: environment_changed(self))
         self.values['environment'].trace_add('write', lambda *_: environment_changed(self))
         self.scene_switcher = SceneSwitcher(self)
         self.protocol('WM_DELETE_WINDOW', self.close)
@@ -70,7 +72,7 @@ class App(tk.Tk):
 
     def randomize(self):
         locked = [k for k, v in self.locks.items() if v.get()]
-        if len(locked) == len(DIMENSIONS) and (not self.copy_random.get() or self.copy_locked.get()):
+        if all(k in locked for k, _ in dimensions(self.render_style.get())) and (not self.copy_random.get() or self.copy_locked.get()):
             self.status.set('参数已全部锁定，且文案随机已关闭或锁定，请解锁需要随机的项目。')
             return
         if self.edited() and not messagebox.askyesno('重新随机', '重新随机会生成新提示词，并替换右侧手动编辑。继续吗？', parent=self):
@@ -79,9 +81,9 @@ class App(tk.Tk):
             self.after_cancel(self.pending)
             self.pending = None
         self.engine.generated = self.generated_names.get()
-        values = self.engine.draw(self.current(), locked, self.strong.get(), self.render_style.get())
+        values = self.engine.draw(self.current(), locked, self.strong.get(), self.render_style.get(), self.industry.get())
         self.ready = False
-        self.copyline.set(self.copy_engine.draw(self.copyline.get(), self.copy_random.get(), self.copy_locked.get()))
+        self.copyline.set(self.copy_engine.draw(self.copyline.get(), self.copy_random.get(), self.copy_locked.get(), self.industry.get()))
         for key, value in values.items():
             self.values[key].set(value)
         sync_style(self)

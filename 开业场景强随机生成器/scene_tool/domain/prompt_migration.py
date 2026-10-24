@@ -2,6 +2,8 @@
 from scene_tool.config.defaults import DEFAULT_CONSTRAINTS
 from scene_tool.config.product_size import FIXED_LARGE
 from scene_tool.domain.prompts import make_prompt
+from scene_tool.config.render_styles import normalize_style, COMMERCIAL
+from scene_tool.domain.industry_profiles import industry_pools
 
 
 def migrate_prompt_state(state, legacy_constraints):
@@ -9,6 +11,12 @@ def migrate_prompt_state(state, legacy_constraints):
     if isinstance(state.get("values"), dict):
         result["values"] = dict(state["values"])
         result["values"].setdefault("environment", "室外")
+    if normalize_style(result.get('render_style')) == COMMERCIAL:
+        result['render_style'] = COMMERCIAL
+        values = result.get('values', {})
+        pools = industry_pools(result.get('industry', '美业'), values.get('environment'), COMMERCIAL)
+        for key in ('display_space', 'background_depth'):
+            values.setdefault(key, pools[key][0])
     known_defaults = (legacy_constraints,) if isinstance(legacy_constraints, str) else tuple(legacy_constraints)
     if result.get('constraints') in known_defaults:
         result['constraints'] = DEFAULT_CONSTRAINTS

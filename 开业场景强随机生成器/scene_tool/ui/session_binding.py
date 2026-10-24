@@ -6,7 +6,7 @@ from scene_tool.domain.prompt_migration import migrate_prompt_state
 from scene_tool.storage.session import load_session, save_session
 
 def save(self):
-    state = {'product_size': self.product_size.get(), 'render_style': self.render_style.get(), 'hidden': {k: v.get() for k, v in self.hidden.items()}, 'copy_random': self.copy_random.get(), 'copy_locked': self.copy_locked.get(),
+    state = {'industry_overrides': self.engine.industry_overrides, 'industry_schema': 1, 'product_size': self.product_size.get(), 'render_style': self.render_style.get(), 'hidden': {k: v.get() for k, v in self.hidden.items()}, 'copy_random': self.copy_random.get(), 'copy_locked': self.copy_locked.get(),
              'copy_recent': self.copy_engine.recent, 'values': self.current(), 'locks': {k: v.get() for k, v in self.locks.items()},
              'generated_names': self.generated_names.get(), 'recent': self.engine.recent,
              'strong': self.strong.get(), 'industry': self.industry.get(), 'copy': self.copyline.get(),
@@ -47,6 +47,8 @@ def restore(self):
                 widget.delete('1.0', 'end')
                 widget.insert('1.0', state[name])
         self.rendered = state.get('rendered', '') if isinstance(state.get('rendered', ''), str) else ''
+        if isinstance(state.get('industry_overrides'), dict):
+            self.engine.industry_overrides = state['industry_overrides']
         self.engine.restore_bags(state.get('bags'))
         self.engine.restore_recent(state.get('recent'))
         self.copy_engine.restore(state.get('copy_recent'))
@@ -55,6 +57,9 @@ def restore(self):
                 variable.set(state[name])
         if isinstance(state.get('generated_names'), bool):
             self.generated_names.set(state['generated_names'])
+        if state.get('industry_schema') == 1:
+            from scene_tool.domain.industry_profiles import industry_key
+            self.industry_context = (industry_key(self.industry.get()), self.values['environment'].get(), self.render_style.get())
         self.status.set('已恢复设置并升级未修改的默认提示词。自定义要求保留；可点“复原默认提示词”采用新版完整要求。')
     except (OSError, ValueError) as exc:
         self.startup_errors.append(f'上次设置无法读取，已尽可能恢复有效内容。\n{exc}')

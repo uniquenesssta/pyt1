@@ -1,6 +1,9 @@
 """Independent scene state, shuffle bags, editable prompts and reset snapshots."""
 import random
 from scene_tool.domain.camera_modes import camera_pool, draw_camera
+from scene_tool.domain.commercial_scenes import scene_profile
+from scene_tool.config.render_styles import COMMERCIAL
+from scene_tool.generation.industry import draw_industry
 from scene_tool.config.render_styles import normalize_style
 from scene_tool.config.product_size import normalize_size
 from scene_tool.domain.scene_prompts import make_scene_prompt
@@ -12,6 +15,7 @@ class SceneModel:
     def __init__(self, profile, state=None, rng=None):
         self.profile, self.rng = profile, rng or random.SystemRandom()
         state = state if isinstance(state, dict) else {}
+        self.commercial_pools = state.get('commercial_pools', {}) if isinstance(state.get('commercial_pools', {}), dict) else {}
         self.product_size = normalize_size(state.get('product_size'))
         self.render_style = normalize_style(state.get('render_style'))
         self.pools = {d['key']: list(d['options']) for d in profile['dimensions']}
@@ -28,10 +32,10 @@ class SceneModel:
         self.locks = {k: bool(state.get('locks', {}).get(k, False)) for k in self.pools}
         self.hidden = {k: state.get('hidden', {}).get(k) is True for k in self.pools}
         self.bags = {k: list(dict.fromkeys(x for x in state.get('bags', {}).get(k, []) if x in pool)) for k, pool in self.pools.items()}
-        mode_bags = {k: v for k, v in state.get('bags', {}).items() if k.startswith('camera_mode:')}
+        mode_bags = {k: v for k, v in state.get('bags', {}).items() if k.startswith(('camera_mode:', 'industry:'))}
         mode_bags.update(state.get('camera_mode_bags', {}))
         for key, bag in mode_bags.items():
-            if key.startswith('camera_mode:') and isinstance(bag, list):
+            if key.startswith(('camera_mode:', 'industry:')) and isinstance(bag, list):
                 self.bags[key] = [x for x in bag if isinstance(x, str)]
         for key in upgraded:
             self.bags[key] = []
@@ -46,13 +50,28 @@ class SceneModel:
         if not self.prompt:
             self.regenerate()
 
+    def active_profile(self):
+        return scene_profile(self.profile, self.render_style)
+
+    def active_pools(self):
+        if self.render_style != COMMERCIAL:
+            return self.pools
+        pools = {d['key']: list(d['options']) for d in self.active_profile()['dimensions']}
+        for key, items in self.commercial_pools.items():
+            if key in pools and isinstance(items, list) and len(items) >= 2:
+                pools[key] = items
+        return pools
+
     def camera_pool(self):
         return camera_pool(self.pools['camera'], self.profile['environment'], self.render_style)
 
     def draw(self):
-        for key, pool in self.pools.items():
+        for key, pool in self.active_pools().items():
             if key == 'camera':
                 self.values[key] = draw_camera(self.camera_pool(), self.values[key], self.locks[key], self.bags, self.rng)
+                continue
+            if self.render_style == COMMERCIAL:
+                self.values[key] = draw_industry(self, key, pool, self.values[key], self.locks[key], '通用', self.profile['environment'], self.render_style)
                 continue
             if self.locks[key] and self.values[key]:
                 continue
@@ -67,7 +86,7 @@ class SceneModel:
             self.values[key] = selected
 
     def generate(self):
-        return make_scene_prompt(self.profile, self.values, self.extra, self.hidden, self.render_style, self.product_size)
+        return make_scene_prompt(self.active_profile(), self.values, self.extra, self.hidden, self.render_style, self.product_size)
 
     def regenerate(self):
         self.prompt = self.rendered = self.generate()
@@ -95,5 +114,5 @@ class SceneModel:
             self.bags[key] = []
 
     def state(self):
-        return {key: getattr(self, key) for key in ('values', 'locks', 'hidden', 'render_style', 'product_size', 'pools', 'bags', 'extra', 'prompt', 'rendered')}
+        return {key: getattr(self, key) for key in ('values', 'locks', 'hidden', 'render_style', 'product_size', 'commercial_pools', 'pools', 'bags', 'extra', 'prompt', 'rendered')}
 

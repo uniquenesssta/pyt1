@@ -5,6 +5,7 @@ from pathlib import Path
 import unittest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from scene_tool.config.defaults import DIMENSIONS
+from scene_tool.domain.industry_profiles import EXTRA_DIMENSIONS
 from scene_tool.config.product_size import FOLLOW_REFERENCE, FIXED_LARGE
 from scene_tool.config.render_styles import BUYER, COMMERCIAL
 from scene_tool.domain.prompts import make_prompt
@@ -16,7 +17,7 @@ from scene_tool.domain.prompt_migration import migrate_prompt_state
 
 class ProductSizeTests(unittest.TestCase):
     def setUp(self):
-        self.values = {k: '示例值' for k, _ in DIMENSIONS}
+        self.values = {k: '示例值' for k, _ in (*DIMENSIONS, *EXTRA_DIMENSIONS)}
         self.values.update(environment='室内', ratio='16:9')
 
     def test_reference_mode_removes_old_large_board_rule_in_both_styles(self):

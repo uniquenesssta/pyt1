@@ -1,9 +1,9 @@
 """Switchable image intent; the buyer-photo template remains the default."""
 BUYER = '真实买家秀'
-COMMERCIAL = '商业主图'
+COMMERCIAL = '商业效果图'
 RENDER_STYLES = (BUYER, COMMERCIAL)
 
-COMMERCIAL_REQUIREMENTS = '''商业主图要求：生成可用于商品主图和商业展示的高品质写实场景效果图，画面经过专业精修，主体突出、构图严谨、边缘清晰，呈现真实可信的板材、气球与空间关系。
+COMMERCIAL_REQUIREMENTS = '''商业效果图要求：生成可用于商品主图和商业展示的高品质写实场景效果图，画面经过专业精修，主体突出、构图严谨、边缘清晰，呈现真实可信的板材、气球与空间关系。
 严格采用本轮指定的75—150mm等效长焦与正面、左前方或右前方视角；正面时成像平面与板面平行，侧面时保留合理侧向透视，不强制转回正面。相机保持水平，后退至完整容纳装置；室内也优先保持所选焦段，空间不足时调整装置与机位，不穿墙、不裁切、不改用广角。
 采用均匀柔和、方向合理的商业摄影布光，可适度补光，主体与背景层次清楚；曝光准确、白平衡自然、色彩纯净，板面文字和印刷图案清晰。控制气球高光，保留轻微通透感，避免金属质感、塑料炫光、死白反光和过度磨皮。
 主体完整入镜，周围留出适量干净空间；背景整洁、有真实场所细节但不抢主体。景深符合实际焦距和距离，主体各部分清晰，不过度虚化，不添加噪点、随手拍歪斜、脏污或做旧效果。
@@ -11,4 +11,6 @@ COMMERCIAL_REQUIREMENTS = '''商业主图要求：生成可用于商品主图和
 
 
 def normalize_style(value):
+    if value == '商业主图':
+        return COMMERCIAL
     return value if value in RENDER_STYLES else BUYER

@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from scene_tool.config.render_styles import RENDER_STYLES
 from scene_tool.ui.camera_binding import sync_opening_camera, sync_scene_camera
+from scene_tool.ui.style_binding import sync_style
 
 
 class RenderStyleSelector:
@@ -30,14 +31,18 @@ class RenderStyleSelector:
             if style == previous:
                 return
             camera = view.values['camera'].get() if hasattr(view, 'values') else None
+            before = view.current() if camera is not None else {}
+            old_copy = view.copyline.get() if camera is not None else ''
             view.render_style.set(style)
             if camera is not None:
-                sync_opening_camera(view)
+                sync_style(view)
             if not view.refresh(force=True):
                 view.render_style.set(previous)
                 if camera is not None:
-                    sync_opening_camera(view)
-                    view.values['camera'].set(camera)
+                    sync_style(view)
+                    for key, value in before.items():
+                        view.values[key].set(value)
+                    view.copyline.set(old_copy)
                 self.sync()
                 return
             view.prompt_reset.snapshot = None
@@ -51,6 +56,7 @@ class RenderStyleSelector:
                 self.sync()
                 return
             previous = panel.model.render_style
+            before_values = dict(panel.model.values)
             camera = panel.model.values['camera']
             panel.model.render_style = style
             sync_scene_camera(panel)
@@ -58,7 +64,7 @@ class RenderStyleSelector:
                 panel.model.regenerate()
             except ValueError as exc:
                 panel.model.render_style = previous
-                panel.model.values['camera'] = camera
+                panel.model.values = before_values
                 sync_scene_camera(panel)
                 self.sync()
                 messagebox.showerror('参数未完成', str(exc), parent=panel)

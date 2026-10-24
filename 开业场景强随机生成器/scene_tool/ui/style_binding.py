@@ -1,31 +1,36 @@
-"""Keep the visible style field and its candidate pool aligned with the scene."""
-
-
-from scene_tool.storage.pools import retired_balloon_values
+"""Bind the current industry's real dimensions, candidates and copy to the UI."""
+from scene_tool.domain.industry_profiles import industry_pools, dimensions, industry_key
+from scene_tool.ui.camera_binding import sync_opening_camera
 
 
 def sync_style(view, replace=False):
-    from scene_tool.ui.camera_binding import sync_opening_camera
+    style, industry = view.render_style.get(), view.industry.get()
+    environment = view.values['environment'].get()
+    if getattr(view, 'parameter_style', style) != style:
+        from scene_tool.ui.parameter_panel import build_parameters
+        build_parameters(view, view.parameter_host)
+    context = (industry_key(industry), environment, style)
+    previous_context = getattr(view, 'industry_context', None)
+    changed = previous_context != context
+    view.industry_context = context
+    pools = view.engine.scoped_pools(industry, environment, style)
+    for key, label in dimensions(style):
+        if key == 'architecture' and environment == '室内' and style != '商业效果图':
+            label = '内部装潢风格'
+        view.parameter_labels[key].configure(text=label)
+        if key in pools:
+            pool = pools[key]
+            view.combos[key].configure(values=pool)
+            if (changed or replace) and view.values[key].get() not in pool:
+                view.values[key].set(view.engine.rng.choice(pool))
     sync_opening_camera(view)
-    indoor = view.values['environment'].get() == '室内'
-    for field, indoor_key, row, inside_label, outside_label in (
-        ('architecture', 'interior', 6, '内部装潢风格', '门店建筑风格'),
-        ('placement', 'indoor_placement', 7, '室内KT板布置位置', '室外KT板布置位置'),
-        ('balloons', 'indoor_balloons', 8, '室内气球造型', '室外气球造型'),
-    ):
-        key, other = (indoor_key, field) if indoor else (field, indoor_key)
-        label = inside_label if indoor else outside_label
-        view.parameter_labels[field].configure(text=label)
-        if field in view.combos:
-            view.combos[field].configure(values=view.engine.pools[key])
-        current = view.values[field].get()
-        retired = field == 'balloons' and current in retired_balloon_values() and current not in view.engine.pools[key]
-        if replace or current in view.engine.pools[other] or retired:
-            view.values[field].set(view.engine.pools[key][0])
+    if changed and (previous_context is None or previous_context[0] != context[0]) and not (previous_context is None and view.copy_locked.get()):
+        view.copyline.set(view.copy_engine.draw(view.copyline.get(), True, False, industry))
 
 
 def environment_changed(view, *_):
     if view.ready:
+        view.ready = False
         sync_style(view, replace=True)
+        view.ready = True
         view.schedule_refresh()
-

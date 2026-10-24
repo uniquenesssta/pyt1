@@ -14,7 +14,8 @@ def build_panel(panel):
     panel.product_size = tk.StringVar(value=panel.model.product_size)
     results.group('产品规格（不参与随机）')
     product_size_row(results, panel.product_size)
-    dimensions = panel.model.profile['dimensions']
+    panel.parameter_labels = {}
+    dimensions = panel.model.active_profile()['dimensions']
     groups = [('环境空间', dimensions[:2] + dimensions[3:5]),
               ('装置与人物', [dimensions[2], dimensions[5], dimensions[6]]),
               ('拍摄', dimensions[7:])]
@@ -28,6 +29,7 @@ def build_panel(panel):
             label = results.result(dimension['label'], panel.values[key], panel.locks[key],
                                    choices=panel.model.pools[key], readonly=key == 'camera', hidden=panel.hidden[key],
                                    on_hide=lambda k=key: change_scene(panel, k))
+            panel.parameter_labels[key] = label
             panel.combos[key] = label.editor
     panel.prompt, panel.extra, header = prompt_editor(right)
     panel.prompt.insert('1.0', panel.model.prompt)

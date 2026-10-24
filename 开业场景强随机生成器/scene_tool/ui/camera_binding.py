@@ -10,6 +10,18 @@ def sync_opening_camera(view):
 
 
 def sync_scene_camera(panel):
+    style = panel.model.render_style
+    previous_style = getattr(panel, '_camera_style', style)
+    changed = previous_style != style
+    panel._camera_style = style
+    pools = panel.model.active_pools()
+    for dimension in panel.model.active_profile()['dimensions']:
+        key = dimension['key']
+        panel.parameter_labels[key].configure(text=dimension['label'])
+        panel.combos[key].configure(values=pools[key])
+        if key != 'camera' and (changed or style == '商业效果图') and panel.model.values[key] not in pools[key]:
+            panel.model.values[key] = panel.model.rng.choice(pools[key])
+        panel.values[key].set(panel.model.values[key])
     pool = panel.model.camera_pool()
     panel.combos['camera'].configure(values=pool)
     if panel.model.values['camera'] not in pool:
