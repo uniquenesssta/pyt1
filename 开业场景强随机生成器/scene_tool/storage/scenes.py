@@ -9,7 +9,9 @@ SCENE_IDS = ('hotel_entrance', 'hotel_lobby', 'private_room', 'apartment', 'vill
 def load_profiles():
     profiles = [load_json(RESOURCES / 'scenes' / (key + '.json')) for key in SCENE_IDS]
     legacy = load_json(RESOURCES / 'legacy_scene_pools_v1.json')
+    cameras = load_json(RESOURCES / 'legacy_scene_camera_v2.json')
     for profile in profiles:
+        profile['legacy_camera'] = cameras.get(profile['id'], [])
         profile['legacy_pools'] = legacy.get(profile['id'], {})
     return profiles
 
@@ -20,3 +22,4 @@ def load_scene_states():
 
 def save_scene_states(active, models):
     save_states(DATA, active, models)
+

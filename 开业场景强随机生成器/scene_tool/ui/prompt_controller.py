@@ -1,6 +1,7 @@
 from pathlib import Path
 from tkinter import messagebox, filedialog
 from scene_tool.domain.prompts import make_prompt
+from scene_tool.domain.visibility import view_hidden
 
 class PromptController:
     def __init__(self, view):
@@ -8,7 +9,7 @@ class PromptController:
 
     def generated(self):
         return make_prompt(self.view.current(), self.view.industry.get(), self.view.constraints.get('1.0', 'end-1c'),
-                           self.view.copyline.get(), self.view.extra.get('1.0', 'end-1c'))
+                           self.view.copyline.get(), self.view.extra.get('1.0', 'end-1c'), hidden=view_hidden(self.view))
 
     def edited(self):
         return self.view.prompt.get('1.0', 'end-1c') != self.view.rendered
@@ -72,3 +73,4 @@ class PromptController:
                 self.view.status.set(f'已导出：{path}')
             except OSError as exc:
                 messagebox.showerror('导出失败', str(exc), parent=self.view)
+

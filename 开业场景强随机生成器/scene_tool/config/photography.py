@@ -5,3 +5,13 @@ PHOTO_REQUIREMENTS = '''照片要求：生成一张普通人用手机后置主�
 使用现场自然光和店内现有灯光，曝光自然、颜色真实，保留阴影细节、地面使用痕迹和真实材质。手持取景略有自然偏差，景深符合手机主摄，不过度虚化；画面清楚，不故意模糊、做旧或添加明显噪点。
 不要3D渲染、建筑效果图、棚拍布光、广告大片、电影调色、夸张HDR或发光轮廓。'''
 DECORATION_REQUIREMENTS = '''装饰范围：现场开业装饰只使用KT板和气球；不添加花艺、鲜花、仿真花、干花、花束、花篮、开业花架、花环或花墙，也不把花材混入气球簇。即使参考现场有花艺，也移除实体花艺；KT板上原有的印刷图案仍按参考图保留。'''
+
+
+
+def photo_requirements(camera='', camera_hidden=False):
+    text = PHOTO_REQUIREMENTS
+    if camera_hidden or ('等效' in camera and 'mm' in camera):
+        text = text.replace('后置主摄', '后置相机')
+        text = text.replace('用后置相机1倍拍摄', '使用本轮指定的等效焦段拍摄' if not camera_hidden else '自然手持拍摄')
+        text = text.replace('景深符合手机主摄', '景深符合实际焦段和拍摄距离')
+    return text

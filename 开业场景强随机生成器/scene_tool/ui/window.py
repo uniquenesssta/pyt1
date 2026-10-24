@@ -25,6 +25,7 @@ class App(tk.Tk):
         apply_theme(self)
         self.values = {k: tk.StringVar() for k, _ in DIMENSIONS}
         self.locks = {k: tk.BooleanVar() for k, _ in DIMENSIONS}
+        self.hidden = {k: tk.BooleanVar(value=False) for k in [*[key for key, _ in DIMENSIONS], 'copy']}
         self.industry = tk.StringVar(value='美业')
         self.copy_random = tk.BooleanVar(value=True)
         self.copy_locked = tk.BooleanVar(value=False)
@@ -134,3 +135,4 @@ class App(tk.Tk):
 
     def restore(self):
         return restore(self)
+

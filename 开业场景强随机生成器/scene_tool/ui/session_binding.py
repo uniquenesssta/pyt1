@@ -4,7 +4,7 @@ from scene_tool.domain.prompt_migration import migrate_prompt_state
 from scene_tool.storage.session import load_session, save_session
 
 def save(self):
-    state = {'copy_random': self.copy_random.get(), 'copy_locked': self.copy_locked.get(),
+    state = {'hidden': {k: v.get() for k, v in self.hidden.items()}, 'copy_random': self.copy_random.get(), 'copy_locked': self.copy_locked.get(),
              'copy_recent': self.copy_engine.recent, 'values': self.current(), 'locks': {k: v.get() for k, v in self.locks.items()},
              'generated_names': self.generated_names.get(), 'recent': self.engine.recent,
              'strong': self.strong.get(), 'industry': self.industry.get(), 'copy': self.copyline.get(),
@@ -31,6 +31,8 @@ def restore(self):
         for key, value in state.get('locks', {}).items():
             if key in self.locks and isinstance(value, bool):
                 self.locks[key].set(value)
+        for key, variable in self.hidden.items():
+            variable.set(state.get('hidden', {}).get(key) is True)
         for name, variable in [('industry', self.industry), ('copy', self.copyline)]:
             if isinstance(state.get(name), str):
                 variable.set(state[name])
@@ -52,3 +54,4 @@ def restore(self):
         self.status.set('已恢复设置并升级未修改的默认提示词。自定义要求保留；可点“复原默认提示词”采用新版完整要求。')
     except (OSError, ValueError) as exc:
         self.startup_errors.append(f'上次设置无法读取，已尽可能恢复有效内容。\n{exc}')
+

@@ -29,6 +29,7 @@ class ScenePanel(ttk.Frame):
     def capture(self):
         self.model.values = {k: v.get().strip() for k, v in self.values.items()}
         self.model.locks = {k: v.get() for k, v in self.locks.items()}
+        self.model.hidden = {k: v.get() for k, v in self.hidden.items()}
         self.model.extra = self.extra.get('1.0', 'end-1c')
         self.model.prompt = self.prompt.get('1.0', 'end-1c')
 
@@ -136,3 +137,4 @@ class ScenePanel(ttk.Frame):
 
     def edit_pools(self):
         edit_pool(self)
+

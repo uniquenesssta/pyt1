@@ -1,6 +1,7 @@
 """Restore the default prompt with one in-session undo snapshot."""
 from scene_tool.config.defaults import DEFAULT_CONSTRAINTS
 from scene_tool.domain.prompts import make_prompt
+from scene_tool.domain.visibility import view_hidden
 
 
 class PromptResetController:
@@ -22,7 +23,7 @@ class PromptResetController:
         view = self.view
         try:
             text = make_prompt(view.current(), view.industry.get(),
-                               DEFAULT_CONSTRAINTS, view.copyline.get(), '')
+                               DEFAULT_CONSTRAINTS, view.copyline.get(), '', hidden=view_hidden(view))
         except ValueError as exc:
             view.status.set(str(exc))
             return False
@@ -54,3 +55,4 @@ class PromptResetController:
         if view.save():
             view.status.set('已恢复复原前的文字；场景参数未改变。')
         return True
+

@@ -12,7 +12,8 @@ class SceneModel:
         self.pools = {d['key']: list(d['options']) for d in profile['dimensions']}
         upgraded = set()
         for key, items in state.get('pools', {}).items():
-            if items == profile.get('legacy_pools', {}).get(key) and key in self.pools:
+            if key in self.pools and (items == profile.get('legacy_pools', {}).get(key) or
+                                     (key == 'camera' and items == profile.get('legacy_camera'))):
                 upgraded.add(key)
                 continue
             if key in self.pools and isinstance(items, list) and len(set(items)) >= 2 and all(isinstance(x, str) and x.strip() for x in items):
@@ -20,6 +21,7 @@ class SceneModel:
         values = state.get('values', {})
         self.values = {k: values.get(k, '') if isinstance(values.get(k, ''), str) else '' for k in self.pools}
         self.locks = {k: bool(state.get('locks', {}).get(k, False)) for k in self.pools}
+        self.hidden = {k: state.get('hidden', {}).get(k) is True for k in self.pools}
         self.bags = {k: list(dict.fromkeys(x for x in state.get('bags', {}).get(k, []) if x in pool)) for k, pool in self.pools.items()}
         for key in upgraded:
             self.bags[key] = []
@@ -49,14 +51,14 @@ class SceneModel:
             self.values[key] = selected
 
     def generate(self):
-        return make_scene_prompt(self.profile, self.values, self.extra)
+        return make_scene_prompt(self.profile, self.values, self.extra, self.hidden)
 
     def regenerate(self):
         self.prompt = self.rendered = self.generate()
 
     def reset(self):
         before = (self.extra, self.prompt, self.rendered)
-        if any(not self.values[k].strip() for k in self.pools):
+        if any(not self.values[k].strip() for k in self.pools if not self.hidden[k]):
             raise ValueError('请填写全部场景参数。')
         self.extra = ''
         self.regenerate()
@@ -77,4 +79,5 @@ class SceneModel:
             self.bags[key] = []
 
     def state(self):
-        return {key: getattr(self, key) for key in ('values', 'locks', 'pools', 'bags', 'extra', 'prompt', 'rendered')}
+        return {key: getattr(self, key) for key in ('values', 'locks', 'hidden', 'pools', 'bags', 'extra', 'prompt', 'rendered')}
+

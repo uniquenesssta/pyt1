@@ -26,7 +26,7 @@ class SceneModeTests(unittest.TestCase):
         self.assertEqual(len(set(schemas)), 7)
         for profile in self.profiles:
             counts = [len(d['options']) for d in profile['dimensions']]
-            self.assertEqual(counts[:8], [60, 40, 40, 40, 40, 32, 56, 32])
+            self.assertEqual(counts[:8], [60, 40, 40, 40, 40, 32, 56, 38])
 
     def test_every_scene_has_independent_nonrepeating_bags(self):
         for profile in self.profiles:
@@ -117,3 +117,4 @@ class SceneModeTests(unittest.TestCase):
         model.bags[key] = ['现代酒店；右侧入口', '中式酒店；院落入口']
         model.draw()
         self.assertEqual(model.values[key], '中式酒店；院落入口')
+

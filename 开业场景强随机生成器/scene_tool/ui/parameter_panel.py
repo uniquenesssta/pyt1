@@ -1,4 +1,5 @@
 from scene_tool.config.defaults import DIMENSIONS
+from scene_tool.ui.visibility_binding import change_opening
 from scene_tool.ui.components.results import ResultList
 
 
@@ -16,7 +17,10 @@ def build_parameters(self, parent):
         for key in fields:
             self.parameter_labels[key] = results.result(
                 labels[key], self.values[key], self.locks[key],
-                choices=self.engine.pools[key], readonly=key == 'environment')
+                choices=self.engine.pools[key], readonly=key == 'environment',
+                hidden=self.hidden[key], on_hide=lambda k=key: change_opening(self, k))
             self.combos[key] = self.parameter_labels[key].editor
         if title == '板面内容':
-            results.result('开业文案', self.copyline, self.copy_locked)
+            results.result('开业文案', self.copyline, self.copy_locked, hidden=self.hidden['copy'],
+                           on_hide=lambda: change_opening(self, 'copy'))
+
