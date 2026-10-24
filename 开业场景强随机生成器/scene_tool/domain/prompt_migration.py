@@ -1,5 +1,6 @@
 """Upgrade untouched defaults and generated text without losing personal edits."""
 from scene_tool.config.defaults import DEFAULT_CONSTRAINTS
+from scene_tool.config.product_size import FIXED_LARGE
 from scene_tool.domain.prompts import make_prompt
 
 
@@ -16,7 +17,7 @@ def migrate_prompt_state(state, legacy_constraints):
         try:
             prompt = make_prompt(result.get('values', {}), result.get('industry', '美业'),
                                  result.get('constraints', DEFAULT_CONSTRAINTS),
-                                 result.get('copy', ''), result.get('extra', ''), hidden=result.get('hidden'), render_style=result.get('render_style'))
+                                 result.get('copy', ''), result.get('extra', ''), hidden=result.get('hidden'), render_style=result.get('render_style'), product_size=result.get('product_size', FIXED_LARGE))
         except (ValueError, AttributeError, TypeError):
             return result
         result['prompt'] = result['rendered'] = prompt

@@ -1,4 +1,5 @@
 from scene_tool.config.defaults import DIMENSIONS
+from scene_tool.config.product_size import PRODUCT_SIZE_CHOICES
 from scene_tool.ui.visibility_binding import change_opening
 from scene_tool.ui.components.results import ResultList
 
@@ -7,6 +8,8 @@ def build_parameters(self, parent):
     results = ResultList(parent)
     self.combos, self.parameter_labels = {}, {}
     labels = dict(DIMENSIONS)
+    results.group('产品规格（不参与随机）')
+    results.result('产品尺寸 / 比例', self.product_size, None, choices=PRODUCT_SIZE_CHOICES)
     for title, fields in (
         ('环境空间', ('environment', 'architecture', 'city', 'address')),
         ('布置', ('placement', 'balloons')),

@@ -2,6 +2,7 @@
 from scene_tool.config.defaults import DEFAULT_CONSTRAINTS
 from scene_tool.domain.prompts import make_prompt
 from scene_tool.domain.visibility import view_hidden
+from scene_tool.config.product_size import FIXED_LARGE
 
 
 class PromptResetController:
@@ -24,7 +25,8 @@ class PromptResetController:
         try:
             text = make_prompt(view.current(), view.industry.get(),
                                DEFAULT_CONSTRAINTS, view.copyline.get(), '', hidden=view_hidden(view),
-                               render_style=view.render_style.get() if hasattr(view, 'render_style') else None)
+                               render_style=view.render_style.get() if hasattr(view, 'render_style') else None,
+                               product_size=view.product_size.get() if hasattr(view, 'product_size') else FIXED_LARGE)
         except ValueError as exc:
             view.status.set(str(exc))
             return False

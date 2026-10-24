@@ -1,11 +1,12 @@
 from scene_tool.config.paths import DATA, RESOURCES
 from scene_tool.config.render_styles import normalize_style
+from scene_tool.config.product_size import normalize_size, FIXED_LARGE
 from scene_tool.storage.json_files import load_json
 from scene_tool.domain.prompt_migration import migrate_prompt_state
 from scene_tool.storage.session import load_session, save_session
 
 def save(self):
-    state = {'render_style': self.render_style.get(), 'hidden': {k: v.get() for k, v in self.hidden.items()}, 'copy_random': self.copy_random.get(), 'copy_locked': self.copy_locked.get(),
+    state = {'product_size': self.product_size.get(), 'render_style': self.render_style.get(), 'hidden': {k: v.get() for k, v in self.hidden.items()}, 'copy_random': self.copy_random.get(), 'copy_locked': self.copy_locked.get(),
              'copy_recent': self.copy_engine.recent, 'values': self.current(), 'locks': {k: v.get() for k, v in self.locks.items()},
              'generated_names': self.generated_names.get(), 'recent': self.engine.recent,
              'strong': self.strong.get(), 'industry': self.industry.get(), 'copy': self.copyline.get(),
@@ -32,6 +33,7 @@ def restore(self):
         for key, value in state.get('locks', {}).items():
             if key in self.locks and isinstance(value, bool):
                 self.locks[key].set(value)
+        self.product_size.set(normalize_size(state.get('product_size'), FIXED_LARGE))
         self.render_style.set(normalize_style(state.get('render_style')))
         for key, variable in self.hidden.items():
             variable.set(state.get('hidden', {}).get(key) is True)

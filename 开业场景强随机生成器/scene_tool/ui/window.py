@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from scene_tool.config.defaults import DIMENSIONS
 from scene_tool.config.render_styles import BUYER
+from scene_tool.config.product_size import FOLLOW_REFERENCE
 from scene_tool.config.paths import DATA
 from scene_tool.generation.copywriting import CopyRandomizer
 from scene_tool.generation.parameters import Randomizer
@@ -27,6 +28,7 @@ class App(tk.Tk):
         self.values = {k: tk.StringVar() for k, _ in DIMENSIONS}
         self.locks = {k: tk.BooleanVar() for k, _ in DIMENSIONS}
         self.hidden = {k: tk.BooleanVar(value=False) for k in [*[key for key, _ in DIMENSIONS], 'copy']}
+        self.product_size = tk.StringVar(value=FOLLOW_REFERENCE)
         self.render_style = tk.StringVar(value=BUYER)
         self.industry = tk.StringVar(value='美业')
         self.copy_random = tk.BooleanVar(value=True)
@@ -51,7 +53,7 @@ class App(tk.Tk):
             self.refresh()
         self.resize_controller = ResizeController(self, self.content_surface)
         self.ready = True
-        for var in [*self.values.values(), self.industry, self.copyline]:
+        for var in [*self.values.values(), self.industry, self.copyline, self.product_size]:
             var.trace_add('write', self.schedule_refresh)
         if not all(v.get() for v in self.values.values()):
             self.randomize()

@@ -1,7 +1,7 @@
 """Compact editable results with candidate pickers and independent locks."""
 from tkinter import ttk
 from scene_tool.ui.components.tooltip import Tooltip
-from scene_tool.ui.components.flag_column import flag_heading, flag_control
+from scene_tool.ui.components.flag_column import flag_heading, flag_control, flag_cell
 
 
 class ResultList(ttk.Frame):
@@ -30,7 +30,11 @@ class ResultList(ttk.Frame):
         name.pack(side='left')
         if hidden is not None:
             flag_control(row, hidden, on_hide)
-        flag_control(row, lock)
+        if lock is not None:
+            flag_control(row, lock)
+        else:
+            flag_cell(row, 'Result.TFrame')
+            flag_cell(row, 'Result.TFrame')
         # Locking excludes random draws, but never prevents intentional editing.
         if choices is None:
             value = ttk.Entry(row, textvariable=variable, width=1)
