@@ -1,5 +1,6 @@
 """Independent scene state, shuffle bags, editable prompts and reset snapshots."""
 import random
+from scene_tool.domain.camera_modes import camera_pool, draw_camera
 from scene_tool.config.render_styles import normalize_style
 from scene_tool.config.product_size import normalize_size
 from scene_tool.domain.scene_prompts import make_scene_prompt
@@ -27,6 +28,11 @@ class SceneModel:
         self.locks = {k: bool(state.get('locks', {}).get(k, False)) for k in self.pools}
         self.hidden = {k: state.get('hidden', {}).get(k) is True for k in self.pools}
         self.bags = {k: list(dict.fromkeys(x for x in state.get('bags', {}).get(k, []) if x in pool)) for k, pool in self.pools.items()}
+        mode_bags = {k: v for k, v in state.get('bags', {}).items() if k.startswith('camera_mode:')}
+        mode_bags.update(state.get('camera_mode_bags', {}))
+        for key, bag in mode_bags.items():
+            if key.startswith('camera_mode:') and isinstance(bag, list):
+                self.bags[key] = [x for x in bag if isinstance(x, str)]
         for key in upgraded:
             self.bags[key] = []
         self.extra = state.get('extra', '')
@@ -40,8 +46,14 @@ class SceneModel:
         if not self.prompt:
             self.regenerate()
 
+    def camera_pool(self):
+        return camera_pool(self.pools['camera'], self.profile['environment'], self.render_style)
+
     def draw(self):
         for key, pool in self.pools.items():
+            if key == 'camera':
+                self.values[key] = draw_camera(self.camera_pool(), self.values[key], self.locks[key], self.bags, self.rng)
+                continue
             if self.locks[key] and self.values[key]:
                 continue
             bag = self.bags[key]

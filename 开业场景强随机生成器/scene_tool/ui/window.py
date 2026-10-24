@@ -79,7 +79,7 @@ class App(tk.Tk):
             self.after_cancel(self.pending)
             self.pending = None
         self.engine.generated = self.generated_names.get()
-        values = self.engine.draw(self.current(), locked, self.strong.get())
+        values = self.engine.draw(self.current(), locked, self.strong.get(), self.render_style.get())
         self.ready = False
         self.copyline.set(self.copy_engine.draw(self.copyline.get(), self.copy_random.get(), self.copy_locked.get()))
         for key, value in values.items():

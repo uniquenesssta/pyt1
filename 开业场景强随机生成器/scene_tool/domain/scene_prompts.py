@@ -5,7 +5,7 @@ from scene_tool.config.product_size import FOLLOW_REFERENCE
 from scene_tool.domain.product_size import size_instructions
 from scene_tool.domain.render_style import styled_values, styled_constraints
 
-REFERENCE_RULES = '参考图用途：保留参考装置的板材形状、数量、图案、文字、颜色和人物比例，不擅自替换姓名或添加品牌、地址及开业文案。产品比例与实际尺寸按独立的产品规格要求执行。气球配色跟随参考图，略微通透、高光自然。仅改变环境、摆位和拍摄构图；装置完整入镜。现场新增装饰仅使用板材与气球，不添加实体花艺、花篮、花束或花墙；保留板面的印刷花卉图案。'
+REFERENCE_RULES = '参考图用途：保留参考装置的板材形状、数量、图案、文字、颜色和人物比例，不擅自替换姓名或添加品牌、地址及开业文案。产品实际尺寸按独立的产品尺寸要求执行。气球配色跟随参考图，略微通透、高光自然。仅改变环境、摆位和拍摄构图；装置完整入镜。现场新增装饰仅使用板材与气球，不添加实体花艺、花篮、花束或花墙；保留板面的印刷花卉图案。'
 
 def make_scene_prompt(profile, values, extra, hidden=None, render_style=None, product_size=FOLLOW_REFERENCE):
     hidden = hidden_keys(hidden)

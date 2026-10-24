@@ -5,6 +5,8 @@ from scene_tool.storage.pools import retired_balloon_values
 
 
 def sync_style(view, replace=False):
+    from scene_tool.ui.camera_binding import sync_opening_camera
+    sync_opening_camera(view)
     indoor = view.values['environment'].get() == '室内'
     for field, indoor_key, row, inside_label, outside_label in (
         ('architecture', 'interior', 6, '内部装潢风格', '门店建筑风格'),
@@ -26,3 +28,4 @@ def environment_changed(view, *_):
     if view.ready:
         sync_style(view, replace=True)
         view.schedule_refresh()
+

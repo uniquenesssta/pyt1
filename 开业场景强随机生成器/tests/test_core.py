@@ -7,6 +7,7 @@ import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from scene_tool.config.defaults import DIMENSIONS
+from scene_tool.domain.camera_modes import camera_pool
 from scene_tool.generation.parameters import Randomizer
 from scene_tool.storage.pools import load_pools
 from scene_tool.domain.prompts import make_prompt
@@ -34,7 +35,7 @@ class RandomizerTests(unittest.TestCase):
             for key, _ in DIMENSIONS:
                 self.assertNotEqual(current[key], previous[key])
                 pool_key = {'architecture': 'interior', 'placement': 'indoor_placement', 'balloons': 'indoor_balloons'}.get(key, key) if current['environment'] == '室内' else key
-                self.assertIn(current[key], self.pools[pool_key])
+                self.assertIn(current[key], camera_pool(self.pools['camera'], current['environment'], None) if key == 'camera' else self.pools[pool_key])
             previous = current
 
     def test_each_dimension_exhausts_pool_before_repeating(self):
@@ -44,6 +45,8 @@ class RandomizerTests(unittest.TestCase):
             previous = self.engine.draw(previous)
             for key, _ in DIMENSIONS:
                 pool_key = {'architecture': 'interior', 'placement': 'indoor_placement', 'balloons': 'indoor_balloons'}.get(key, key) if previous['environment'] == '室内' else key
+                if key == 'camera' and previous['environment'] == '室内':
+                    continue
                 if len(seen[pool_key]) < len(self.pools[pool_key]):
                     seen[pool_key].append(previous[key])
         for key in self.pools:
@@ -148,3 +151,4 @@ class RandomizerTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+

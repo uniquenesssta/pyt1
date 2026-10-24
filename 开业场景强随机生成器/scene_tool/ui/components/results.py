@@ -32,9 +32,6 @@ class ResultList(ttk.Frame):
             flag_control(row, hidden, on_hide)
         if lock is not None:
             flag_control(row, lock)
-        else:
-            flag_cell(row, 'Result.TFrame')
-            flag_cell(row, 'Result.TFrame')
         # Locking excludes random draws, but never prevents intentional editing.
         if choices is None:
             value = ttk.Entry(row, textvariable=variable, width=1)

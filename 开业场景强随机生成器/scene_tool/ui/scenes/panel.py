@@ -11,6 +11,12 @@ class ScenePanel(ttk.Frame):
         self.pending = None
         self.updating = False
         build_panel(self)
+        from scene_tool.ui.camera_binding import sync_scene_camera
+        sync_scene_camera(self)
+        if self.model.prompt == self.model.rendered:
+            self.model.regenerate()
+            self.prompt.delete('1.0', 'end')
+            self.prompt.insert('1.0', self.model.prompt)
         for variable in self.values.values():
             variable.trace_add('write', self.schedule)
         self.extra.bind('<KeyRelease>', self.schedule)

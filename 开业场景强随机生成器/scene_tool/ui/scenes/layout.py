@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from scene_tool.config.product_size import PRODUCT_SIZE_CHOICES
+from scene_tool.ui.components.product_size import product_size_row
 from scene_tool.ui.components.results import ResultList
 from scene_tool.ui.visibility_binding import change_scene
 from scene_tool.ui.components.workbench import workbench, actions
@@ -13,7 +13,7 @@ def build_panel(panel):
     panel.values, panel.locks, panel.combos, panel.hidden = {}, {}, {}, {}
     panel.product_size = tk.StringVar(value=panel.model.product_size)
     results.group('产品规格（不参与随机）')
-    results.result('产品尺寸 / 比例', panel.product_size, None, choices=PRODUCT_SIZE_CHOICES)
+    product_size_row(results, panel.product_size)
     dimensions = panel.model.profile['dimensions']
     groups = [('环境空间', dimensions[:2] + dimensions[3:5]),
               ('装置与人物', [dimensions[2], dimensions[5], dimensions[6]]),
@@ -26,7 +26,7 @@ def build_panel(panel):
             panel.locks[key] = tk.BooleanVar(value=panel.model.locks[key])
             panel.hidden[key] = tk.BooleanVar(value=panel.model.hidden[key])
             label = results.result(dimension['label'], panel.values[key], panel.locks[key],
-                                   choices=panel.model.pools[key], hidden=panel.hidden[key],
+                                   choices=panel.model.pools[key], readonly=key == 'camera', hidden=panel.hidden[key],
                                    on_hide=lambda k=key: change_scene(panel, k))
             panel.combos[key] = label.editor
     panel.prompt, panel.extra, header = prompt_editor(right)

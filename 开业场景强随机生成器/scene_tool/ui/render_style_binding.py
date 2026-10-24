@@ -2,6 +2,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from scene_tool.config.render_styles import RENDER_STYLES
+from scene_tool.ui.camera_binding import sync_opening_camera, sync_scene_camera
 
 
 class RenderStyleSelector:
@@ -28,9 +29,15 @@ class RenderStyleSelector:
             previous = view.render_style.get()
             if style == previous:
                 return
+            camera = view.values['camera'].get() if hasattr(view, 'values') else None
             view.render_style.set(style)
+            if camera is not None:
+                sync_opening_camera(view)
             if not view.refresh(force=True):
                 view.render_style.set(previous)
+                if camera is not None:
+                    sync_opening_camera(view)
+                    view.values['camera'].set(camera)
                 self.sync()
                 return
             view.prompt_reset.snapshot = None
@@ -44,11 +51,15 @@ class RenderStyleSelector:
                 self.sync()
                 return
             previous = panel.model.render_style
+            camera = panel.model.values['camera']
             panel.model.render_style = style
+            sync_scene_camera(panel)
             try:
                 panel.model.regenerate()
             except ValueError as exc:
                 panel.model.render_style = previous
+                panel.model.values['camera'] = camera
+                sync_scene_camera(panel)
                 self.sync()
                 messagebox.showerror('参数未完成', str(exc), parent=panel)
                 return

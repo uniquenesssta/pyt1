@@ -31,7 +31,7 @@ class ProductSizeTests(unittest.TestCase):
     def test_fixed_and_custom_sizes_are_separate_from_photo_ratio(self):
         fixed = make_prompt(self.values, product_size=FIXED_LARGE)
         self.assertIn('3.5米宽、2.2米高', fixed)
-        for size in ('宽2米×高1.5米', '固定比例：1:1'):
+        for size in ('宽2米×高1.5米', '宽80厘米×高60厘米'):
             prompt = make_prompt(self.values, product_size=size)
             self.assertIn(size, prompt)
             self.assertNotIn('3.5', prompt)

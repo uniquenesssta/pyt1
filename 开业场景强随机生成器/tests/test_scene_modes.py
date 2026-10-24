@@ -31,17 +31,18 @@ class SceneModeTests(unittest.TestCase):
     def test_every_scene_has_independent_nonrepeating_bags(self):
         for profile in self.profiles:
             model = SceneModel(profile, rng=random.Random(42))
+            active_pools = dict(model.pools, camera=model.camera_pool())
             seen = {key: [value] for key, value in model.values.items()}
             for _ in range(100):
                 old = dict(model.values)
                 model.draw()
                 for key, value in model.values.items():
                     self.assertNotEqual(value, old[key])
-                    self.assertIn(value, model.pools[key])
-                    if len(seen[key]) < len(model.pools[key]):
+                    self.assertIn(value, active_pools[key])
+                    if len(seen[key]) < len(active_pools[key]):
                         seen[key].append(value)
             for key in seen:
-                self.assertEqual(set(seen[key]), set(model.pools[key]))
+                self.assertEqual(set(seen[key]), set(active_pools[key]))
 
     def test_locks_edits_and_pools_survive_roundtrip(self):
         for profile in self.profiles:

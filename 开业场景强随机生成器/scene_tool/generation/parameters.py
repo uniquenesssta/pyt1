@@ -1,4 +1,5 @@
 import random
+from scene_tool.domain.camera_modes import camera_pool, draw_camera
 from scene_tool.domain.scene_pools import pool_key as active_pool, INDOOR_KEYS
 from scene_tool.config.defaults import DIMENSIONS
 from scene_tool.domain.pools import validate_pools
@@ -21,6 +22,8 @@ class Randomizer:
         if not isinstance(bags, dict):
             return
         for key, items in bags.items():
+            if key.startswith('camera_mode:') and isinstance(items, list):
+                self.bags[key] = [x for x in items if isinstance(x, str)]
             if key in self.pools and isinstance(items, list):
                 self.bags[key] = list(dict.fromkeys(x for x in items
                     if isinstance(x, str) and x in self.pools[key]))
@@ -32,10 +35,14 @@ class Randomizer:
                 if isinstance(items, list):
                     self.recent[key] = [x for x in items if isinstance(x, str)][-200:]
 
-    def draw(self, current=None, locked=(), strong=True):
+    def draw(self, current=None, locked=(), strong=True, render_style=None):
         current = current or {}
         result = dict(current)
         for key in ['environment'] + [k for k, _ in DIMENSIONS if k != 'environment']:
+            if key == 'camera':
+                pool = camera_pool(self.pools['camera'], result.get('environment'), render_style)
+                result[key] = draw_camera(pool, current.get(key), key in locked, self.bags, self.rng, strong)
+                continue
             pool_key = active_pool(key, result.get('environment'))
             switched = key in INDOOR_KEYS and result.get('environment') != current.get('environment', '室外')
             if key in locked and current.get(key, '').strip() and not switched:
@@ -64,3 +71,4 @@ class Randomizer:
             bag.remove(selected)
             result[key] = selected
         return result
+

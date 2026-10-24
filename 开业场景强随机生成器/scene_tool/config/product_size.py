@@ -1,8 +1,12 @@
-"""Product geometry is independent of the photograph aspect ratio."""
-FOLLOW_REFERENCE = '跟随参考图产品比例'
+"""Physical product dimensions; photograph aspect ratio is configured elsewhere."""
+FOLLOW_REFERENCE = '参考图尺寸（未标注则不指定）'
 FIXED_LARGE = '固定尺寸：3.5米×2.2米'
-PRODUCT_SIZE_CHOICES = (FOLLOW_REFERENCE, FIXED_LARGE, '固定比例：1:1', '固定比例：4:3', '固定比例：16:9')
+PRODUCT_SIZE_CHOICES = (FOLLOW_REFERENCE, FIXED_LARGE)
 
 
 def normalize_size(value, default=FOLLOW_REFERENCE):
-    return value.strip() if isinstance(value, str) and value.strip() else default
+    if not isinstance(value, str) or not value.strip():
+        return default
+    if value == '跟随参考图产品比例' or value.startswith('固定比例：'):
+        return FOLLOW_REFERENCE
+    return value.strip()

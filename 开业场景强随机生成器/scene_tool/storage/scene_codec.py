@@ -11,6 +11,7 @@ def encode_scene(model):
     state = dict(model.state())
     defaults = {d['key']: d['options'] for d in model.profile['dimensions']}
     state['pools'] = {k: v for k, v in model.pools.items() if v != defaults[k]}
+    state['camera_mode_bags'] = {k: v for k, v in model.bags.items() if k.startswith('camera_mode:')}
     state['bags'] = {}
     for key, pool in model.pools.items():
         indices = {value: i for i, value in enumerate(pool)}
@@ -38,3 +39,4 @@ def decode_scene(profile, saved):
                               if type(i) is int and 0 <= i < len(pool)] if bag.get('pool_hash') == pool_digest(pool) else []
     state.setdefault('rendered', state.get('prompt', ''))
     return state
+

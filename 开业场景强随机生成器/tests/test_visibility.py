@@ -37,6 +37,7 @@ class VisibilityTests(unittest.TestCase):
                 model.values[key] = f'唯一值_{key}'
                 model.hidden[key] = True
                 model.locks[key] = True
+            model.values['camera'] = model.camera_pool()[0]
             model.regenerate()
             self.assertNotIn('唯一值_', model.prompt)
             before = dict(model.values)
@@ -48,7 +49,7 @@ class VisibilityTests(unittest.TestCase):
                 loaded = SceneModel(profile, state)
                 self.assertEqual(loaded.hidden, model.hidden)
                 loaded.hidden['camera'] = False
-                self.assertIn('唯一值_camera', loaded.generate())
+                self.assertIn(model.values['camera'], loaded.generate())
 
     def test_old_generated_session_migration_keeps_hidden_fields_out(self):
         values = {k: f'值_{k}' for k, _ in DIMENSIONS}
