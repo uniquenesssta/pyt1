@@ -57,17 +57,14 @@ class CameraModeTests(unittest.TestCase):
                 seen.add(value)
             self.assertNotIn('后置主摄1倍', restored.generate())
 
-    def test_size_presets_are_dimensions_and_custom_button_is_visible(self):
+    def test_size_presets_are_dimensions_and_selector_is_readonly(self):
+        self.assertEqual(len(PRODUCT_SIZE_CHOICES), 2)
         self.assertTrue(all('比例' not in x for x in PRODUCT_SIZE_CHOICES))
         self.assertEqual(normalize_size('跟随参考图产品比例'), FOLLOW_REFERENCE)
-        self.assertEqual(normalize_size('固定比例：1:1'), FOLLOW_REFERENCE)
         variable = MagicMock()
         variable.get.return_value = FOLLOW_REFERENCE
         results = MagicMock()
-        with patch('scene_tool.ui.components.product_size.ttk.Button') as button, patch('scene_tool.ui.components.product_size.simpledialog.askstring', return_value='宽2米×高1米'):
-            product_size_row(results, variable)
-            self.assertEqual(results.result.call_args.args[0], '产品尺寸')
-            self.assertEqual(button.call_args.kwargs['text'], '自己填尺寸')
-            button.return_value.pack.assert_called_once()
-            button.call_args.kwargs['command']()
-            variable.set.assert_called_with('宽2米×高1米')
+        product_size_row(results, variable)
+        self.assertEqual(results.result.call_args.args[0], '产品尺寸')
+        self.assertTrue(results.result.call_args.kwargs['readonly'])
+        self.assertEqual(results.result.call_args.kwargs['choices'], PRODUCT_SIZE_CHOICES)

@@ -18,6 +18,8 @@ class PhotoTests(unittest.TestCase):
         self.legacy = load_json(RESOURCES / 'legacy_prompt_v1.json')['constraints']
 
     def test_photo_and_no_flowers_including_with_custom_constraints(self):
+        # This assertion covers the 1x template; telephoto has separate coverage.
+        self.values['camera'] = '正面平视，手持手机后置主摄1倍拍摄'
         prompt = make_prompt(self.values, constraints='保持我的红色背景')
         self.assertIn(PHOTO_REQUIREMENTS, prompt)
         self.assertIn(DECORATION_REQUIREMENTS, prompt)
@@ -51,3 +53,4 @@ class PhotoTests(unittest.TestCase):
             self.assertEqual(new, dict(state, constraints=DEFAULT_CONSTRAINTS))
         custom = dict(state, constraints=previous + '\n我的新要求')
         self.assertEqual(migrate_prompt_state(custom, versions), custom)
+

@@ -1,7 +1,7 @@
 """Compact editable results with candidate pickers and independent locks."""
 from tkinter import ttk
 from scene_tool.ui.components.tooltip import Tooltip
-from scene_tool.ui.components.flag_column import flag_heading, flag_control, flag_cell
+from scene_tool.ui.components.flag_column import flag_heading, flag_control
 
 
 class ResultList(ttk.Frame):
@@ -12,7 +12,7 @@ class ResultList(ttk.Frame):
         self.next_row = 0
 
     def group(self, title):
-        header = ttk.Frame(self)
+        header = ttk.Frame(self, padding=(6, 0))
         header.grid(row=self.next_row, column=0, sticky='ew', pady=(4, 2))
         ttk.Label(header, text=title, style='Section.TLabel').pack(side='left')
         flag_heading(header, '隐藏')
