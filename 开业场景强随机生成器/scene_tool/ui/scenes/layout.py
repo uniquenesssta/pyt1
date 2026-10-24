@@ -19,7 +19,9 @@ def build_panel(panel):
             key = dimension['key']
             panel.values[key] = tk.StringVar(value=panel.model.values[key])
             panel.locks[key] = tk.BooleanVar(value=panel.model.locks[key])
-            results.result(dimension['label'], panel.values[key], panel.locks[key])
+            label = results.result(dimension['label'], panel.values[key], panel.locks[key],
+                                   choices=panel.model.pools[key])
+            panel.combos[key] = label.editor
     panel.prompt, panel.extra, header = prompt_editor(right)
     panel.prompt.insert('1.0', panel.model.prompt)
     panel.extra.insert('1.0', panel.model.extra)
