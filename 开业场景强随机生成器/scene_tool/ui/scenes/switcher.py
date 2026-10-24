@@ -5,6 +5,7 @@ from scene_tool.domain.scene_model import SceneModel
 from scene_tool.storage.scenes import load_profiles, load_scene_states, save_scene_states
 from scene_tool.ui.scenes.panel import ScenePanel
 from scene_tool.ui.prompt_scroll import PromptScrollMemory
+from scene_tool.ui.render_style_binding import RenderStyleSelector
 
 
 class SceneSwitcher:
@@ -35,6 +36,7 @@ class SceneSwitcher:
         selector = ttk.Combobox(bar, textvariable=self.selection, values=choices, state='readonly', width=24)
         selector.pack(side='left')
         selector.bind('<<ComboboxSelected>>', self.switch)
+        self.style_selector = RenderStyleSelector(self, bar)
         self.viewport = ttk.Frame(window)
         self.viewport.place(x=0, y=50, relwidth=1, relheight=1, height=-50)
         window.content_surface.place(in_=self.viewport, x=0, y=0, relwidth=1, relheight=1)
@@ -82,10 +84,12 @@ class SceneSwitcher:
             self.panels[target].lift()
         prompt = self.window.prompt if target == '开业场景' else self.panels[target].prompt
         self.scroll_memory.restore(prompt)
+        self.style_selector.sync()
         self.persist()
 
     def save(self):
         for panel in self.panels.values():
             panel.pause()
         return self.persist()
+
 

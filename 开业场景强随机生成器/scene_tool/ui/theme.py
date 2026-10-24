@@ -24,3 +24,7 @@ def apply_theme(self):
     style.configure('Result.TLabel', background='#ffffff', foreground='#253148', font=('Microsoft YaHei UI', 10))
     style.configure('Muted.TLabel', background='#ffffff', foreground='#747d8c', font=('Microsoft YaHei UI', 9))
     style.configure('Result.TCheckbutton', background='#ffffff')
+    style.layout('Result.TCheckbutton', [('Checkbutton.padding', {'sticky': 'nswe', 'children': [
+        ('Checkbutton.focus', {'sticky': 'nswe', 'children': [
+            ('Checkbutton.indicator', {'sticky': 'nswe'})]})]})])
+

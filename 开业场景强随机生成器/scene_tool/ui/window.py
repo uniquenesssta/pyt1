@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from scene_tool.config.defaults import DIMENSIONS
+from scene_tool.config.render_styles import BUYER
 from scene_tool.config.paths import DATA
 from scene_tool.generation.copywriting import CopyRandomizer
 from scene_tool.generation.parameters import Randomizer
@@ -26,6 +27,7 @@ class App(tk.Tk):
         self.values = {k: tk.StringVar() for k, _ in DIMENSIONS}
         self.locks = {k: tk.BooleanVar() for k, _ in DIMENSIONS}
         self.hidden = {k: tk.BooleanVar(value=False) for k in [*[key for key, _ in DIMENSIONS], 'copy']}
+        self.render_style = tk.StringVar(value=BUYER)
         self.industry = tk.StringVar(value='美业')
         self.copy_random = tk.BooleanVar(value=True)
         self.copy_locked = tk.BooleanVar(value=False)

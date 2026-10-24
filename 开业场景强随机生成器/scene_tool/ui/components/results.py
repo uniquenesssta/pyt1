@@ -1,6 +1,7 @@
 """Compact editable results with candidate pickers and independent locks."""
 from tkinter import ttk
 from scene_tool.ui.components.tooltip import Tooltip
+from scene_tool.ui.components.flag_column import flag_heading, flag_control
 
 
 class ResultList(ttk.Frame):
@@ -14,8 +15,8 @@ class ResultList(ttk.Frame):
         header = ttk.Frame(self)
         header.grid(row=self.next_row, column=0, sticky='ew', pady=(4, 2))
         ttk.Label(header, text=title, style='Section.TLabel').pack(side='left')
-        ttk.Label(header, text='隐藏', width=5).pack(side='right')
-        ttk.Label(header, text='锁定', width=5).pack(side='right')
+        flag_heading(header, '隐藏')
+        flag_heading(header, '锁定')
         self.next_row += 1
 
     def result(self, label, variable, lock, choices=None, readonly=False, hidden=None, on_hide=None):
@@ -28,9 +29,8 @@ class ResultList(ttk.Frame):
         name = ttk.Label(row, text=label, style='Muted.TLabel', width=16, anchor='w')
         name.pack(side='left')
         if hidden is not None:
-            ttk.Checkbutton(row, variable=hidden, command=on_hide, width=3,
-                            style='Result.TCheckbutton').pack(side='right')
-        ttk.Checkbutton(row, variable=lock, width=3, style='Result.TCheckbutton').pack(side='right')
+            flag_control(row, hidden, on_hide)
+        flag_control(row, lock)
         # Locking excludes random draws, but never prevents intentional editing.
         if choices is None:
             value = ttk.Entry(row, textvariable=variable, width=1)

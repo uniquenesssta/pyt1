@@ -1,5 +1,6 @@
 """Independent scene state, shuffle bags, editable prompts and reset snapshots."""
 import random
+from scene_tool.config.render_styles import normalize_style
 from scene_tool.domain.scene_prompts import make_scene_prompt
 
 
@@ -9,6 +10,7 @@ class SceneModel:
     def __init__(self, profile, state=None, rng=None):
         self.profile, self.rng = profile, rng or random.SystemRandom()
         state = state if isinstance(state, dict) else {}
+        self.render_style = normalize_style(state.get('render_style'))
         self.pools = {d['key']: list(d['options']) for d in profile['dimensions']}
         upgraded = set()
         for key, items in state.get('pools', {}).items():
@@ -51,7 +53,7 @@ class SceneModel:
             self.values[key] = selected
 
     def generate(self):
-        return make_scene_prompt(self.profile, self.values, self.extra, self.hidden)
+        return make_scene_prompt(self.profile, self.values, self.extra, self.hidden, self.render_style)
 
     def regenerate(self):
         self.prompt = self.rendered = self.generate()
@@ -79,5 +81,5 @@ class SceneModel:
             self.bags[key] = []
 
     def state(self):
-        return {key: getattr(self, key) for key in ('values', 'locks', 'hidden', 'pools', 'bags', 'extra', 'prompt', 'rendered')}
+        return {key: getattr(self, key) for key in ('values', 'locks', 'hidden', 'render_style', 'pools', 'bags', 'extra', 'prompt', 'rendered')}
 

@@ -16,7 +16,7 @@ def migrate_prompt_state(state, legacy_constraints):
         try:
             prompt = make_prompt(result.get('values', {}), result.get('industry', '美业'),
                                  result.get('constraints', DEFAULT_CONSTRAINTS),
-                                 result.get('copy', ''), result.get('extra', ''), hidden=result.get('hidden'))
+                                 result.get('copy', ''), result.get('extra', ''), hidden=result.get('hidden'), render_style=result.get('render_style'))
         except (ValueError, AttributeError, TypeError):
             return result
         result['prompt'] = result['rendered'] = prompt

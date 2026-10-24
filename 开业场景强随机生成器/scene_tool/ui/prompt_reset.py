@@ -23,7 +23,8 @@ class PromptResetController:
         view = self.view
         try:
             text = make_prompt(view.current(), view.industry.get(),
-                               DEFAULT_CONSTRAINTS, view.copyline.get(), '', hidden=view_hidden(view))
+                               DEFAULT_CONSTRAINTS, view.copyline.get(), '', hidden=view_hidden(view),
+                               render_style=view.render_style.get() if hasattr(view, 'render_style') else None)
         except ValueError as exc:
             view.status.set(str(exc))
             return False

@@ -8,7 +8,13 @@ DECORATION_REQUIREMENTS = '''装饰范围：现场开业装饰只使用KT板和�
 
 
 
-def photo_requirements(camera='', camera_hidden=False):
+def photo_requirements(camera='', camera_hidden=False, render_style=None):
+    from scene_tool.config.render_styles import COMMERCIAL, COMMERCIAL_REQUIREMENTS
+    if render_style == COMMERCIAL:
+        text = COMMERCIAL_REQUIREMENTS
+        if camera_hidden:
+            text = text.replace('严格采用本轮指定的拍摄角度与等效焦距。选择75—150mm正面长焦时，相机对准装置中心、正面平视，成像平面与板面平行；通过足够的拍摄距离完整容纳装置，保持板材和人物原有比例、竖线端正，避免广角拉伸和近大远小的夸张透视。', '合理安排构图和拍摄距离，完整容纳装置，保持板材和人物原有比例，避免夸张透视。')
+        return text
     text = PHOTO_REQUIREMENTS
     if camera_hidden or ('等效' in camera and 'mm' in camera):
         text = text.replace('后置主摄', '后置相机')
