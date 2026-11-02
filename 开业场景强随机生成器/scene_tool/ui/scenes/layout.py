@@ -1,4 +1,5 @@
 import tkinter as tk
+from scene_tool.config import surface_reflection as reflection
 from tkinter import ttk
 from scene_tool.ui.components.product_size import product_size_row
 from scene_tool.ui.components.results import ResultList
@@ -24,6 +25,8 @@ def build_panel(panel):
     panel.material_row = results.result('自定义材质', panel.close_material, None).master
     panel.parameter_labels = {}
     dimensions = panel.model.active_profile()['dimensions']
+    if not any(d['key'] == reflection.KEY for d in dimensions):
+        dimensions = [*dimensions, reflection.dimension()]
     groups = [('环境空间', dimensions[:2] + dimensions[3:5]),
               ('装置与人物', [dimensions[2], dimensions[5], dimensions[6]]),
               ('拍摄', dimensions[7:])]
@@ -32,12 +35,15 @@ def build_panel(panel):
         panel.group_labels.append(results.group(title))
         for dimension in fields:
             key = dimension['key']
-            panel.values[key] = tk.StringVar(value=panel.model.values[key])
-            panel.locks[key] = tk.BooleanVar(value=panel.model.locks[key])
-            panel.hidden[key] = tk.BooleanVar(value=panel.model.hidden[key])
+            panel.values[key] = tk.StringVar(value=panel.model.values.get(key, reflection.OPTIONS[0]))
+            panel.locks[key] = tk.BooleanVar(value=panel.model.locks.get(key, False))
+            panel.hidden[key] = tk.BooleanVar(value=panel.model.hidden.get(key, False))
             label = results.result(dimension['label'], panel.values[key], panel.locks[key],
-                                   choices=panel.model.pools[key], readonly=key == 'camera', hidden=panel.hidden[key],
+                                   choices=panel.model.pools.get(key, dimension['options']), readonly=key == 'camera', hidden=panel.hidden[key],
                                    on_hide=lambda k=key: change_scene(panel, k))
+            if key == reflection.KEY:
+                panel.reflection_row = label.master
+                panel.reflection_row_index = results.next_row - 1
             panel.parameter_labels[key] = label
             panel.combos[key] = label.editor
             if key == 'camera':

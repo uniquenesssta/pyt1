@@ -1,6 +1,7 @@
 """Reference preservation and scene-specific prompt composition."""
 from scene_tool.config.photography import photo_requirements
 from scene_tool.domain.visibility import hidden_keys
+from scene_tool.config import surface_reflection as reflection
 from scene_tool.config.product_size import FOLLOW_REFERENCE
 from scene_tool.domain.product_size import size_instructions
 from scene_tool.domain.render_style import styled_values, styled_constraints
@@ -10,6 +11,8 @@ REFERENCE_RULES = '参考图用途：保留参考装置的板材形状、数量�
 def make_scene_prompt(profile, values, extra, hidden=None, render_style=None, product_size=FOLLOW_REFERENCE):
     hidden = hidden_keys(hidden)
     values = styled_values(values, render_style)
+    if render_style == '近景摄影':
+        values.setdefault(reflection.KEY, reflection.OPTIONS[0])
     if any(not values[k].strip() for k in [d['key'] for d in profile['dimensions'] if d['key'] not in hidden]):
         raise ValueError('请填写全部场景参数。')
     if render_style == '近景摄影':
@@ -20,6 +23,8 @@ def make_scene_prompt(profile, values, extra, hidden=None, render_style=None, pr
             key = d['key']
             if key not in hidden:
                 value = values[key]
+                if key == reflection.KEY:
+                    value = reflection.prompt_value(value)
                 lines.append(d['label'] + '：' + value)
         if extra.strip():
             lines.extend(['补充要求：', extra.strip()])

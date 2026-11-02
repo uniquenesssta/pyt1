@@ -1,5 +1,6 @@
 """Independent scene state, shuffle bags, editable prompts and reset snapshots."""
 import random
+from scene_tool.config import surface_reflection as reflection
 from scene_tool.domain.camera_modes import camera_pool, draw_camera
 from scene_tool.domain.commercial_scenes import scene_profile
 from scene_tool.config.render_styles import COMMERCIAL
@@ -34,6 +35,11 @@ class SceneModel:
         self.values = {k: values.get(k, '') if isinstance(values.get(k, ''), str) else '' for k in self.pools}
         self.locks = {k: bool(state.get('locks', {}).get(k, False)) for k in self.pools}
         self.hidden = {k: state.get('hidden', {}).get(k) is True for k in self.pools}
+        if self.render_style == '近景摄影' or reflection.KEY in values:
+            saved = values.get(reflection.KEY)
+            self.values[reflection.KEY] = saved if isinstance(saved, str) and saved.strip() else reflection.OPTIONS[0]
+            self.locks[reflection.KEY] = state.get('locks', {}).get(reflection.KEY) is True
+            self.hidden[reflection.KEY] = state.get('hidden', {}).get(reflection.KEY) is True
         self.bags = {k: list(dict.fromkeys(x for x in state.get('bags', {}).get(k, []) if x in pool)) for k, pool in self.pools.items()}
         mode_bags = {k: v for k, v in state.get('bags', {}).items() if k.startswith(('camera_mode:', 'industry:'))}
         mode_bags.update(state.get('camera_mode_bags', {}))
@@ -88,8 +94,10 @@ class SceneModel:
                 locks.discard(mapping[key])
         if fixed_camera:
             locks.add('camera')
-        values, choices = draw_shot({v:self.values[k] for k,v in mapping.items()}, locks, pools,
+        values, choices = draw_shot({v:self.values.get(k, '') for k,v in mapping.items()}, locks, pools,
                                     self.rng, self.bags, keep=keep)
+        self.hidden.setdefault(reflection.KEY, False)
+        self.locks.setdefault(reflection.KEY, False)
         self.values.update({k:values[v] for k,v in mapping.items()})
         return {k:choices[v] for k,v in mapping.items()}
 

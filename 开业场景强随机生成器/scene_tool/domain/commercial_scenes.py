@@ -1,6 +1,7 @@
 """Commercial display dimensions for the seven non-opening scenes."""
 from copy import deepcopy
 from scene_tool.config.render_styles import COMMERCIAL
+from scene_tool.config import surface_reflection as reflection
 
 
 def scene_profile(profile, style):
@@ -14,6 +15,7 @@ def scene_profile(profile, style):
             label, pool = FIELDS[name]
             result['dimensions'][index].update(label=label, options=list(pool), close_key=name)
         result['dimensions'][7]['label'] = '近景机位'
+        result['dimensions'].append(reflection.dimension())
         return result
     if style != COMMERCIAL:
         return profile

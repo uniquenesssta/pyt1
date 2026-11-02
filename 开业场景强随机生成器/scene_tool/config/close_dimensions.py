@@ -2,7 +2,10 @@
 from scene_tool.config.closeup import FOCUS, CROPS
 from scene_tool.config.studio_shots import SHOT_KEYS, choices
 
+from scene_tool.config import surface_reflection as reflection
+
 FIELDS = {
+    reflection.KEY: (reflection.LABEL, reflection.OPTIONS),
     'detail_edge': ('邻接边缘', ('让相邻元素停在画边', '保留主体边缘轮廓', '只露出少量相邻区域', '沿主体外缘留出少量空间')),
     'detail_layers': ('前后层次', ('只从产品间隙或画边露出少量哑光台面', '相邻部件形成前后层次', '用原有边界区分相邻区域，不垫高主体', '压低背景对比突出局部')),
     'detail_space': ('局部留白', ('沿原有留白收边', '主体一侧多留少量空间', '四周紧凑但不切断识别点', '留出局部轮廓的呼吸空间')),
@@ -29,6 +32,6 @@ def upgrade_options(key, items):
 
 GROUPS = (('近景布置', ('detail_edge','detail_layers','detail_space')),
           ('近景内容', ('detail_focus','detail_surface','detail_art')),
-          ('近景拍摄', ('detail_crop','camera','detail_light','detail_plane','ratio')))
+          ('近景拍摄', ('detail_crop','camera','detail_light',reflection.KEY,'detail_plane','ratio')))
 LABELS = {**{k:v[0] for k,v in FIELDS.items()}, 'environment':'室内 / 室外','camera':'近景机位','ratio':'画面比例'}
 DIMENSIONS = tuple((k,LABELS[k]) for _,keys in GROUPS for k in keys)

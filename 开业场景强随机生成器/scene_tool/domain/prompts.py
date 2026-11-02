@@ -4,6 +4,7 @@ from scene_tool.config.render_styles import normalize_style
 from scene_tool.config.photography import photo_requirements, DECORATION_REQUIREMENTS
 from scene_tool.domain.copy_layout import copy_instructions
 from scene_tool.domain.visibility import hidden_keys
+from scene_tool.config import surface_reflection as reflection
 from scene_tool.config.product_size import FIXED_LARGE
 from scene_tool.domain.product_size import size_instructions, size_constraints, size_environment
 from scene_tool.domain.render_style import styled_values, styled_constraints, styled_environment
@@ -17,6 +18,8 @@ def make_prompt(values, industry='美业', constraints=DEFAULT_CONSTRAINTS,
     values = styled_values(values, render_style)
     values = dict(values)
     values.setdefault('environment', '室外')
+    if render_style == '近景摄影':
+        values.setdefault(reflection.KEY, reflection.OPTIONS[0])
     missing = [label for key, label in active_dimensions if key not in hidden and not values.get(key, '').strip()]
     if missing:
         raise ValueError('请填写：' + '、'.join(missing))
@@ -29,6 +32,8 @@ def make_prompt(values, industry='美业', constraints=DEFAULT_CONSTRAINTS,
             if key not in hidden:
                 # Full-installation layout is context, not a framing instruction.
                 value = values[key].split('；')[0] if key == 'placement' else values[key]
+                if key == reflection.KEY:
+                    value = reflection.prompt_value(value)
                 lines.append(f'{dimension_label(key, label, values)}：{value}')
         if extra.strip():
             lines.extend(['补充要求：', extra.strip()])
