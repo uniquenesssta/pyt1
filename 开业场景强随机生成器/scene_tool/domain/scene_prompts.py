@@ -1,5 +1,6 @@
 """Reference preservation and scene-specific prompt composition."""
 from scene_tool.config.photography import photo_requirements
+from scene_tool.config.material_surface import OLD_SURFACES
 from scene_tool.domain.visibility import hidden_keys
 from scene_tool.config import highlight_position as position, surface_reflection as reflection
 from scene_tool.config.product_size import FOLLOW_REFERENCE
@@ -23,7 +24,9 @@ def make_scene_prompt(profile, values, extra, hidden=None, render_style=None, pr
             key = d['key']
             if key not in hidden:
                 value = values[key]
-                if key == reflection.KEY:
+                if d.get('close_key', key) == 'detail_surface':
+                    value = OLD_SURFACES.get(value, value)
+                elif key == reflection.KEY:
                     value = reflection.prompt_value(value)
                 elif d.get('close_key', key) == position.KEY:
                     value = position.prompt_value(value)

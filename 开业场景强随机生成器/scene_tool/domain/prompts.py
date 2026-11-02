@@ -3,6 +3,7 @@ from scene_tool.domain.industry_profiles import dimensions
 from scene_tool.config.render_styles import normalize_style
 from scene_tool.config.photography import photo_requirements, DECORATION_REQUIREMENTS
 from scene_tool.domain.copy_layout import copy_instructions
+from scene_tool.config.material_surface import OLD_SURFACES
 from scene_tool.domain.visibility import hidden_keys
 from scene_tool.config import highlight_position as position, surface_reflection as reflection
 from scene_tool.config.product_size import FIXED_LARGE
@@ -32,7 +33,9 @@ def make_prompt(values, industry='美业', constraints=DEFAULT_CONSTRAINTS,
             if key not in hidden:
                 # Full-installation layout is context, not a framing instruction.
                 value = values[key].split('；')[0] if key == 'placement' else values[key]
-                if key == reflection.KEY:
+                if key == 'detail_surface':
+                    value = OLD_SURFACES.get(value, value)
+                elif key == reflection.KEY:
                     value = reflection.prompt_value(value)
                 elif key == position.KEY:
                     value = position.prompt_value(value)

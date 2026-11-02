@@ -5,9 +5,9 @@ AUTO, MATTE, SOFT, GLOSS, HIGH = OPTIONS = ('跟随材质', '哑光', '微光', 
 _DESCRIPTIONS = {
     AUTO: '保留参考产品的实际光泽',
     MATTE: '表面有明暗层次，但看不见明显反光带',
-    SOFT: '能辨认出淡淡的反光，保留底色和细纹',
+    SOFT: '同一色块仅在迎光处稍浅，其余保持原色，亮度变化轻微',
     GLOSS: '能看见清楚的柔边反光带，带内比带外亮',
-    HIGH: '反光明显，亮部仍看得见纹理，不泛白',
+    HIGH: '反光明显，亮部仍看得清原有细节，不泛白',
 }
 # Match exact shipped strings only; handwritten instructions remain user data.
 _LEGACY = dict(zip((

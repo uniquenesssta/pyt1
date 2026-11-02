@@ -1,4 +1,5 @@
 """Shared vocabulary for photographing an existing product rather than redesigning it."""
+from scene_tool.config.material_surface import SURFACE_OPTIONS, OLD_SURFACES
 from scene_tool.config.closeup import FOCUS, CROPS
 from scene_tool.config.studio_shots import SHOT_KEYS, choices
 
@@ -10,7 +11,7 @@ FIELDS = {
     'detail_layers': ('前后层次', ('只从产品间隙或画边露出少量哑光台面', '相邻部件形成前后层次', '用原有边界区分相邻区域，不垫高主体', '压低背景对比突出局部')),
     'detail_space': ('局部留白', ('沿原有留白收边', '主体一侧多留少量空间', '四周紧凑但不切断识别点', '留出局部轮廓的呼吸空间')),
     'detail_focus': ('细节主体', FOCUS),
-    'detail_surface': ('材质表现', ('保留真实明暗过渡', '呈现轮廓与底色的交界', '保留表面细微质感，不锐化造边', '保留原有色泽与纹理')),
+    'detail_surface': ('材质表现', SURFACE_OPTIONS),
     'detail_art': ('外观保留重点', ('保持局部真实形状', '保留已有可辨识细节', '保持原有颜色与明暗过渡', '不拉伸或美化主体轮廓')),
     'detail_crop': ('局部构图', CROPS),
     'detail_light': (position.LABEL, ('大面积侧柔光，另一侧白卡轻补，保留细微纹理', '近轴柔光均匀覆盖主体，白平衡中性，色块不偏色', '宽柔光从侧上方照亮主体，让色块均匀、细微纹理自然可见', '用黑旗收住杂散反光，仅保留材质本身的光泽')),
@@ -24,6 +25,8 @@ for key in LEGACY_FIELDS:
 
 def upgrade_options(key, items):
     # Older editors saved complete default lists, even when only one field was edited.
+    if key == 'detail_surface':
+        return list(dict.fromkeys(OLD_SURFACES.get(x, x) for x in items))
     if key == reflection.KEY:
         return list(dict.fromkeys(reflection.normalize(x) for x in items))
     if key == position.KEY and any(x in position.LEGACY for x in items):
