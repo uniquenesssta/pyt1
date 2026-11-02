@@ -14,8 +14,12 @@ def sync_scene_camera(panel):
     if style == '近景摄影':
         panel.size_row.grid_remove()
         panel.subject_row.grid()
+        panel.material_row.grid()
+        panel.material_row.master.rowconfigure(panel.material_row.grid_info()['row'], weight=1, uniform='results')
     else:
         panel.subject_row.grid_remove()
+        panel.material_row.master.rowconfigure(panel.material_row_index, weight=0, uniform='')
+        panel.material_row.grid_remove()
         panel.size_row.grid()
     previous_style = getattr(panel, '_camera_style', style)
     changed = previous_style != style

@@ -30,6 +30,7 @@ class App(tk.Tk):
         self.locks = {k: tk.BooleanVar() for k, _ in (*DIMENSIONS, *EXTRA_DIMENSIONS)}
         self.hidden = {k: tk.BooleanVar(value=False) for k in [*[key for key, _ in (*DIMENSIONS, *EXTRA_DIMENSIONS)], 'copy']}
         self.values['close_subject'] = tk.StringVar()
+        self.values['close_material'] = tk.StringVar()
         self.product_size = tk.StringVar(value=FOLLOW_REFERENCE)
         self.render_style = tk.StringVar(value=BUYER)
         self.industry = tk.StringVar(value='美业')

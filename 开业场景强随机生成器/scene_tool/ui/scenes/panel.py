@@ -21,6 +21,7 @@ class ScenePanel(ttk.Frame):
             variable.trace_add('write', self.schedule)
         self.extra.bind('<KeyRelease>', self.schedule)
         self.close_subject.trace_add('write', self.schedule)
+        self.close_material.trace_add('write', self.schedule)
         self.product_size.trace_add('write', self.schedule)
         self.prompt.bind('<<Modified>>', self.prompt_changed)
         self.update_status()
@@ -38,6 +39,7 @@ class ScenePanel(ttk.Frame):
         self.model.values = {k: v.get().strip() for k, v in self.values.items()}
         self.model.locks = {k: v.get() for k, v in self.locks.items()}
         self.model.close_subject = self.close_subject.get()
+        self.model.close_material = self.close_material.get()
         self.model.product_size = self.product_size.get()
         self.model.hidden = {k: v.get() for k, v in self.hidden.items()}
         self.model.extra = self.extra.get('1.0', 'end-1c')

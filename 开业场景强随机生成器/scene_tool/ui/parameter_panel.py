@@ -19,6 +19,7 @@ def build_parameters(self, parent):
     results.group('产品规格（不参与随机）')
     if style == '近景摄影':
         results.result('拍摄对象', self.values['close_subject'], None)
+        results.result('自定义材质', self.values['close_material'], None)
     else:
         product_size_row(results, self.product_size)
         results.result('开业类型', self.industry, None, choices=INDUSTRIES)

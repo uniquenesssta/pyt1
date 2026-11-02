@@ -19,6 +19,9 @@ def build_panel(panel):
     # Share one grid slot so switching style does not leave an empty row.
     results.rowconfigure(results.next_row - 1, weight=0, uniform='')
     panel.subject_row.grid_configure(row=results.next_row - 2)
+    panel.close_material = tk.StringVar(value=panel.model.close_material)
+    panel.material_row_index = results.next_row
+    panel.material_row = results.result('自定义材质', panel.close_material, None).master
     panel.parameter_labels = {}
     dimensions = panel.model.active_profile()['dimensions']
     groups = [('环境空间', dimensions[:2] + dimensions[3:5]),

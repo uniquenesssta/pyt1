@@ -20,5 +20,7 @@ ANGLES = (
 REQUIREMENTS = '请为【{subject}】拍摄一张写实近景照片。选择它本身确实存在的一处代表性细节作为焦点，让其余部分自然落在画外。保留真实比例、轮廓、颜色和材质；有参考图时以参考图为准，没有标注尺寸时不猜测大小。采用符合现场的柔和光线，焦点清晰，保留自然景深，不额外添加道具、文字或装饰。'
 
 
-def closeup_brief(subject):
-    return REQUIREMENTS.format(subject=(subject or '').strip() or '参考图中的主体')
+def closeup_brief(subject, material=None):
+    material = (material or '').strip()
+    description = ('指定材质：' + material + '。按此材质呈现纹理与反光，不擅自添加其他工艺。' if material else '材质按参考图可见特征表现，不推测未指定的材质或工艺。')
+    return REQUIREMENTS.format(subject=(subject or '').strip() or '参考图中的主体') + '\n' + description

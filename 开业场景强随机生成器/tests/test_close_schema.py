@@ -45,3 +45,14 @@ class CloseSchemaTests(unittest.TestCase):
                 model.draw()
                 restored = SceneModel(profile, model.state())
                 self.assertIn(subject or '参考图中的主体', restored.generate())
+
+    def test_custom_material_persists_and_empty_does_not_guess(self):
+        values = Randomizer(load_pools(RESOURCES/'pools.json')).draw({'close_material':'哑光红纸，局部烫金'}, render_style=CLOSEUP)
+        self.assertIn('指定材质：哑光红纸，局部烫金', make_prompt(values, render_style=CLOSEUP))
+        for profile in load_profiles():
+            model = SceneModel(profile, {'render_style':CLOSEUP, 'close_material':values['close_material']})
+            model.draw()
+            restored = SceneModel(profile, model.state())
+            self.assertIn('指定材质：哑光红纸，局部烫金', restored.generate())
+            restored.close_material = ' '
+            self.assertNotIn('指定材质：', restored.generate())
