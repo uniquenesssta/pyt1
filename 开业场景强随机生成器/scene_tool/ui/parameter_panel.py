@@ -25,7 +25,7 @@ def build_parameters(self, parent):
         results.result('开业类型', self.industry, None, choices=INDUSTRIES)
     from scene_tool.config.close_dimensions import GROUPS
     for title, fields in GROUPS if style == '近景摄影' else (
-        ('环境空间', ('environment', 'architecture', 'display_space', 'background_depth') if style == COMMERCIAL else ('environment', 'architecture') if style == '近景摄影' else ('environment', 'architecture', 'city', 'address')),
+        ('环境空间', ('environment', 'architecture', 'display_space', 'background_depth') if style == COMMERCIAL else ('environment', 'architecture', 'city', 'address')),
         ('布置', ('placement', 'balloons')),
         ('板面内容', ('brand', 'logo_shape', 'logo_structure')),
         ('拍摄', ('detail_focus', 'detail_crop', 'camera', 'lighting', 'ratio') if style == '近景摄影' else ('camera', 'lighting', 'ratio')),
@@ -37,6 +37,9 @@ def build_parameters(self, parent):
                 choices=scoped.get(key, self.engine.pools.get(key, [])), readonly=key in ('environment', 'camera'),
                 hidden=self.hidden[key], on_hide=lambda k=key: change_opening(self, k))
             self.combos[key] = self.parameter_labels[key].editor
+            if style == '近景摄影' and key == 'camera':
+                from scene_tool.ui.studio_binding import opening_camera_changed
+                self.combos[key].bind('<<ComboboxSelected>>', lambda _: opening_camera_changed(self))
         if title == '板面内容':
             results.result('开业文案', self.copyline, self.copy_locked, hidden=self.hidden['copy'],
                            on_hide=lambda: change_opening(self, 'copy'))

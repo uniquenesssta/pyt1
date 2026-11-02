@@ -13,6 +13,10 @@ def sync_style(view, replace=False):
     previous_context = getattr(view, 'industry_context', None)
     changed = previous_context != context
     view.industry_context = context
+    if style == '近景摄影':
+        from scene_tool.ui.studio_binding import sync_opening_studio
+        sync_opening_studio(view)
+        return
     pools = view.engine.scoped_pools(industry, environment, style)
     for key, label in dimensions(style):
         if key == 'architecture' and environment == '室内' and style != '商业效果图':

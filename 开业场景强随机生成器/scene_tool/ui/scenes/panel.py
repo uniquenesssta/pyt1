@@ -12,8 +12,14 @@ class ScenePanel(ttk.Frame):
         self.updating = False
         build_panel(self)
         from scene_tool.ui.camera_binding import sync_scene_camera
-        sync_scene_camera(self)
-        if self.model.prompt == self.model.rendered:
+        try:
+            sync_scene_camera(self)
+            synced = True
+        except ValueError as exc:
+            self.studio_camera = self.model.values['camera']
+            messagebox.showwarning('近景镜头', str(exc), parent=self)
+            synced = False
+        if synced and self.model.prompt == self.model.rendered:
             self.model.regenerate()
             self.prompt.delete('1.0', 'end')
             self.prompt.insert('1.0', self.model.prompt)
@@ -84,10 +90,17 @@ class ScenePanel(ttk.Frame):
     def randomize(self):
         if not self.allow_replace():
             return
-        self.model.draw()
+        try:
+            self.model.draw()
+        except ValueError as exc:
+            messagebox.showwarning('无法随机', str(exc), parent=self)
+            return
         self.updating = True
         for key, value in self.model.values.items():
             self.values[key].set(value)
+        if self.model.render_style == '近景摄影':
+            from scene_tool.ui.studio_binding import sync_scene_studio
+            sync_scene_studio(self)
         self.updating = False
         self.model.regenerate()
         self.show_prompt()

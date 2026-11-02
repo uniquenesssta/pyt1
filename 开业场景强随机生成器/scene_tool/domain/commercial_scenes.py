@@ -12,7 +12,7 @@ def scene_profile(profile, style):
                    2:'detail_focus', 5:'detail_surface', 6:'detail_art', 8:'detail_light'}
         for index, name in mapping.items():
             label, pool = FIELDS[name]
-            result['dimensions'][index].update(label=label, options=list(pool))
+            result['dimensions'][index].update(label=label, options=list(pool), close_key=name)
         result['dimensions'][7]['label'] = '近景机位'
         return result
     if style != COMMERCIAL:

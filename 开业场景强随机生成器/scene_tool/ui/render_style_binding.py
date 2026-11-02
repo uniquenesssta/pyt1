@@ -34,9 +34,14 @@ class RenderStyleSelector:
             before = view.current() if camera is not None else {}
             old_copy = view.copyline.get() if camera is not None else ''
             view.render_style.set(style)
-            if camera is not None:
-                sync_style(view)
-            if not view.refresh(force=True):
+            try:
+                if camera is not None:
+                    sync_style(view)
+                updated = view.refresh(force=True)
+            except ValueError as exc:
+                view.status.set(str(exc))
+                updated = False
+            if not updated:
                 view.render_style.set(previous)
                 if camera is not None:
                     sync_style(view)
@@ -59,8 +64,8 @@ class RenderStyleSelector:
             before_values = dict(panel.model.values)
             camera = panel.model.values['camera']
             panel.model.render_style = style
-            sync_scene_camera(panel)
             try:
+                sync_scene_camera(panel)
                 panel.model.regenerate()
             except ValueError as exc:
                 panel.model.render_style = previous

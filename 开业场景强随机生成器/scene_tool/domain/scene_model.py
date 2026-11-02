@@ -58,7 +58,8 @@ class SceneModel:
 
     def active_pools(self):
         if self.render_style == '近景摄影':
-            return {d['key']: list(self.closeup_pools.get(d['key'], d['options'])) for d in self.active_profile()['dimensions']}
+            from scene_tool.config.close_dimensions import upgrade_options
+            return {d['key']: upgrade_options(d.get('close_key', d['key']), self.closeup_pools.get(d['key'], d['options'])) for d in self.active_profile()['dimensions']}
         if self.render_style != COMMERCIAL:
             return self.pools
         pools = {d['key']: list(d['options']) for d in self.active_profile()['dimensions']}
@@ -70,7 +71,32 @@ class SceneModel:
     def camera_pool(self):
         return camera_pool(self.pools['camera'], self.profile['environment'], self.render_style)
 
+    def studio_draw(self, *, keep=False, fixed_camera=False):
+        from scene_tool.generation.studio_shots import draw_shot
+        dims = self.active_profile()['dimensions']
+        mapping = {d['key']:d.get('close_key', d['key']) for d in dims}
+        pools = {mapping[k]:v for k,v in self.active_pools().items()}
+        pools['camera'] = self.camera_pool()
+        locks = {mapping[k] for k in self.locks if self.locks[k]}
+        # Scene slots also serve buyer/commercial fields. A lock on a value
+        # from that other schema must not inject a venue/activity into a studio shot.
+        other = scene_profile(self.profile, COMMERCIAL)['dimensions']
+        for d in other:
+            key = d['key']
+            value = self.values[key]
+            if value not in pools[mapping[key]] and (value in self.pools[key] or value in d['options'] or value in self.commercial_pools.get(key, ())):
+                locks.discard(mapping[key])
+        if fixed_camera:
+            locks.add('camera')
+        values, choices = draw_shot({v:self.values[k] for k,v in mapping.items()}, locks, pools,
+                                    self.rng, self.bags, keep=keep)
+        self.values.update({k:values[v] for k,v in mapping.items()})
+        return {k:choices[v] for k,v in mapping.items()}
+
     def draw(self):
+        if self.render_style == '近景摄影':
+            self.studio_draw()
+            return
         for key, pool in self.active_pools().items():
             if key == 'camera':
                 self.values[key] = draw_camera(self.camera_pool(), self.values[key], self.locks[key], self.bags, self.rng)

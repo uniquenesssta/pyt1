@@ -27,7 +27,11 @@ class Randomizer:
         context = '|'.join((industry_key(industry), environment or '室外', style or ''))
         for key, items in self.industry_overrides.get(context, {}).items():
             if isinstance(items, list) and len(set(items)) >= 2 and all(isinstance(x, str) and x.strip() for x in items):
-                pools[key] = list(items)
+                if style == '近景摄影':
+                    from scene_tool.config.close_dimensions import upgrade_options
+                    pools[key] = upgrade_options(key, items)
+                else:
+                    pools[key] = list(items)
         return pools
 
     def restore_bags(self, bags):
@@ -47,11 +51,23 @@ class Randomizer:
                 if isinstance(items, list):
                     self.recent[key] = [x for x in items if isinstance(x, str)][-200:]
 
+    def studio_draw(self, current, locked, industry, *, keep=False, strong=True):
+        from scene_tool.config.closeup import ANGLES, CLOSEUP
+        from scene_tool.generation.studio_shots import draw_shot
+        pools = self.scoped_pools(industry, current.get('environment'), CLOSEUP)
+        pools.setdefault('ratio', self.pools['ratio'])
+        pools['camera'] = ANGLES
+        return draw_shot(current, locked, pools, self.rng, self.bags, keep=keep, strong=strong)
+
     def draw(self, current=None, locked=(), strong=True, render_style=None, industry=None):
         if render_style in ('商业效果图', '近景摄影') and industry is None:
             industry = '通用'
         current = current or {}
         result = dict(current)
+        if render_style == '近景摄影':
+            sampled, _ = self.studio_draw(current, locked, industry, strong=strong)
+            result.update(sampled)
+            return result
         for key in ['environment'] + [k for k, _ in dimensions(render_style) if k != 'environment']:
             scoped = self.scoped_pools(industry, result.get('environment'), render_style) if industry is not None else {}
             if key in scoped:

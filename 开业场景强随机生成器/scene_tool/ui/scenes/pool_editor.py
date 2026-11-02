@@ -34,11 +34,23 @@ def edit_pool(panel):
         if any(len(set(x.strip() for x in items if x.strip())) < 2 for items in working.values()):
             messagebox.showerror('候选不足', '每项至少需要两个不同候选。', parent=dialog)
             return
+        if model.render_style == '近景摄影':
+            panel.capture()
+            previous = model.closeup_pools
+            model.closeup_pools = {k:list(dict.fromkeys(x.strip() for x in items if x.strip())) for k,items in working.items()}
+            try:
+                from scene_tool.ui.studio_binding import sync_scene_studio
+                sync_scene_studio(panel)
+            except ValueError as exc:
+                model.closeup_pools = previous
+                messagebox.showerror('无法保存参数池', str(exc), parent=dialog)
+                return
+            panel.persist()
+            dialog.destroy()
+            return
         for key, items in working.items():
             from scene_tool.config.render_styles import COMMERCIAL
-            if model.render_style == '近景摄影':
-                model.closeup_pools[key] = list(dict.fromkeys(x.strip() for x in items if x.strip()))
-            elif model.render_style == COMMERCIAL:
+            if model.render_style == COMMERCIAL:
                 model.commercial_pools[key] = list(dict.fromkeys(x.strip() for x in items if x.strip()))
             else:
                 model.set_pool(key, items)

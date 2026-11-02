@@ -27,6 +27,12 @@ def sync_scene_camera(panel):
     titles = ('近景布置', '近景内容', '近景拍摄') if style == '近景摄影' else ('环境空间', '装置与人物', '拍摄')
     for label, title in zip(panel.group_labels, titles):
         label.configure(text=title)
+    if style == '近景摄影':
+        from scene_tool.ui.studio_binding import sync_scene_studio
+        for dimension in panel.model.active_profile()['dimensions']:
+            panel.parameter_labels[dimension['key']].configure(text=dimension['label'])
+        sync_scene_studio(panel)
+        return
     pools = panel.model.active_pools()
     for dimension in panel.model.active_profile()['dimensions']:
         key = dimension['key']

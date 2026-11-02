@@ -15,11 +15,11 @@ def make_scene_prompt(profile, values, extra, hidden=None, render_style=None, pr
     if render_style == '近景摄影':
         from scene_tool.config.closeup import closeup_brief
         from scene_tool.config.photography import DECORATION_REQUIREMENTS
-        lines = [closeup_brief(values.get('close_subject'), values.get('close_material')), '拍摄地点：' + profile['name']]
+        lines = [closeup_brief(values.get('close_subject'), values.get('close_material'), None if 'camera' in hidden else values.get('camera'))]
         for d in profile['dimensions']:
             key = d['key']
             if key not in hidden:
-                value = values[key].split('；')[0] if key not in ('camera', 'ratio') else values[key]
+                value = values[key]
                 lines.append(d['label'] + '：' + value)
         if extra.strip():
             lines.extend(['补充要求：', extra.strip()])

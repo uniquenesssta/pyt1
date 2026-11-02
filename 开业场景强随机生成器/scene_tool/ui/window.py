@@ -51,8 +51,15 @@ class App(tk.Tk):
         self.engine = Randomizer(pools)
         self.build_ui()
         self.restore()
-        sync_style(self)
-        if not self.edited():
+        try:
+            sync_style(self)
+            synced = True
+        except ValueError as exc:
+            # Keep saved locks and text editable even if an old configuration conflicts.
+            self.status.set(str(exc))
+            self.studio_camera = self.values['camera'].get()
+            synced = False
+        if synced and not self.edited():
             self.refresh()
         self.resize_controller = ResizeController(self, self.content_surface)
         self.ready = True
@@ -83,9 +90,14 @@ class App(tk.Tk):
             self.after_cancel(self.pending)
             self.pending = None
         self.engine.generated = self.generated_names.get()
-        values = self.engine.draw(self.current(), locked, self.strong.get(), self.render_style.get(), self.industry.get())
+        try:
+            values = self.engine.draw(self.current(), locked, self.strong.get(), self.render_style.get(), self.industry.get())
+        except ValueError as exc:
+            self.status.set(str(exc))
+            return
         self.ready = False
-        self.copyline.set(self.copy_engine.draw(self.copyline.get(), self.copy_random.get(), self.copy_locked.get(), self.industry.get()))
+        if self.render_style.get() != '近景摄影':
+            self.copyline.set(self.copy_engine.draw(self.copyline.get(), self.copy_random.get(), self.copy_locked.get(), self.industry.get()))
         for key, value in values.items():
             self.values[key].set(value)
         sync_style(self)

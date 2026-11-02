@@ -40,6 +40,9 @@ def build_panel(panel):
                                    on_hide=lambda k=key: change_scene(panel, k))
             panel.parameter_labels[key] = label
             panel.combos[key] = label.editor
+            if key == 'camera':
+                from scene_tool.ui.studio_binding import scene_camera_changed
+                label.editor.bind('<<ComboboxSelected>>', lambda _: scene_camera_changed(panel))
     panel.prompt, panel.extra, header = prompt_editor(right)
     panel.prompt.insert('1.0', panel.model.prompt)
     panel.extra.insert('1.0', panel.model.extra)

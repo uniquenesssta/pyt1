@@ -45,6 +45,16 @@ def edit_pools(self):
         context = '|'.join((industry_key(industry), environment or '室外', style or ''))
         previous = self.engine.industry_overrides.get(context)
         self.engine.industry_overrides[context] = {k: list(dict.fromkeys(v)) for k, v in working.items()}
+        if style == '近景摄影':
+            try:
+                self.engine.studio_draw(self.current(), {k for k, var in self.locks.items() if var.get()}, industry, keep=True)
+            except ValueError as exc:
+                if previous is None:
+                    self.engine.industry_overrides.pop(context, None)
+                else:
+                    self.engine.industry_overrides[context] = previous
+                messagebox.showerror('无法保存参数池', str(exc), parent=dialog)
+                return
         if not self.save():
             if previous is None:
                 self.engine.industry_overrides.pop(context, None)
