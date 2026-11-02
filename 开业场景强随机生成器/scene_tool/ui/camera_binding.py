@@ -14,12 +14,15 @@ def sync_scene_camera(panel):
     previous_style = getattr(panel, '_camera_style', style)
     changed = previous_style != style
     panel._camera_style = style
+    titles = ('近景布置', '近景内容', '近景拍摄') if style == '近景摄影' else ('环境空间', '装置与人物', '拍摄')
+    for label, title in zip(panel.group_labels, titles):
+        label.configure(text=title)
     pools = panel.model.active_pools()
     for dimension in panel.model.active_profile()['dimensions']:
         key = dimension['key']
         panel.parameter_labels[key].configure(text=dimension['label'])
         panel.combos[key].configure(values=pools[key])
-        if key != 'camera' and (changed or style == '商业效果图') and panel.model.values[key] not in pools[key]:
+        if key != 'camera' and (changed or style in ('商业效果图', '近景摄影')) and panel.model.values[key] not in pools[key]:
             panel.model.values[key] = panel.model.rng.choice(pools[key])
         panel.values[key].set(panel.model.values[key])
     pool = panel.model.camera_pool()

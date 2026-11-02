@@ -19,8 +19,9 @@ def build_panel(panel):
     groups = [('环境空间', dimensions[:2] + dimensions[3:5]),
               ('装置与人物', [dimensions[2], dimensions[5], dimensions[6]]),
               ('拍摄', dimensions[7:])]
+    panel.group_labels = []
     for title, fields in groups:
-        results.group(title)
+        panel.group_labels.append(results.group(title))
         for dimension in fields:
             key = dimension['key']
             panel.values[key] = tk.StringVar(value=panel.model.values[key])

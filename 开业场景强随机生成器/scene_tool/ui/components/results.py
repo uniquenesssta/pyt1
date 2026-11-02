@@ -14,10 +14,13 @@ class ResultList(ttk.Frame):
     def group(self, title):
         header = ttk.Frame(self, padding=(6, 0))
         header.grid(row=self.next_row, column=0, sticky='ew', pady=(4, 2))
-        ttk.Label(header, text=title, style='Section.TLabel').pack(side='left')
+        caption = ttk.Label(header, text=title, style='Section.TLabel')
+        caption.pack(side='left')
         flag_heading(header, '隐藏')
         flag_heading(header, '锁定')
         self.next_row += 1
+
+        return caption
 
     def result(self, label, variable, lock, choices=None, readonly=False, hidden=None, on_hide=None):
         row = ttk.Frame(self, style='Result.TFrame', padding=(6, 1))

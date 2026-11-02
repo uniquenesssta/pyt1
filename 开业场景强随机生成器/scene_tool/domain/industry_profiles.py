@@ -16,11 +16,12 @@ EXTRA_DIMENSIONS = (('display_space', '商业展示空间'), ('background_depth'
 
 
 CLOSE_FIELDS = (('detail_focus', '近景主体'), ('detail_crop', '局部构图'))
-EXTRA_DIMENSIONS += CLOSE_FIELDS
+from scene_tool.config import close_dimensions as close
+EXTRA_DIMENSIONS += tuple((k,v[0]) for k,v in close.FIELDS.items())
 
 def dimensions(style):
     if style == CLOSEUP:
-        return tuple(CLOSE_FIELDS[0] if k == 'city' else CLOSE_FIELDS[1] if k == 'address' else (k, label) for k, label in DIMENSIONS)
+        return close.DIMENSIONS
     return COMMERCIAL_DIMENSIONS if style == COMMERCIAL else DIMENSIONS
 
 
@@ -34,6 +35,8 @@ def profile(value):
 
 
 def industry_pools(industry, environment, style):
+    if style == CLOSEUP:
+        return {k:list(v[1]) for k,v in close.FIELDS.items()}
     data = profile(industry_key(industry))
     indoor = environment == '室内'
     commercial = style == COMMERCIAL

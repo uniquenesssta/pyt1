@@ -19,7 +19,8 @@ def build_parameters(self, parent):
     results.group('产品规格（不参与随机）')
     product_size_row(results, self.product_size)
     results.result('开业类型', self.industry, None, choices=INDUSTRIES)
-    for title, fields in (
+    from scene_tool.config.close_dimensions import GROUPS
+    for title, fields in GROUPS if style == '近景摄影' else (
         ('环境空间', ('environment', 'architecture', 'display_space', 'background_depth') if style == COMMERCIAL else ('environment', 'architecture') if style == '近景摄影' else ('environment', 'architecture', 'city', 'address')),
         ('布置', ('placement', 'balloons')),
         ('板面内容', ('brand', 'logo_shape', 'logo_structure')),

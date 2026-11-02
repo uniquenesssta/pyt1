@@ -5,11 +5,15 @@ from scene_tool.config.render_styles import COMMERCIAL
 
 def scene_profile(profile, style):
     if style == '近景摄影':
-        from scene_tool.config.closeup import FOCUS, CROPS
+        from scene_tool.config.close_dimensions import FIELDS
         result = deepcopy(profile)
-        for index, label, options in ((3, '近景主体', FOCUS), (5, '局部构图', CROPS)):
-            result['dimensions'][index].update(label=label, options=list(options))
-        result['dimensions'][7]['label'] = '近景摄影角度'
+        # Same physical rows across scene styles; every close-up row has its own candidates.
+        mapping = {0:'detail_edge', 1:'detail_layers', 3:'detail_space', 4:'detail_crop',
+                   2:'detail_focus', 5:'detail_surface', 6:'detail_art', 8:'detail_light'}
+        for index, name in mapping.items():
+            label, pool = FIELDS[name]
+            result['dimensions'][index].update(label=label, options=list(pool))
+        result['dimensions'][7]['label'] = '近景机位'
         return result
     if style != COMMERCIAL:
         return profile
