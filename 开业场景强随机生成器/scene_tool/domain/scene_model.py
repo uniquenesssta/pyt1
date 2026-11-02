@@ -77,7 +77,7 @@ class SceneModel:
     def camera_pool(self):
         return camera_pool(self.pools['camera'], self.profile['environment'], self.render_style)
 
-    def studio_draw(self, *, keep=False, fixed_camera=False):
+    def studio_draw(self, *, keep=False, fixed_camera=False, fixed_key=None):
         from scene_tool.generation.studio_shots import draw_shot
         dims = self.active_profile()['dimensions']
         mapping = {d['key']:d.get('close_key', d['key']) for d in dims}
@@ -94,6 +94,8 @@ class SceneModel:
                 locks.discard(mapping[key])
         if fixed_camera:
             locks.add('camera')
+        if fixed_key:
+            locks.add(mapping[fixed_key])
         values, choices = draw_shot({v:self.values.get(k, '') for k,v in mapping.items()}, locks, pools,
                                     self.rng, self.bags, keep=keep)
         self.hidden.setdefault(reflection.KEY, False)

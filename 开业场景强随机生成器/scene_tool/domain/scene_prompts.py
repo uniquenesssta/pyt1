@@ -1,7 +1,7 @@
 """Reference preservation and scene-specific prompt composition."""
 from scene_tool.config.photography import photo_requirements
 from scene_tool.domain.visibility import hidden_keys
-from scene_tool.config import surface_reflection as reflection
+from scene_tool.config import highlight_position as position, surface_reflection as reflection
 from scene_tool.config.product_size import FOLLOW_REFERENCE
 from scene_tool.domain.product_size import size_instructions
 from scene_tool.domain.render_style import styled_values, styled_constraints
@@ -25,6 +25,8 @@ def make_scene_prompt(profile, values, extra, hidden=None, render_style=None, pr
                 value = values[key]
                 if key == reflection.KEY:
                     value = reflection.prompt_value(value)
+                elif d.get('close_key', key) == position.KEY:
+                    value = position.prompt_value(value)
                 lines.append(d['label'] + '：' + value)
         if extra.strip():
             lines.extend(['补充要求：', extra.strip()])

@@ -27,7 +27,7 @@ class CloseSchemaTests(unittest.TestCase):
             for _ in range(3):
                 model.draw()
                 prompt = model.generate()
-                for label in ('细节主体','邻接边缘','外观保留重点','近景机位','细节受光'):
+                for label in ('细节主体','邻接边缘','外观保留重点','近景机位','亮光位置'):
                     self.assertIn(label + '：', prompt)
             model.render_style = '真实买家秀'
             self.assertEqual(model.active_profile(), profile)

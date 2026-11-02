@@ -43,7 +43,7 @@ class StudioShotsTests(unittest.TestCase):
         self.assertEqual(current['environment'], '室外')  # preserved for the buyer mode
 
     def test_locked_camera_and_locked_field_constrain_family(self):
-        for key in ('camera', 'detail_crop', 'detail_focus', 'detail_light', 'detail_plane'):
+        for key in ('camera', 'detail_crop', 'detail_focus', 'detail_plane'):
             val = SHOTS[ALONG][key][0]
             current = {key: val}
             for _ in range(6):

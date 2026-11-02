@@ -1,4 +1,6 @@
 """Compatible shooting directions for three studio setups."""
+from scene_tool.config import highlight_position
+
 FLAT, ALONG, CORNER = '平铺斜线构图', '沿面斜拍', '边角交叠特写'
 
 SHOTS = {
@@ -15,8 +17,7 @@ SHOTS = {
         'detail_focus': ('同时呈现主体和同平面相邻细节，保持原有间距',
                          '焦点选在主图与连续边缘之间，同一平面的细线都清楚'),
         'detail_plane': ('保持同平面清晰，不沿画面对角线制造模糊', '以足够景深同时交代主体和相邻平面图案'),
-        'detail_light': ('大柔光箱从侧上方均匀照亮整段产品，反侧白卡轻补，色块稳定',
-                         '高位漫射主光覆盖画幅，压低镜面眩光，保留原有深浅色的分界'),
+        'detail_light': highlight_position.OPTIONS,
     },
     ALONG: {
         'camera': ('从左侧降低机位，沿展示面纵向望向远端，对焦近处主细节',
@@ -30,8 +31,7 @@ SHOTS = {
                          '焦点落在近端轮廓转折处，让稍远的相邻结构仍可辨识'),
         'detail_plane': ('近处焦点清楚，沿实际距离逐渐过渡，不加整片径向模糊',
                          '收光圈留住近端主体厚度，远处只轻微失焦'),
-        'detail_light': ('大面积侧柔光横过展示面，黑旗收住反光，近端细节保持本色',
-                         '从斜上方宽柔光补亮主体，让远近层次来自透视和焦点'),
+        'detail_light': highlight_position.OPTIONS,
     },
     CORNER: {
         'camera': ('从左侧斜上方瞄准两条边的交会处，让可见边角进入画面中心附近',
@@ -44,8 +44,7 @@ SHOTS = {
                          '以边缘交界为焦点，同时保留边内、边外各一小段'),
         'detail_plane': ('让交会处和邻近轮廓清楚，保留实际层间距',
                          '焦点停在边缘，厚度只依实物呈现，不模拟浮雕'),
-        'detail_light': ('侧上方大柔光配轻补光，已有叠层只留一线接触阴影',
-                         '柔光沿边角落下，保住边缘明暗差，不凭空制造悬浮层'),
+        'detail_light': highlight_position.OPTIONS,
     },
 }
 

@@ -37,6 +37,9 @@ def build_parameters(self, parent):
                 choices=scoped.get(key, self.engine.pools.get(key, [])), readonly=key in ('environment', 'camera'),
                 hidden=self.hidden[key], on_hide=lambda k=key: change_opening(self, k))
             self.combos[key] = self.parameter_labels[key].editor
+            if style == '近景摄影' and key in ('detail_reflection', 'detail_light'):
+                from scene_tool.ui.highlight_binding import bind_highlight
+                bind_highlight(self, key)
             if style == '近景摄影' and key == 'camera':
                 from scene_tool.ui.studio_binding import opening_camera_changed
                 self.combos[key].bind('<<ComboboxSelected>>', lambda _: opening_camera_changed(self))

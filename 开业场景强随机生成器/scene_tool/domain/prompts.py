@@ -4,7 +4,7 @@ from scene_tool.config.render_styles import normalize_style
 from scene_tool.config.photography import photo_requirements, DECORATION_REQUIREMENTS
 from scene_tool.domain.copy_layout import copy_instructions
 from scene_tool.domain.visibility import hidden_keys
-from scene_tool.config import surface_reflection as reflection
+from scene_tool.config import highlight_position as position, surface_reflection as reflection
 from scene_tool.config.product_size import FIXED_LARGE
 from scene_tool.domain.product_size import size_instructions, size_constraints, size_environment
 from scene_tool.domain.render_style import styled_values, styled_constraints, styled_environment
@@ -34,6 +34,8 @@ def make_prompt(values, industry='美业', constraints=DEFAULT_CONSTRAINTS,
                 value = values[key].split('；')[0] if key == 'placement' else values[key]
                 if key == reflection.KEY:
                     value = reflection.prompt_value(value)
+                elif key == position.KEY:
+                    value = position.prompt_value(value)
                 lines.append(f'{dimension_label(key, label, values)}：{value}')
         if extra.strip():
             lines.extend(['补充要求：', extra.strip()])

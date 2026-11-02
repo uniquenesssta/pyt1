@@ -46,6 +46,9 @@ def build_panel(panel):
                 panel.reflection_row_index = results.next_row - 1
             panel.parameter_labels[key] = label
             panel.combos[key] = label.editor
+            if key in (reflection.KEY, panel.model.profile['dimensions'][8]['key']):
+                from scene_tool.ui.highlight_binding import bind_highlight
+                bind_highlight(panel, key, scene=True)
             if key == 'camera':
                 from scene_tool.ui.studio_binding import scene_camera_changed
                 label.editor.bind('<<ComboboxSelected>>', lambda _: scene_camera_changed(panel))
