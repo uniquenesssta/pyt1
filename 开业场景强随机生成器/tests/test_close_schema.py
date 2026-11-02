@@ -27,7 +27,21 @@ class CloseSchemaTests(unittest.TestCase):
             for _ in range(3):
                 model.draw()
                 prompt = model.generate()
-                for label in ('细节主体','邻接边缘','原稿保留重点','近景机位','细节受光'):
+                for label in ('细节主体','邻接边缘','外观保留重点','近景机位','细节受光'):
                     self.assertIn(label + '：', prompt)
             model.render_style = '真实买家秀'
             self.assertEqual(model.active_profile(), profile)
+
+    def test_free_subject_survives_draw_save_and_prompt(self):
+        engine = Randomizer(load_pools(RESOURCES/'pools.json'))
+        for subject in ('白瓷咖啡杯', '自行车后拨', ''):
+            values = engine.draw({'close_subject': subject}, render_style=CLOSEUP, industry='美业')
+            prompt = make_prompt(values, render_style=CLOSEUP)
+            self.assertIn(subject or '参考图中的主体', prompt)
+            for word in ('KT板', '气球', '美业', '开业现场', '3.5米'):
+                self.assertNotIn(word, prompt)
+            for profile in load_profiles():
+                model = SceneModel(profile, {'close_subject':subject, 'render_style':CLOSEUP})
+                model.draw()
+                restored = SceneModel(profile, model.state())
+                self.assertIn(subject or '参考图中的主体', restored.generate())

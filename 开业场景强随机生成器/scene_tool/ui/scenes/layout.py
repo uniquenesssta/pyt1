@@ -13,7 +13,12 @@ def build_panel(panel):
     panel.values, panel.locks, panel.combos, panel.hidden = {}, {}, {}, {}
     panel.product_size = tk.StringVar(value=panel.model.product_size)
     results.group('产品规格（不参与随机）')
-    product_size_row(results, panel.product_size)
+    panel.size_row = product_size_row(results, panel.product_size).master
+    panel.close_subject = tk.StringVar(value=panel.model.close_subject)
+    panel.subject_row = results.result('拍摄对象', panel.close_subject, None).master
+    # Share one grid slot so switching style does not leave an empty row.
+    results.rowconfigure(results.next_row - 1, weight=0, uniform='')
+    panel.subject_row.grid_configure(row=results.next_row - 2)
     panel.parameter_labels = {}
     dimensions = panel.model.active_profile()['dimensions']
     groups = [('环境空间', dimensions[:2] + dimensions[3:5]),

@@ -11,6 +11,12 @@ def sync_opening_camera(view):
 
 def sync_scene_camera(panel):
     style = panel.model.render_style
+    if style == '近景摄影':
+        panel.size_row.grid_remove()
+        panel.subject_row.grid()
+    else:
+        panel.subject_row.grid_remove()
+        panel.size_row.grid()
     previous_style = getattr(panel, '_camera_style', style)
     changed = previous_style != style
     panel._camera_style = style

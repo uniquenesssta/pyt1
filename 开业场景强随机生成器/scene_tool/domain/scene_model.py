@@ -17,6 +17,7 @@ class SceneModel:
         state = state if isinstance(state, dict) else {}
         self.closeup_pools = state.get('closeup_pools', {})
         self.commercial_pools = state.get('commercial_pools', {}) if isinstance(state.get('commercial_pools', {}), dict) else {}
+        self.close_subject = state.get('close_subject', '')
         self.product_size = normalize_size(state.get('product_size'))
         self.render_style = normalize_style(state.get('render_style'))
         self.pools = {d['key']: list(d['options']) for d in profile['dimensions']}
@@ -89,7 +90,7 @@ class SceneModel:
             self.values[key] = selected
 
     def generate(self):
-        return make_scene_prompt(self.active_profile(), self.values, self.extra, self.hidden, self.render_style, self.product_size)
+        return make_scene_prompt(self.active_profile(), dict(self.values, close_subject=self.close_subject), self.extra, self.hidden, self.render_style, self.product_size)
 
     def regenerate(self):
         self.prompt = self.rendered = self.generate()
@@ -117,5 +118,5 @@ class SceneModel:
             self.bags[key] = []
 
     def state(self):
-        return {key: getattr(self, key) for key in ('values', 'locks', 'hidden', 'render_style', 'product_size', 'commercial_pools', 'closeup_pools', 'pools', 'bags', 'extra', 'prompt', 'rendered')}
+        return {key: getattr(self, key) for key in ('values', 'locks', 'hidden', 'render_style', 'product_size', 'close_subject', 'commercial_pools', 'closeup_pools', 'pools', 'bags', 'extra', 'prompt', 'rendered')}
 

@@ -13,9 +13,9 @@ def make_scene_prompt(profile, values, extra, hidden=None, render_style=None, pr
     if any(not values[k].strip() for k in [d['key'] for d in profile['dimensions'] if d['key'] not in hidden]):
         raise ValueError('请填写全部场景参数。')
     if render_style == '近景摄影':
-        from scene_tool.config.closeup import REQUIREMENTS
+        from scene_tool.config.closeup import closeup_brief
         from scene_tool.config.photography import DECORATION_REQUIREMENTS
-        lines = [REQUIREMENTS, DECORATION_REQUIREMENTS, size_instructions(product_size), '场景：' + profile['name'], profile['rules']]
+        lines = [closeup_brief(values.get('close_subject')), '拍摄地点：' + profile['name']]
         for d in profile['dimensions']:
             key = d['key']
             if key not in hidden:

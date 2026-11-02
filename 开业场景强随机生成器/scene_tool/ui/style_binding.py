@@ -21,7 +21,7 @@ def sync_style(view, replace=False):
         if key in pools:
             pool = pools[key]
             view.combos[key].configure(values=pool)
-            if (changed or replace or not view.values[key].get()) and view.values[key].get() not in pool:
+            if (changed or replace or not view.values[key].get() or (style == '近景摄影' and not view.ready and not view.locks[key].get())) and view.values[key].get() not in pool:
                 view.values[key].set(view.engine.rng.choice(pool))
     sync_opening_camera(view)
     if changed and (previous_context is None or previous_context[0] != context[0]) and not (previous_context is None and view.copy_locked.get()):

@@ -21,8 +21,8 @@ def make_prompt(values, industry='美业', constraints=DEFAULT_CONSTRAINTS,
     if missing:
         raise ValueError('请填写：' + '、'.join(missing))
     if render_style == '近景摄影':
-        from scene_tool.config.closeup import REQUIREMENTS
-        lines = [REQUIREMENTS, DECORATION_REQUIREMENTS, size_instructions(product_size), f'场地行业：{industry}']
+        from scene_tool.config.closeup import closeup_brief
+        lines = [closeup_brief(values.get('close_subject'))]
         if constraints != DEFAULT_CONSTRAINTS:
             lines.append(constraints)
         for key, label in active_dimensions:
