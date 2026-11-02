@@ -1,7 +1,8 @@
 """Switchable image intent; the buyer-photo template remains the default."""
 BUYER = '真实买家秀'
 COMMERCIAL = '商业效果图'
-RENDER_STYLES = (BUYER, COMMERCIAL)
+from scene_tool.config.closeup import CLOSEUP
+RENDER_STYLES = (BUYER, COMMERCIAL, CLOSEUP)
 
 COMMERCIAL_REQUIREMENTS = '''商业效果图要求：生成可用于商品主图和商业展示的高品质写实场景效果图，画面经过专业精修，主体突出、构图严谨、边缘清晰，呈现真实可信的板材、气球与空间关系。
 严格采用本轮指定的75—150mm等效长焦与正面、左前方或右前方视角；正面时成像平面与板面平行，侧面时保留合理侧向透视，不强制转回正面。相机保持水平，后退至完整容纳装置；室内也优先保持所选焦段，空间不足时调整装置与机位，不穿墙、不裁切、不改用广角。

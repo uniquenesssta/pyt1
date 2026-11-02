@@ -15,6 +15,7 @@ class SceneModel:
     def __init__(self, profile, state=None, rng=None):
         self.profile, self.rng = profile, rng or random.SystemRandom()
         state = state if isinstance(state, dict) else {}
+        self.closeup_pools = state.get('closeup_pools', {})
         self.commercial_pools = state.get('commercial_pools', {}) if isinstance(state.get('commercial_pools', {}), dict) else {}
         self.product_size = normalize_size(state.get('product_size'))
         self.render_style = normalize_style(state.get('render_style'))
@@ -54,6 +55,8 @@ class SceneModel:
         return scene_profile(self.profile, self.render_style)
 
     def active_pools(self):
+        if self.render_style == '近景摄影':
+            return {d['key']: list(self.closeup_pools.get(d['key'], d['options'])) for d in self.active_profile()['dimensions']}
         if self.render_style != COMMERCIAL:
             return self.pools
         pools = {d['key']: list(d['options']) for d in self.active_profile()['dimensions']}
@@ -70,7 +73,7 @@ class SceneModel:
             if key == 'camera':
                 self.values[key] = draw_camera(self.camera_pool(), self.values[key], self.locks[key], self.bags, self.rng)
                 continue
-            if self.render_style == COMMERCIAL:
+            if self.render_style in (COMMERCIAL, '近景摄影'):
                 self.values[key] = draw_industry(self, key, pool, self.values[key], self.locks[key], '通用', self.profile['environment'], self.render_style)
                 continue
             if self.locks[key] and self.values[key]:
@@ -114,5 +117,5 @@ class SceneModel:
             self.bags[key] = []
 
     def state(self):
-        return {key: getattr(self, key) for key in ('values', 'locks', 'hidden', 'render_style', 'product_size', 'commercial_pools', 'pools', 'bags', 'extra', 'prompt', 'rendered')}
+        return {key: getattr(self, key) for key in ('values', 'locks', 'hidden', 'render_style', 'product_size', 'commercial_pools', 'closeup_pools', 'pools', 'bags', 'extra', 'prompt', 'rendered')}
 

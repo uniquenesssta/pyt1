@@ -12,6 +12,18 @@ def make_scene_prompt(profile, values, extra, hidden=None, render_style=None, pr
     values = styled_values(values, render_style)
     if any(not values[k].strip() for k in [d['key'] for d in profile['dimensions'] if d['key'] not in hidden]):
         raise ValueError('请填写全部场景参数。')
+    if render_style == '近景摄影':
+        from scene_tool.config.closeup import REQUIREMENTS
+        from scene_tool.config.photography import DECORATION_REQUIREMENTS
+        lines = [REQUIREMENTS, DECORATION_REQUIREMENTS, size_instructions(product_size), '场景：' + profile['name'], profile['rules']]
+        for d in profile['dimensions']:
+            key = d['key']
+            if key not in hidden:
+                value = values[key].split('；')[0] if key not in ('camera', 'ratio') else values[key]
+                lines.append(d['label'] + '：' + value)
+        if extra.strip():
+            lines.extend(['补充要求：', extra.strip()])
+        return '\n'.join(lines)
     photo = photo_requirements(values.get("camera", ""), "camera" in hidden, render_style).replace('开业现场照片', '现场照片').replace('店内现有灯光', '现场现有灯光')
     lines = [photo, '', REFERENCE_RULES, '', size_instructions(product_size), '', '当前场景：' + profile['name'],
              '场景边界：' + profile['rules'],

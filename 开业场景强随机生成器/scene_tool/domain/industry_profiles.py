@@ -3,6 +3,7 @@ import json
 from functools import lru_cache
 from scene_tool.config.paths import RESOURCES
 from scene_tool.config.render_styles import COMMERCIAL
+from scene_tool.config.closeup import CLOSEUP, FOCUS, CROPS
 from scene_tool.config.defaults import DIMENSIONS
 
 COMMERCIAL_DIMENSIONS = tuple((('display_space', '商业展示空间') if k == 'city' else
@@ -14,7 +15,12 @@ COMMERCIAL_DIMENSIONS = tuple((('display_space', '商业展示空间') if k == '
 EXTRA_DIMENSIONS = (('display_space', '商业展示空间'), ('background_depth', '背景层次'))
 
 
+CLOSE_FIELDS = (('detail_focus', '近景主体'), ('detail_crop', '局部构图'))
+EXTRA_DIMENSIONS += CLOSE_FIELDS
+
 def dimensions(style):
+    if style == CLOSEUP:
+        return tuple(CLOSE_FIELDS[0] if k == 'city' else CLOSE_FIELDS[1] if k == 'address' else (k, label) for k, label in DIMENSIONS)
     return COMMERCIAL_DIMENSIONS if style == COMMERCIAL else DIMENSIONS
 
 
@@ -55,4 +61,6 @@ def industry_pools(industry, environment, style):
         result['background_depth'] = [a + '；' + b for a in ('背景近距离简洁衬托', '中景保留空间轮廓', '远景形成自然纵深', '前中后景分层')
                                       for b in ('背景低对比不抢主体', '一侧留白衬托装置', '建筑线条引导视线', '材质层次清楚不过度虚化')]
         result['lighting'] = ['柔和侧光配适度补光', '均匀明亮的商业展示光', '柔和逆侧光勾勒板材，正面补光', '自然窗光方向加柔和补光', '阴天漫射光质感，主体曝光准确', '暖色环境光配中性主体光']
+    if style == CLOSEUP:
+        result.update(detail_focus=list(FOCUS), detail_crop=list(CROPS))
     return result

@@ -20,10 +20,10 @@ def build_parameters(self, parent):
     product_size_row(results, self.product_size)
     results.result('开业类型', self.industry, None, choices=INDUSTRIES)
     for title, fields in (
-        ('环境空间', ('environment', 'architecture', 'display_space', 'background_depth') if style == COMMERCIAL else ('environment', 'architecture', 'city', 'address')),
+        ('环境空间', ('environment', 'architecture', 'display_space', 'background_depth') if style == COMMERCIAL else ('environment', 'architecture') if style == '近景摄影' else ('environment', 'architecture', 'city', 'address')),
         ('布置', ('placement', 'balloons')),
         ('板面内容', ('brand', 'logo_shape', 'logo_structure')),
-        ('拍摄', ('camera', 'lighting', 'ratio')),
+        ('拍摄', ('detail_focus', 'detail_crop', 'camera', 'lighting', 'ratio') if style == '近景摄影' else ('camera', 'lighting', 'ratio')),
     ):
         results.group(title)
         for key in fields:

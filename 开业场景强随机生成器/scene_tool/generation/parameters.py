@@ -48,7 +48,7 @@ class Randomizer:
                     self.recent[key] = [x for x in items if isinstance(x, str)][-200:]
 
     def draw(self, current=None, locked=(), strong=True, render_style=None, industry=None):
-        if render_style == '商业效果图' and industry is None:
+        if render_style in ('商业效果图', '近景摄影') and industry is None:
             industry = '通用'
         current = current or {}
         result = dict(current)

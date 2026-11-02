@@ -36,7 +36,9 @@ def edit_pool(panel):
             return
         for key, items in working.items():
             from scene_tool.config.render_styles import COMMERCIAL
-            if model.render_style == COMMERCIAL:
+            if model.render_style == '近景摄影':
+                model.closeup_pools[key] = list(dict.fromkeys(x.strip() for x in items if x.strip()))
+            elif model.render_style == COMMERCIAL:
                 model.commercial_pools[key] = list(dict.fromkeys(x.strip() for x in items if x.strip()))
             else:
                 model.set_pool(key, items)

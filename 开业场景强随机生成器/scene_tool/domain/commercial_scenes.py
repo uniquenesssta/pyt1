@@ -4,6 +4,13 @@ from scene_tool.config.render_styles import COMMERCIAL
 
 
 def scene_profile(profile, style):
+    if style == '近景摄影':
+        from scene_tool.config.closeup import FOCUS, CROPS
+        result = deepcopy(profile)
+        for index, label, options in ((3, '近景主体', FOCUS), (5, '局部构图', CROPS)):
+            result['dimensions'][index].update(label=label, options=list(options))
+        result['dimensions'][7]['label'] = '近景摄影角度'
+        return result
     if style != COMMERCIAL:
         return profile
     result = deepcopy(profile)

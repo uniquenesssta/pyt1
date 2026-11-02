@@ -20,6 +20,19 @@ def make_prompt(values, industry='美业', constraints=DEFAULT_CONSTRAINTS,
     missing = [label for key, label in active_dimensions if key not in hidden and not values.get(key, '').strip()]
     if missing:
         raise ValueError('请填写：' + '、'.join(missing))
+    if render_style == '近景摄影':
+        from scene_tool.config.closeup import REQUIREMENTS
+        lines = [REQUIREMENTS, DECORATION_REQUIREMENTS, size_instructions(product_size), f'本轮行业：{industry}', *(copy_instructions(copy) if 'copy' not in hidden else [])]
+        if constraints != DEFAULT_CONSTRAINTS:
+            lines.append(constraints)
+        for key, label in active_dimensions:
+            if key not in hidden:
+                # Full-installation layout is context, not a framing instruction.
+                value = values[key].split('；')[0] if key == 'placement' else values[key]
+                lines.append(f'{dimension_label(key, label, values)}：{value}')
+        if extra.strip():
+            lines.extend(['补充要求：', extra.strip()])
+        return '\n'.join(lines)
     lines = [photo_requirements(values.get("camera", ""), "camera" in hidden, render_style), DECORATION_REQUIREMENTS, '', size_constraints(styled_constraints(constraints, render_style), product_size).strip(), '',
              size_instructions(product_size), '', f'本轮行业：{industry.strip() or "通用"}', *(copy_instructions(copy) if 'copy' not in hidden else []), '',
              size_environment(styled_environment(environment_instructions(values), render_style), product_size) if 'environment' not in hidden else '', '', '本轮场景参数：']
