@@ -29,9 +29,10 @@ LEGACY_CAMERA_MAP = {
         (ALONG, 1), (ALONG, 2), (ALONG, 3), (CORNER, 0), (FLAT, 3), (CORNER, 2),
     ))
 }
-REQUIREMENTS = '''为【{subject}】拍摄一张可用于商品详情页的专业单反棚拍商品近景。使用干净的哑光棚拍台，画面只露产品和必要的台面。以全画幅单反配90–105mm微距镜头的成像为基准，稳定机位、低ISO，按细节厚度收光圈，让选定部位清楚可辨。
-镜头可对焦近处，但取景不等于极限微距。画面同时容纳主要细节和一处相邻结构，先看清产品，再看到表面质感，保留比例、字形、图案、配色及表面结构，不重绘、不猜测尺寸。产品原稿决定产品外观；拍摄样片只参考机位、取景和布光，不移植样片上的文字、纹样、颜色或道具。
-用可控柔光塑造材质，按实物校准白平衡和曝光，亮部不过曝，暗部有层次。边缘干净，无锐化白边、假散景或夸张HDR，不额外添加道具和装饰。'''
+REQUIREMENTS = """为【{subject}】生成商品详情页用的专业单反棚拍近景（photorealistic）。干净哑光棚台，画内只留产品与必要台面。
+以全画幅单反、90–105mm微距镜头成像为参考；取入主要细节和一处相邻结构，不做极限放大。机位、裁切和对焦按本轮参数执行。
+产品原稿决定形状、数量、图文、配色和比例；实物材质图决定表面外观。拍摄样片只参考机位与布光，不移植其图案或道具。
+可控棚灯，曝光与色彩自然，保留图文；不额外强化纹理、锐化白边或添加假散景。"""
 
 
 def closeup_brief(subject, material=None, camera=None):
@@ -39,5 +40,5 @@ def closeup_brief(subject, material=None, camera=None):
     subject = (subject or '').strip()
     layout = ''
     if any(word in subject for word in ('对联', '春联', '联幅')):
-        layout = '\n对联取景：保留原稿的字形、字距、边饰和相对大小，按本轮镜头取景，让画内可见的笔画、边饰或边角保持原有关系。若参考中确有多幅，可让另一幅仅从画边带入；单幅绝不复制。不把一个完整大字居中放满，不擅自增加金纹、龙纹或文字。'
+        layout = '\n对联取景：按原稿保留字形、字距及边饰；参考确有多幅时才带入相邻联幅，单幅绝不复制。不把完整大字居中放满。'
     return REQUIREMENTS.format(subject=(subject or '').strip() or '参考图中的主体') + '\n' + description + layout + (f'\n本轮棚拍镜头：{camera_family(camera)}。' if camera_family(camera) else '')

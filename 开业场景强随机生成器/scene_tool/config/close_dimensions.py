@@ -8,7 +8,7 @@ from scene_tool.config import highlight_position as position, surface_reflection
 FIELDS = {
     reflection.KEY: (reflection.LABEL, reflection.OPTIONS),
     'detail_edge': ('邻接边缘', ('让相邻元素停在画边', '保留主体边缘轮廓', '只露出少量相邻区域', '沿主体外缘留出少量空间')),
-    'detail_layers': ('前后层次', ('只从产品间隙或画边露出少量哑光台面', '相邻部件形成前后层次', '用原有边界区分相邻区域，不垫高主体', '压低背景对比突出局部')),
+    'detail_layers': ('前后层次', ('只从产品间隙或画边露出少量哑光台面', '只呈现已有部件的前后关系，不增加叠层', '用原有边界区分相邻区域，不垫高主体', '压低背景对比突出局部')),
     'detail_space': ('局部留白', ('沿原有留白收边', '主体一侧多留少量空间', '四周紧凑但不切断识别点', '留出局部轮廓的呼吸空间')),
     'detail_focus': ('细节主体', FOCUS),
     'detail_surface': ('材质表现', SURFACE_OPTIONS),
@@ -23,10 +23,18 @@ for key in LEGACY_FIELDS:
     FIELDS[key] = (FIELDS[key][0], choices(key))
 
 
+def normalize_value(key, value):
+    if key == 'detail_layers' and value == '相邻部件形成前后层次':
+        return '只呈现已有部件的前后关系，不增加叠层'
+    if key == 'detail_surface':
+        return OLD_SURFACES.get(value, value)
+    return value
+
+
 def upgrade_options(key, items):
     # Older editors saved complete default lists, even when only one field was edited.
-    if key == 'detail_surface':
-        return list(dict.fromkeys(OLD_SURFACES.get(x, x) for x in items))
+    if key in ('detail_layers', 'detail_surface'):
+        return list(dict.fromkeys(normalize_value(key, x) for x in items))
     if key == reflection.KEY:
         return list(dict.fromkeys(reflection.normalize(x) for x in items))
     if key == position.KEY and any(x in position.LEGACY for x in items):

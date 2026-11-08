@@ -10,6 +10,9 @@ def draw_industry(engine, key, pool, previous, locked, industry, environment, st
     bag[:] = [x for x in bag if x in pool]
     if not strong or not any(x != previous for x in bag):
         bag[:] = pool
-    selected = engine.rng.choice([x for x in bag if x != previous] or bag)
+    candidates = [x for x in bag if x != previous] or bag
+    family = (previous or '').split('；', 1)[0]
+    different = [x for x in candidates if x.split('；', 1)[0] != family]
+    selected = engine.rng.choice(different or candidates)
     bag.remove(selected)
     return selected

@@ -20,7 +20,7 @@ def styled_values(values, style):
 
 def styled_constraints(constraints, style):
     if style == COMMERCIAL and constraints == DEFAULT_CONSTRAINTS:
-        return constraints.split('生活化细节：')[0].rstrip().replace('开业文案和地址', '开业文案').replace('品牌和地址', '品牌').replace('根据本轮建筑和摆位提供足够的实际空间；门廊、树荫与街道的明暗差应符合当前天气和时段，不把阴影处照成均匀棚拍光。', '根据商业展示空间、背景层次和装置构图布置环境，光线按本轮商业灯光执行。') + '\n\n商业画面整理：主体周围保持整洁，默认不安排路人和车辆遮挡或干扰装置；保留自然真实的场所背景。'
+        return constraints.split('生活化细节：')[0].rstrip().replace('开业文案和地址', '开业文案') + '\n商业画面整理：默认无人，保持真实场所背景，布光按本轮商业光线执行。'
     return constraints
 
 

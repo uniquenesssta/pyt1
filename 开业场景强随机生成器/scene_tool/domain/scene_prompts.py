@@ -1,6 +1,7 @@
 """Reference preservation and scene-specific prompt composition."""
+from scene_tool.config.prompt_contract import RESOLVED_PARAMETERS
 from scene_tool.config.photography import photo_requirements
-from scene_tool.config.material_surface import OLD_SURFACES
+from scene_tool.config.close_dimensions import normalize_value
 from scene_tool.domain.visibility import hidden_keys
 from scene_tool.config import highlight_position as position, surface_reflection as reflection
 from scene_tool.config.product_size import FOLLOW_REFERENCE
@@ -24,13 +25,13 @@ def make_scene_prompt(profile, values, extra, hidden=None, render_style=None, pr
             key = d['key']
             if key not in hidden:
                 value = values[key]
-                if d.get('close_key', key) == 'detail_surface':
-                    value = OLD_SURFACES.get(value, value)
-                elif key == reflection.KEY:
+                value = normalize_value(d.get('close_key', key), value)
+                if key == reflection.KEY:
                     value = reflection.prompt_value(value)
                 elif d.get('close_key', key) == position.KEY:
                     value = position.prompt_value(value)
                 lines.append(d['label'] + '：' + value)
+        lines.append(RESOLVED_PARAMETERS)
         if extra.strip():
             lines.extend(['补充要求：', extra.strip()])
         return '\n'.join(lines)
@@ -42,6 +43,7 @@ def make_scene_prompt(profile, values, extra, hidden=None, render_style=None, pr
     if profile['environment'] == '室内':
         lines.insert(-2, '全部拍摄发生在室内，不出现室内车辆；时段只影响现有室内光线和窗外。')
     lines += [d['label'] + '：' + values[d['key']] for d in profile['dimensions'] if d['key'] not in hidden]
+    lines.append(RESOLVED_PARAMETERS)
     if extra.strip():
         lines += ['', '补充要求：', extra.strip()]
     return '\n'.join(lines)

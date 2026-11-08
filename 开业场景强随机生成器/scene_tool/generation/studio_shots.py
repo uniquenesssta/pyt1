@@ -1,6 +1,7 @@
 """Draw the family first, then sample only compatible visible field values."""
 from scene_tool.config import highlight_position as pos, surface_reflection as surf
 from scene_tool.config.closeup import LEGACY_CAMERA_MAP
+from scene_tool.config.close_dimensions import normalize_value
 from scene_tool.config.studio_shots import FLAT, SHOTS, SHOT_KEYS, camera_family, choices
 
 
@@ -27,7 +28,7 @@ def draw_shot(current, locked, pools, rng, bags, *, keep=False, strong=True):
     Unclassified custom text is an explicit user choice, available across families.
     """
     locked = set(locked)
-    current = dict(current)
+    current = {k: normalize_value(k, v) for k, v in current.items()}
     current['camera'] = LEGACY_CAMERA_MAP.get(current.get('camera'), current.get('camera'))
     old_reflection = current.get(surf.KEY)
     current[surf.KEY] = surf.normalize(old_reflection)

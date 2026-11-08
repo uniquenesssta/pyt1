@@ -25,7 +25,7 @@ def restore(self):
         return
     try:
         legacy = tuple(load_json(RESOURCES / name)['constraints']
-                       for name in ('legacy_prompt_v1.json', 'legacy_prompt_v2.json'))
+                       for name in ('legacy_prompt_v1.json', 'legacy_prompt_v2.json', 'legacy_prompt_v3.json'))
         state = migrate_prompt_state(load_session(path), legacy)
         for key, value in state.get('values', {}).items():
             if key in self.values and isinstance(value, str):

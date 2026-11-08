@@ -24,8 +24,9 @@ def scene_profile(profile, style):
     for index in (0, 1, 3, 4):
         ds[index]['options'] = [value + '；商业展示整理，背景简洁、材质真实，不抢装置主体' for value in ds[index]['options']]
     ds[2]['label'] = '商业装置布局'
-    ds[2]['options'] = [value + '；' + layout for value in profile['dimensions'][2]['options'][:8]
-                         for layout in ('主体居中，左右均衡', '主体偏左，右侧留白', '主体偏右，左侧留白', '前后分层，主体完整')]
+    # Physical placement comes from the full scene pool. Frame position belongs
+    # only to the composition field, avoiding left/centre/right contradictions.
+    ds[2]['options'] = list(profile['dimensions'][2]['options'])
     ds[5]['label'] = '主体展示构图'
     ds[5]['options'] = [a + '；' + b + '；默认无人，不添加行人和车辆'
                        for a in ('主体居中', '主体位于左侧三分线', '主体位于右侧三分线', '主体占画面主要区域')

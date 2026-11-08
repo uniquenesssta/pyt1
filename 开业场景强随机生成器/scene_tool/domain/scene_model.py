@@ -3,6 +3,7 @@ import random
 from scene_tool.config import surface_reflection as reflection
 from scene_tool.domain.camera_modes import camera_pool, draw_camera
 from scene_tool.domain.commercial_scenes import scene_profile
+from scene_tool.domain.commercial_migration import upgrade_commercial_state
 from scene_tool.config.render_styles import COMMERCIAL
 from scene_tool.generation.industry import draw_industry
 from scene_tool.config.render_styles import normalize_style
@@ -15,7 +16,7 @@ from scene_tool.domain.scene_prompts import make_scene_prompt
 class SceneModel:
     def __init__(self, profile, state=None, rng=None):
         self.profile, self.rng = profile, rng or random.SystemRandom()
-        state = state if isinstance(state, dict) else {}
+        state = upgrade_commercial_state(profile, state if isinstance(state, dict) else {})
         self.closeup_pools = state.get('closeup_pools', {})
         self.commercial_pools = state.get('commercial_pools', {}) if isinstance(state.get('commercial_pools', {}), dict) else {}
         self.close_subject = state.get('close_subject', '')
@@ -56,7 +57,7 @@ class SceneModel:
         self.undo = None
         if not all(self.values.values()):
             self.draw()
-        if not self.prompt:
+        if not self.prompt or self.prompt == self.rendered:
             self.regenerate()
 
     def active_profile(self):

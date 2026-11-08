@@ -1,9 +1,10 @@
+from scene_tool.config.prompt_contract import RESOLVED_PARAMETERS
 from scene_tool.config.defaults import DIMENSIONS, DEFAULT_CONSTRAINTS
 from scene_tool.domain.industry_profiles import dimensions
 from scene_tool.config.render_styles import normalize_style
 from scene_tool.config.photography import photo_requirements, DECORATION_REQUIREMENTS
 from scene_tool.domain.copy_layout import copy_instructions
-from scene_tool.config.material_surface import OLD_SURFACES
+from scene_tool.config.close_dimensions import normalize_value
 from scene_tool.domain.visibility import hidden_keys
 from scene_tool.config import highlight_position as position, surface_reflection as reflection
 from scene_tool.config.product_size import FIXED_LARGE
@@ -33,13 +34,13 @@ def make_prompt(values, industry='美业', constraints=DEFAULT_CONSTRAINTS,
             if key not in hidden:
                 # Full-installation layout is context, not a framing instruction.
                 value = values[key].split('；')[0] if key == 'placement' else values[key]
-                if key == 'detail_surface':
-                    value = OLD_SURFACES.get(value, value)
-                elif key == reflection.KEY:
+                value = normalize_value(key, value)
+                if key == reflection.KEY:
                     value = reflection.prompt_value(value)
                 elif key == position.KEY:
                     value = position.prompt_value(value)
                 lines.append(f'{dimension_label(key, label, values)}：{value}')
+        lines.append(RESOLVED_PARAMETERS)
         if extra.strip():
             lines.extend(['补充要求：', extra.strip()])
         return '\n'.join(lines)
@@ -48,6 +49,7 @@ def make_prompt(values, industry='美业', constraints=DEFAULT_CONSTRAINTS,
              size_environment(styled_environment(environment_instructions(values), render_style), product_size) if 'environment' not in hidden else '', '', '本轮场景参数：']
     values = scene_parameters(values)
     lines.extend(f'{dimension_label(key, label, values)}：{values[key].strip()}' for key, label in active_dimensions if key not in hidden)
+    lines.append(RESOLVED_PARAMETERS)
     if extra.strip():
         lines.extend(['', '补充要求：', extra.strip()])
     return '\n'.join(lines)
