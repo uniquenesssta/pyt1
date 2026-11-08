@@ -1,8 +1,10 @@
+from scene_tool.ui.close_auxiliary import open_auxiliary
 import tkinter as tk
 from scene_tool.config import surface_reflection as reflection
 from tkinter import ttk
 from scene_tool.ui.components.product_size import product_size_row
 from scene_tool.ui.components.results import ResultList
+from scene_tool.ui.variant_binding import open_scene_variants
 from scene_tool.ui.visibility_binding import change_scene
 from scene_tool.ui.components.workbench import workbench, actions
 from scene_tool.ui.components.prompt_editor import prompt_editor
@@ -58,7 +60,8 @@ def build_panel(panel):
     panel.sync_status = tk.StringVar(value='已同步')
     ttk.Label(header, textvariable=panel.sync_status, foreground='#737b8a').pack(side='right')
     menu = actions(footer, panel.randomize, panel.copy, panel.unlock, panel.update_prompt,
-            panel.export, panel.reset, panel.undo_reset)
+            panel.export, panel.reset, panel.undo_reset, lambda: open_scene_variants(panel))
+    menu.add_command(label='近景辅助项', command=lambda: open_auxiliary(panel, scene=True))
     menu.add_separator()
     menu.add_command(label='编辑本场景参数池', command=panel.edit_pools)
 

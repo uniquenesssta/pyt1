@@ -15,7 +15,8 @@ def sync_opening_studio(view, fixed_camera=False, fixed_key=None):
     for key, value in values.items():
         if view.values[key].get() != value:
             view.values[key].set(value)
-        view.combos[key].configure(values=ANGLES if key == 'camera' else options[key])
+        if key in view.combos:
+            view.combos[key].configure(values=ANGLES if key == 'camera' else options[key])
     view.studio_values = dict(values)
     view.studio_camera = values['camera']
 

@@ -1,0 +1,1 @@
+"""Independent, reviewable prompt alternatives."""

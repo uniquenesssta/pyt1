@@ -1,7 +1,7 @@
 """Reference preservation and scene-specific prompt composition."""
 from scene_tool.config.prompt_contract import RESOLVED_PARAMETERS
 from scene_tool.config.photography import photo_requirements
-from scene_tool.config.close_dimensions import normalize_value
+from scene_tool.domain.close_output import close_lines
 from scene_tool.domain.visibility import hidden_keys
 from scene_tool.config import highlight_position as position, surface_reflection as reflection
 from scene_tool.config.product_size import FOLLOW_REFERENCE
@@ -21,16 +21,8 @@ def make_scene_prompt(profile, values, extra, hidden=None, render_style=None, pr
         from scene_tool.config.closeup import closeup_brief
         from scene_tool.config.photography import DECORATION_REQUIREMENTS
         lines = [closeup_brief(values.get('close_subject'), values.get('close_material'), None if 'camera' in hidden else values.get('camera'))]
-        for d in profile['dimensions']:
-            key = d['key']
-            if key not in hidden:
-                value = values[key]
-                value = normalize_value(d.get('close_key', key), value)
-                if key == reflection.KEY:
-                    value = reflection.prompt_value(value)
-                elif d.get('close_key', key) == position.KEY:
-                    value = position.prompt_value(value)
-                lines.append(d['label'] + '：' + value)
+        lines.extend(close_lines(((d['key'],d['label'],d.get('close_key',d['key']))
+                                  for d in profile['dimensions']), values, hidden))
         lines.append(RESOLVED_PARAMETERS)
         if extra.strip():
             lines.extend(['补充要求：', extra.strip()])

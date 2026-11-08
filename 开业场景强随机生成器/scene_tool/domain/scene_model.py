@@ -104,11 +104,13 @@ class SceneModel:
         self.values.update({k:values[v] for k,v in mapping.items()})
         return {k:choices[v] for k,v in mapping.items()}
 
-    def draw(self):
+    def draw(self, *, preserve_locked=False):
         if self.render_style == '近景摄影':
             self.studio_draw()
             return
         for key, pool in self.active_pools().items():
+            if preserve_locked and self.locks[key] and self.values[key].strip():
+                continue
             if key == 'camera':
                 self.values[key] = draw_camera(self.camera_pool(), self.values[key], self.locks[key], self.bags, self.rng)
                 continue

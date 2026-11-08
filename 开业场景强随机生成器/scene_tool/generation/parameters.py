@@ -59,7 +59,7 @@ class Randomizer:
         pools['camera'] = ANGLES
         return draw_shot(current, locked, pools, self.rng, self.bags, keep=keep, strong=strong)
 
-    def draw(self, current=None, locked=(), strong=True, render_style=None, industry=None):
+    def draw(self, current=None, locked=(), strong=True, render_style=None, industry=None, *, preserve_locked=False):
         if render_style in ('商业效果图', '近景摄影') and industry is None:
             industry = '通用'
         current = current or {}
@@ -69,6 +69,8 @@ class Randomizer:
             result.update(sampled)
             return result
         for key in ['environment'] + [k for k, _ in dimensions(render_style) if k != 'environment']:
+            if preserve_locked and key in locked and current.get(key, '').strip():
+                continue
             scoped = self.scoped_pools(industry, result.get('environment'), render_style) if industry is not None else {}
             if key in scoped:
                 result[key] = draw_industry(self, key, scoped[key], current.get(key), key in locked, industry, result.get('environment'), render_style, strong)

@@ -16,7 +16,7 @@ def open_settings(view):
     industry = tk.StringVar(value=view.industry.get())
     flags = [(label, variable, tk.BooleanVar(value=variable.get())) for label, variable in (
         ('强随机轮换', view.strong), ('随机开业文案', view.copy_random),
-        ('品牌和街道随机组合', view.generated_names))]
+        ('街道随机组合（买家秀）', view.generated_names))]
     ttk.Label(body, text='行业（仅影响开业提示词）').pack(anchor='w')
     ttk.Combobox(body, textvariable=industry, values=INDUSTRIES).pack(fill='x', pady=8)
     for label, _, temporary in flags:
@@ -35,3 +35,4 @@ def open_settings(view):
         view.save()
         dialog.destroy()
     ttk.Button(body, text='保存设置', command=save).pack(pady=(12, 0))
+

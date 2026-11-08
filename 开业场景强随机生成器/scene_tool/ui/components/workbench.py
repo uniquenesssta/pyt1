@@ -15,8 +15,10 @@ def workbench(parent):
     return left, right, footer
 
 
-def actions(footer, randomize, copy, unlock, update, export, reset, undo):
+def actions(footer, randomize, copy, unlock, update, export, reset, undo, variants=None):
     ttk.Button(footer, text='重新随机', style='Primary.TButton', command=randomize).pack(side='left')
+    if variants:
+        ttk.Button(footer, text='生成4套方案', command=variants).pack(side='left', padx=(8, 0))
     ttk.Button(footer, text='全部解锁', command=unlock).pack(side='left', padx=8)
     ttk.Button(footer, text='复制提示词', style='Primary.TButton', command=copy).pack(side='right')
     more = ttk.Menubutton(footer, text='更多操作')
@@ -36,3 +38,4 @@ class MenuAction:
 
     def configure(self, **options):
         self.menu.entryconfigure(self.index, **options)
+

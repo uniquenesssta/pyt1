@@ -1,7 +1,9 @@
+from scene_tool.ui.close_auxiliary import open_auxiliary
 from tkinter import ttk
 from scene_tool.ui.parameter_panel import build_parameters
 from scene_tool.ui.prompt_panel import build_prompt_panel
 from scene_tool.ui.components.workbench import workbench, actions, MenuAction
+from scene_tool.ui.variant_binding import open_opening_variants
 from scene_tool.ui.settings_dialog import open_settings
 
 
@@ -15,9 +17,11 @@ def build_ui(self):
     build_prompt_panel(self, right)
     menu = actions(footer, self.randomize, self.copy_prompt, self.unlock,
                    lambda: self.refresh(force=True), self.export,
-                   self.prompt_reset.reset, self.prompt_reset.undo)
+                   self.prompt_reset.reset, self.prompt_reset.undo, lambda: open_opening_variants(self))
     self.undo_reset_button = MenuAction(menu, 3)
     self.undo_reset_button.configure(state='disabled')
+    menu.add_command(label='近景辅助项', command=lambda: open_auxiliary(self))
     menu.add_separator()
     menu.add_command(label='开业场景设置', command=lambda: open_settings(self))
     menu.add_command(label='编辑参数池', command=self.edit_pools)
+

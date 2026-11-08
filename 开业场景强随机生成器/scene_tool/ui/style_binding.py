@@ -3,7 +3,7 @@ from scene_tool.domain.industry_profiles import industry_pools, dimensions, indu
 from scene_tool.ui.camera_binding import sync_opening_camera
 
 
-def sync_style(view, replace=False):
+def sync_style(view, replace=False, *, preserve_values=False):
     style, industry = view.render_style.get(), view.industry.get()
     environment = view.values['environment'].get()
     if getattr(view, 'parameter_style', style) != style:
@@ -25,10 +25,10 @@ def sync_style(view, replace=False):
         if key in pools:
             pool = pools[key]
             view.combos[key].configure(values=pool)
-            if (changed or replace or not view.values[key].get() or (style == '近景摄影' and not view.ready and not view.locks[key].get())) and view.values[key].get() not in pool:
+            if not preserve_values and (changed or replace or not view.values[key].get() or (style == '近景摄影' and not view.ready and not view.locks[key].get())) and view.values[key].get() not in pool:
                 view.values[key].set(view.engine.rng.choice(pool))
     sync_opening_camera(view)
-    if changed and (previous_context is None or previous_context[0] != context[0]) and not (previous_context is None and view.copy_locked.get()):
+    if not preserve_values and changed and (previous_context is None or previous_context[0] != context[0]) and not (previous_context is None and view.copy_locked.get()):
         view.copyline.set(view.copy_engine.draw(view.copyline.get(), True, False, industry))
 
 

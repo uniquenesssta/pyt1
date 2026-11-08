@@ -4,7 +4,7 @@ from scene_tool.domain.industry_profiles import dimensions
 from scene_tool.config.render_styles import normalize_style
 from scene_tool.config.photography import photo_requirements, DECORATION_REQUIREMENTS
 from scene_tool.domain.copy_layout import copy_instructions
-from scene_tool.config.close_dimensions import normalize_value
+from scene_tool.domain.close_output import close_lines
 from scene_tool.domain.visibility import hidden_keys
 from scene_tool.config import highlight_position as position, surface_reflection as reflection
 from scene_tool.config.product_size import FIXED_LARGE
@@ -30,16 +30,7 @@ def make_prompt(values, industry='美业', constraints=DEFAULT_CONSTRAINTS,
         lines = [closeup_brief(values.get('close_subject'), values.get('close_material'), None if 'camera' in hidden else values.get('camera'))]
         if constraints != DEFAULT_CONSTRAINTS:
             lines.append(constraints)
-        for key, label in active_dimensions:
-            if key not in hidden:
-                # Full-installation layout is context, not a framing instruction.
-                value = values[key].split('；')[0] if key == 'placement' else values[key]
-                value = normalize_value(key, value)
-                if key == reflection.KEY:
-                    value = reflection.prompt_value(value)
-                elif key == position.KEY:
-                    value = position.prompt_value(value)
-                lines.append(f'{dimension_label(key, label, values)}：{value}')
+        lines.extend(close_lines(((k,label,k) for k,label in active_dimensions), values, hidden))
         lines.append(RESOLVED_PARAMETERS)
         if extra.strip():
             lines.extend(['补充要求：', extra.strip()])
