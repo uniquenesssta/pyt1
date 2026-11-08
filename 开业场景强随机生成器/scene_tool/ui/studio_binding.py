@@ -4,9 +4,11 @@ from scene_tool.config.closeup import ANGLES, CLOSEUP
 from scene_tool.generation.studio_shots import ShotConflict
 
 
-def sync_opening_studio(view, fixed_camera=False, fixed_key=None):
+def sync_opening_studio(view, fixed_camera=False, fixed_key=None, preserve_values=False):
     current = view.current()
     locks = {k for k, var in view.locks.items() if var.get()}
+    if preserve_values:
+        locks.update(k for k,v in current.items() if v)
     if fixed_camera:
         locks.add('camera')
     if fixed_key:
@@ -21,8 +23,8 @@ def sync_opening_studio(view, fixed_camera=False, fixed_key=None):
     view.studio_camera = values['camera']
 
 
-def sync_scene_studio(panel, fixed_camera=False, fixed_key=None):
-    options = panel.model.studio_draw(keep=True, fixed_camera=fixed_camera, fixed_key=fixed_key)
+def sync_scene_studio(panel, fixed_camera=False, fixed_key=None, preserve_values=False):
+    options = panel.model.studio_draw(keep=True, fixed_camera=fixed_camera, fixed_key=fixed_key, preserve_values=preserve_values)
     for key, value in panel.model.values.items():
         if panel.values[key].get() != value:
             panel.values[key].set(value)

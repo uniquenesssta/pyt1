@@ -1,5 +1,6 @@
 """Independent scene state, shuffle bags, editable prompts and reset snapshots."""
 import random
+from scene_tool.config.random_strategy import normalize as normalize_strategy
 from scene_tool.config import surface_reflection as reflection
 from scene_tool.domain.camera_modes import camera_pool, draw_camera
 from scene_tool.domain.commercial_scenes import scene_profile
@@ -17,6 +18,9 @@ class SceneModel:
     def __init__(self, profile, state=None, rng=None):
         self.profile, self.rng = profile, rng or random.SystemRandom()
         state = upgrade_commercial_state(profile, state if isinstance(state, dict) else {})
+        self.random_strategy = normalize_strategy(state.get('random_strategy'))
+        step = state.get('strategy_step', 0)
+        self.strategy_step = step if type(step) is int and step >= 0 else 0
         self.closeup_pools = state.get('closeup_pools', {})
         self.commercial_pools = state.get('commercial_pools', {}) if isinstance(state.get('commercial_pools', {}), dict) else {}
         self.close_subject = state.get('close_subject', '')
@@ -78,7 +82,7 @@ class SceneModel:
     def camera_pool(self):
         return camera_pool(self.pools['camera'], self.profile['environment'], self.render_style)
 
-    def studio_draw(self, *, keep=False, fixed_camera=False, fixed_key=None):
+    def studio_draw(self, *, keep=False, fixed_camera=False, fixed_key=None, preserve_values=False):
         from scene_tool.generation.studio_shots import draw_shot
         dims = self.active_profile()['dimensions']
         mapping = {d['key']:d.get('close_key', d['key']) for d in dims}
@@ -95,6 +99,8 @@ class SceneModel:
                 locks.discard(mapping[key])
         if fixed_camera:
             locks.add('camera')
+        if preserve_values:
+            locks.update(mapping[k] for k,v in self.values.items() if v and k in mapping)
         if fixed_key:
             locks.add(mapping[fixed_key])
         values, choices = draw_shot({v:self.values.get(k, '') for k,v in mapping.items()}, locks, pools,
@@ -158,5 +164,5 @@ class SceneModel:
             self.bags[key] = []
 
     def state(self):
-        return {key: getattr(self, key) for key in ('values', 'locks', 'hidden', 'render_style', 'product_size', 'close_subject', 'close_material', 'commercial_pools', 'closeup_pools', 'pools', 'bags', 'extra', 'prompt', 'rendered')}
+        return {key: getattr(self, key) for key in ('random_strategy', 'strategy_step', 'values', 'locks', 'hidden', 'render_style', 'product_size', 'close_subject', 'close_material', 'commercial_pools', 'closeup_pools', 'pools', 'bags', 'extra', 'prompt', 'rendered')}
 

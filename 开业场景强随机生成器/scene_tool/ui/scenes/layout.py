@@ -1,4 +1,3 @@
-from scene_tool.ui.close_auxiliary import open_auxiliary
 import tkinter as tk
 from scene_tool.config import surface_reflection as reflection
 from tkinter import ttk
@@ -25,6 +24,9 @@ def build_panel(panel):
     panel.close_material = tk.StringVar(value=panel.model.close_material)
     panel.material_row_index = results.next_row
     panel.material_row = results.result('自定义材质', panel.close_material, None).master
+    from scene_tool.ui.material_presets import material_preset_row
+    panel.material_preset_row_index = results.next_row
+    panel.material_preset_row = material_preset_row(results, panel, scene=True)
     panel.parameter_labels = {}
     dimensions = panel.model.active_profile()['dimensions']
     if not any(d['key'] == reflection.KEY for d in dimensions):
@@ -61,7 +63,6 @@ def build_panel(panel):
     ttk.Label(header, textvariable=panel.sync_status, foreground='#737b8a').pack(side='right')
     menu = actions(footer, panel.randomize, panel.copy, panel.unlock, panel.update_prompt,
             panel.export, panel.reset, panel.undo_reset, lambda: open_scene_variants(panel))
-    menu.add_command(label='近景辅助项', command=lambda: open_auxiliary(panel, scene=True))
     menu.add_separator()
     menu.add_command(label='编辑本场景参数池', command=panel.edit_pools)
 

@@ -11,6 +11,7 @@ def apply_theme(self):
     style.configure('TLabel', background='#f3f5fa', foreground='#24324b')
     style.configure('TCheckbutton', background='#f3f5fa')
     style.configure('TButton', padding=(12, 7))
+    style.configure('Inline.TButton', padding=(4, 1))
     if native:
         style.element_create('Accent.border', 'from', 'clam', 'Button.border')
         style.layout('Primary.TButton', [('Accent.border', {'sticky': 'nswe', 'children': [

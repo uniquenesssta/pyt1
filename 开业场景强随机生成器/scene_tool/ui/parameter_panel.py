@@ -1,4 +1,3 @@
-from scene_tool.config.close_auxiliary import KEYS as AUXILIARY
 from scene_tool.config.defaults import DIMENSIONS, INDUSTRIES
 from scene_tool.domain.industry_profiles import dimensions, industry_pools
 from scene_tool.config.render_styles import COMMERCIAL
@@ -21,6 +20,8 @@ def build_parameters(self, parent):
     if style == '近景摄影':
         results.result('拍摄对象', self.values['close_subject'], None)
         results.result('自定义材质', self.values['close_material'], None)
+        from scene_tool.ui.material_presets import material_preset_row
+        material_preset_row(results, self)
     else:
         product_size_row(results, self.product_size)
         results.result('开业类型', self.industry, None, choices=INDUSTRIES)
@@ -33,8 +34,6 @@ def build_parameters(self, parent):
     ):
         results.group(title)
         for key in fields:
-            if style == '近景摄影' and key in AUXILIARY:
-                continue
             self.parameter_labels[key] = results.result(
                 labels[key], self.values[key], self.locks[key],
                 choices=scoped.get(key, self.engine.pools.get(key, [])), readonly=key in ('environment', 'camera'),

@@ -5,6 +5,8 @@ from scene_tool.domain.industry_profiles import EXTRA_DIMENSIONS, dimensions
 from scene_tool.config.render_styles import BUYER
 from scene_tool.config.product_size import FOLLOW_REFERENCE
 from scene_tool.config.paths import DATA
+from scene_tool.config.random_strategy import PRIMARY
+from scene_tool.generation.strategy import draw_opening
 from scene_tool.generation.copywriting import CopyRandomizer
 from scene_tool.generation.parameters import Randomizer
 from scene_tool.storage.pools import load_startup_pools
@@ -38,6 +40,8 @@ class App(tk.Tk):
         self.copy_locked = tk.BooleanVar(value=False)
         self.copy_engine = CopyRandomizer()
         self.copyline = tk.StringVar(value='盛大开业 · 美好启幕')
+        self.random_strategy = tk.StringVar(value=PRIMARY)
+        self.strategy_step = 0
         self.strong = tk.BooleanVar(value=True)
         self.generated_names = tk.BooleanVar(value=True)
         self.status = tk.StringVar(value='')
@@ -91,16 +95,21 @@ class App(tk.Tk):
             self.pending = None
         self.engine.generated = self.generated_names.get()
         try:
-            values = self.engine.draw(self.current(), locked, self.strong.get(), self.render_style.get(), self.industry.get())
+            values, change_copy = draw_opening(self.engine, self.current(), locked,
+                strategy=self.random_strategy.get(), hidden={k for k,v in self.hidden.items() if v.get()},
+                strong=self.strong.get(), style=self.render_style.get(), industry=self.industry.get(),
+                step=self.strategy_step, copy_random=self.copy_random.get(), copy_locked=self.copy_locked.get())
         except ValueError as exc:
             self.status.set(str(exc))
             return
         self.ready = False
-        if self.render_style.get() != '近景摄影':
+        if self.random_strategy.get() == PRIMARY:
+            self.strategy_step += 1
+        if self.render_style.get() != '近景摄影' and change_copy:
             self.copyline.set(self.copy_engine.draw(self.copyline.get(), self.copy_random.get(), self.copy_locked.get(), self.industry.get()))
         for key, value in values.items():
             self.values[key].set(value)
-        sync_style(self)
+        sync_style(self, preserve_values=self.random_strategy.get() == PRIMARY)
         self.ready = True
         self.rendered = self.prompt.get('1.0', 'end-1c')
         self.refresh()

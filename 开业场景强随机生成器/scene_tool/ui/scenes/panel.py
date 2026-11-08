@@ -1,4 +1,6 @@
 from pathlib import Path
+from scene_tool.config.random_strategy import PRIMARY
+from scene_tool.generation.strategy import draw_scene
 from tkinter import ttk, messagebox, filedialog
 from scene_tool.ui.scenes.layout import build_panel
 from scene_tool.ui.scenes.pool_editor import edit_pool
@@ -91,7 +93,9 @@ class ScenePanel(ttk.Frame):
         if not self.allow_replace():
             return
         try:
-            self.model.draw()
+            draw_scene(self.model, self.model.strategy_step)
+            if self.model.random_strategy == PRIMARY:
+                self.model.strategy_step += 1
         except ValueError as exc:
             messagebox.showwarning('无法随机', str(exc), parent=self)
             return
@@ -100,7 +104,7 @@ class ScenePanel(ttk.Frame):
             self.values[key].set(value)
         if self.model.render_style == '近景摄影':
             from scene_tool.ui.studio_binding import sync_scene_studio
-            sync_scene_studio(self)
+            sync_scene_studio(self, preserve_values=self.model.random_strategy == PRIMARY)
         self.updating = False
         self.model.regenerate()
         self.show_prompt()

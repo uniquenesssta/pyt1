@@ -15,7 +15,7 @@ def sync_style(view, replace=False, *, preserve_values=False):
     view.industry_context = context
     if style == '近景摄影':
         from scene_tool.ui.studio_binding import sync_opening_studio
-        sync_opening_studio(view)
+        sync_opening_studio(view, preserve_values=preserve_values)
         return
     pools = view.engine.scoped_pools(industry, environment, style)
     for key, label in dimensions(style):

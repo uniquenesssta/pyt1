@@ -17,6 +17,8 @@ def sync_scene_camera(panel):
         panel.reflection_row.grid()
         panel.reflection_row.master.rowconfigure(panel.reflection_row_index, weight=1, uniform='results')
         panel.material_row.grid()
+        panel.material_preset_row.grid()
+        panel.material_preset_row.master.rowconfigure(panel.material_preset_row_index, weight=1, uniform='results')
         panel.material_row.master.rowconfigure(panel.material_row.grid_info()['row'], weight=1, uniform='results')
     else:
         panel.subject_row.grid_remove()
@@ -24,6 +26,8 @@ def sync_scene_camera(panel):
         panel.reflection_row.master.rowconfigure(panel.reflection_row_index, weight=0, uniform='')
         panel.material_row.master.rowconfigure(panel.material_row_index, weight=0, uniform='')
         panel.material_row.grid_remove()
+        panel.material_preset_row.grid_remove()
+        panel.material_preset_row.master.rowconfigure(panel.material_preset_row_index, weight=0, uniform='')
         panel.size_row.grid()
     previous_style = getattr(panel, '_camera_style', style)
     changed = previous_style != style
@@ -31,19 +35,6 @@ def sync_scene_camera(panel):
     titles = ('近景布置', '近景内容', '近景拍摄') if style == '近景摄影' else ('环境空间', '装置与人物', '拍摄')
     for label, title in zip(panel.group_labels, titles):
         label.configure(text=title)
-    from scene_tool.config.close_auxiliary import KEYS as AUXILIARY
-    from scene_tool.domain.commercial_scenes import scene_profile
-    for dimension in scene_profile(panel.model.profile, '近景摄影')['dimensions']:
-        if dimension.get('close_key') in AUXILIARY:
-            row = panel.parameter_labels[dimension['key']].master
-            if not hasattr(row, '_auxiliary_row'):
-                row._auxiliary_row = row.grid_info()['row']
-            if style == '近景摄影':
-                row.grid_remove()
-                row.master.rowconfigure(row._auxiliary_row, weight=0, uniform='')
-            else:
-                row.grid()
-                row.master.rowconfigure(row._auxiliary_row, weight=1, uniform='results')
     if style == '近景摄影':
         from scene_tool.ui.studio_binding import sync_scene_studio
         for dimension in panel.model.active_profile()['dimensions']:

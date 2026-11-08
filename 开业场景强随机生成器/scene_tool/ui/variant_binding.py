@@ -54,7 +54,7 @@ def open_scene_variants(panel):
         for key,value in panel.model.values.items(): panel.values[key].set(value)
         if panel.model.render_style=='近景摄影':
             from scene_tool.ui.studio_binding import sync_scene_studio
-            sync_scene_studio(panel)
+            sync_scene_studio(panel, preserve_values=True)
         panel.updating=False
         panel.model.prompt=panel.model.rendered=item.prompt
         panel.model.undo=None
