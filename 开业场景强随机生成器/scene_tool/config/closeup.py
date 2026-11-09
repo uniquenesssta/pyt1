@@ -1,5 +1,6 @@
 """Subject, framing and camera choices for the independent close-up style."""
 from scene_tool.config.material_surface import material_brief
+from scene_tool.config.material_finish import FOLLOW, normalize as normalize_finish
 
 CLOSEUP = '近景摄影'
 FOCUS = ('最能辨认对象的一处轮廓', '可辨识的主要细节及其相邻轮廓', '主体边缘与背景的交界', '外形转折处', '受光面与阴影的过渡', '一处具有代表性的真实细节')
@@ -32,11 +33,14 @@ LEGACY_CAMERA_MAP = {
 REQUIREMENTS = """为【{subject}】生成商品详情页用的专业单反棚拍近景（photorealistic）。干净哑光棚台，画内只留产品与必要台面。
 以全画幅单反、90–105mm微距镜头成像为参考；取入主要细节和一处相邻结构，不做极限放大。机位、裁切和对焦按本轮参数执行。
 产品原稿决定形状、数量、图文、配色和比例；实物材质图决定表面外观。拍摄样片只参考机位与布光，不移植其图案或道具。
-可控棚灯，曝光与色彩自然，保留图文；不额外强化纹理、锐化白边或添加假散景。"""
+可控棚灯，曝光与色彩自然，保留图文、真实轮廓、底色和明暗过渡；不额外强化纹理、锐化白边或添加假散景。"""
 
 
-def closeup_brief(subject, material=None, camera=None):
+def closeup_brief(subject, material=None, camera=None, finish=None):
     description = material_brief(material)
+    finish = normalize_finish(finish)
+    if finish != FOLLOW:
+        description += f' 材质表面：{finish}。'
     subject = (subject or '').strip()
     layout = ''
     if any(word in subject for word in ('对联', '春联', '联幅')):

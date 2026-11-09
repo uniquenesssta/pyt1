@@ -22,6 +22,8 @@ def build_parameters(self, parent):
         results.result('自定义材质', self.values['close_material'], None)
         from scene_tool.ui.material_presets import material_preset_row
         material_preset_row(results, self)
+        from scene_tool.ui.material_finish import material_finish_row
+        material_finish_row(results, self)
     else:
         product_size_row(results, self.product_size)
         results.result('开业类型', self.industry, None, choices=INDUSTRIES)

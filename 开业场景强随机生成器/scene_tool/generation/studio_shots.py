@@ -1,5 +1,7 @@
 """Draw the family first, then sample only compatible visible field values."""
-from scene_tool.config import highlight_position as pos, surface_reflection as surf
+from scene_tool.config import highlight_position as pos, surface_reflection as surf, material_finish
+from scene_tool.config.appearance_rules import static_keys
+from scene_tool.domain.material_finish import filter_pools, compatible as finish_compatible
 from scene_tool.config.closeup import LEGACY_CAMERA_MAP
 from scene_tool.config.close_dimensions import normalize_value
 from scene_tool.config.studio_shots import FLAT, SHOTS, SHOT_KEYS, camera_family, choices
@@ -22,7 +24,7 @@ def _pick(items, previous, rng, bags, key, strong):
     return value
 
 
-def draw_shot(current, locked, pools, rng, bags, *, keep=False, strong=True):
+def draw_shot(current, locked, pools, rng, bags, *, keep=False, strong=True, finish=None):
     """Return new values and dropdown pools without mutating input values.
 
     Unclassified custom text is an explicit user choice, available across families.
@@ -39,6 +41,11 @@ def draw_shot(current, locked, pools, rng, bags, *, keep=False, strong=True):
             current[pos.KEY] = pos.LEFT
         else:
             current[pos.KEY] = pos.CENTER
+    try:
+        pools = filter_pools(pools, finish, current, locked)
+    except ValueError as exc:
+        raise ShotConflict(str(exc)) from exc
+    locked.update(static_keys(pools,current))
     valid = {}
     pairs_by_family = {}
     lighting_conflict = False
@@ -57,7 +64,7 @@ def draw_shot(current, locked, pools, rng, bags, *, keep=False, strong=True):
             available[key] = allowed
         else:
             pairs = [(s, p) for s in available[surf.KEY] for p in available[pos.KEY]
-                     if pos.compatible(s, p)
+                     if pos.compatible(material_finish.effective(finish, s), p) and finish_compatible(finish,s,p)
                      and (surf.KEY not in locked or not current.get(surf.KEY) or s == current[surf.KEY])
                      and (pos.KEY not in locked or not current.get(pos.KEY) or p == current[pos.KEY])]
             if pairs:

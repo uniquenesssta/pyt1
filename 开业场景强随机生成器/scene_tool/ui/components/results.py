@@ -22,7 +22,7 @@ class ResultList(ttk.Frame):
 
         return caption
 
-    def result(self, label, variable, lock, choices=None, readonly=False, hidden=None, on_hide=None):
+    def result(self, label, variable, lock, choices=None, readonly=False, hidden=None, on_hide=None, hint=''):
         row = ttk.Frame(self, style='Result.TFrame', padding=(6, 1))
         row.grid(row=self.next_row, column=0, sticky='nsew', pady=1)
         self.rowconfigure(self.next_row, weight=1, uniform='results')
@@ -45,6 +45,6 @@ class ResultList(ttk.Frame):
         value.pack(side='left', fill='x', expand=True, padx=(4, 6))
         name.editor = value
         for widget in (name, value):
-            Tooltip(widget, lambda: f'{name.cget("text")}\n{variable.get()}')
+            Tooltip(widget, lambda: f'{name.cget("text")}\n{variable.get()}' + ('\n' + hint if hint else ''))
         return name
 

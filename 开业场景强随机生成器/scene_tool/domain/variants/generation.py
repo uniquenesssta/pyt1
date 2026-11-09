@@ -2,11 +2,13 @@
 import copy
 import random
 from scene_tool.config.closeup import CLOSEUP
+from scene_tool.config.appearance_rules import covered
 from scene_tool.config.product_size import FOLLOW_REFERENCE
 from scene_tool.config.studio_shots import camera_family
 from scene_tool.domain.prompts import make_prompt
 from scene_tool.domain.visibility import hidden_keys
 from scene_tool.domain.variants.selection import Variant, select_variants
+from scene_tool.generation.lock_policy import contextual_locks
 
 def clone_rng(rng):
     return random.SystemRandom() if isinstance(rng, random.SystemRandom) else copy.deepcopy(rng)
@@ -41,7 +43,7 @@ def features(values, style, hidden, mapping=None):
             result[names[k]] = v.split('；',1)[0]
     # Other visible changes still count when the main fields are locked.
     for k,v in canonical.items():
-        if k not in names and k not in ('close_subject','close_material','brand','logo_shape','logo_structure'):
+        if k not in names and k not in ('close_subject','close_material','close_finish','brand','logo_shape','logo_structure') and not (style == CLOSEUP and covered(k,v)):
             result[k] = v
     return result
 
@@ -56,8 +58,8 @@ def opening_variants(engine, values, locks, *, style, industry, constraints, cop
     # Four photographic alternatives for the same design and format.
     locked = set(locks) | {k for k in ('brand','logo_shape','logo_structure','ratio') if current.get(k)}
     # A locked interior layout/camera must not be carried into an outdoor draft.
-    if style != CLOSEUP and locked.intersection(('architecture','placement','balloons','camera')):
-        locked.add('environment')
+    if style != CLOSEUP:
+        locked = contextual_locks(current,locked,style)
     hidden = hidden_keys(hidden)
     candidates = []
     for _ in range(48):

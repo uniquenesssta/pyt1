@@ -18,6 +18,8 @@ def sync_scene_camera(panel):
         panel.reflection_row.master.rowconfigure(panel.reflection_row_index, weight=1, uniform='results')
         panel.material_row.grid()
         panel.material_preset_row.grid()
+        panel.material_finish_row.grid()
+        panel.material_finish_row.master.rowconfigure(panel.material_finish_row_index, weight=1, uniform='results')
         panel.material_preset_row.master.rowconfigure(panel.material_preset_row_index, weight=1, uniform='results')
         panel.material_row.master.rowconfigure(panel.material_row.grid_info()['row'], weight=1, uniform='results')
     else:
@@ -27,6 +29,8 @@ def sync_scene_camera(panel):
         panel.material_row.master.rowconfigure(panel.material_row_index, weight=0, uniform='')
         panel.material_row.grid_remove()
         panel.material_preset_row.grid_remove()
+        panel.material_finish_row.grid_remove()
+        panel.material_finish_row.master.rowconfigure(panel.material_finish_row_index, weight=0, uniform='')
         panel.material_preset_row.master.rowconfigure(panel.material_preset_row_index, weight=0, uniform='')
         panel.size_row.grid()
     previous_style = getattr(panel, '_camera_style', style)
@@ -46,7 +50,7 @@ def sync_scene_camera(panel):
         key = dimension['key']
         panel.parameter_labels[key].configure(text=dimension['label'])
         panel.combos[key].configure(values=pools[key])
-        if key != 'camera' and (changed or style in ('商业效果图', '近景摄影')) and panel.model.values[key] not in pools[key]:
+        if key != 'camera' and (changed or not panel.model.values[key]) and panel.model.values[key] not in pools[key]:
             panel.model.values[key] = panel.model.rng.choice(pools[key])
         panel.values[key].set(panel.model.values[key])
     pool = panel.model.camera_pool()

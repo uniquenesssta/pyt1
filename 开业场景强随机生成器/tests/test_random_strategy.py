@@ -27,6 +27,7 @@ class RandomStrategyTests(unittest.TestCase):
         view=opening_view(CLOSEUP)
         changed=set()
         families=set()
+        rotating=[g for g in CLOSE_GROUPS if g!=('detail_surface','detail_art')]
         for step in range(15):
             old=view.current()
             values,_=self.opening(view,step)
@@ -35,7 +36,7 @@ class RandomStrategyTests(unittest.TestCase):
             for key in CLOSE_MAIN:
                 self.assertIn(values[key],SHOTS[family][key])
             self.assertTrue(light.compatible(values[reflection.KEY],values[light.KEY]))
-            expected=set(CLOSE_GROUPS[step%len(CLOSE_GROUPS)])
+            expected=set(rotating[step%len(rotating)])
             for group in CLOSE_GROUPS:
                 for key in group:
                     if values[key]!=old[key]:
@@ -44,7 +45,7 @@ class RandomStrategyTests(unittest.TestCase):
                     view.values[key].set(values[key])
             for key in CLOSE_MAIN: view.values[key].set(values[key])
         self.assertEqual(families,set(SHOTS))
-        self.assertTrue(set(k for g in CLOSE_GROUPS for k in g)<=changed)
+        self.assertTrue(set(k for g in rotating for k in g)<=changed)
 
     def test_locked_custom_values_hidden_controls_and_context_are_preserved(self):
         view=opening_view('商业效果图')
@@ -125,10 +126,10 @@ class RandomStrategyTests(unittest.TestCase):
         for profile in load_profiles():
             model=SceneModel(profile,{'render_style':CLOSEUP})
             panel=SimpleNamespace(model=model,group_labels=[],reflection_row_index=4,
-                material_preset_row_index=3,material_row_index=2,
+                material_preset_row_index=3,material_row_index=2,material_finish_row_index=5,
                 values={k:Value(v) for k,v in model.values.items()},
                 combos={k:Mock() for k in model.values},parameter_labels={k:Mock() for k in model.values})
-            for key in ('size_row','subject_row','reflection_row','material_row','material_preset_row'):
+            for key in ('size_row','subject_row','reflection_row','material_row','material_preset_row','material_finish_row'):
                 setattr(panel,key,Mock(grid_info=lambda:{'row':2}))
             sync_scene_camera(panel)
             for d in model.active_profile()['dimensions']:

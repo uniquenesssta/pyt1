@@ -48,6 +48,7 @@ class ScenePanel(ttk.Frame):
         self.model.locks = {k: v.get() for k, v in self.locks.items()}
         self.model.close_subject = self.close_subject.get()
         self.model.close_material = self.close_material.get()
+        self.model.close_finish = self.close_finish.get()
         self.model.product_size = self.product_size.get()
         self.model.hidden = {k: v.get() for k, v in self.hidden.items()}
         self.model.extra = self.extra.get('1.0', 'end-1c')
@@ -74,8 +75,9 @@ class ScenePanel(ttk.Frame):
             try:
                 self.model.regenerate()
                 self.show_prompt()
-            except ValueError:
-                pass
+            except ValueError as exc:
+                self.sync_status.set('未更新：' + str(exc))
+                return
 
         self.update_status()
 
@@ -104,7 +106,7 @@ class ScenePanel(ttk.Frame):
             self.values[key].set(value)
         if self.model.render_style == '近景摄影':
             from scene_tool.ui.studio_binding import sync_scene_studio
-            sync_scene_studio(self, preserve_values=self.model.random_strategy == PRIMARY)
+            sync_scene_studio(self, preserve_values=True)
         self.updating = False
         self.model.regenerate()
         self.show_prompt()

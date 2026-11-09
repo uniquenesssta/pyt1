@@ -35,7 +35,7 @@ class Value:
 def opening_view(style):
     engine = Randomizer(load_pools(RESOURCES/'pools.json'), random.Random(5))
     values = {k:'' for k,_ in (*DIMENSIONS, *EXTRA_DIMENSIONS)}
-    values.update(close_subject='我的产品', close_material='自填表面')
+    values.update(close_subject='我的产品', close_material='自填表面', close_finish='跟随参考')
     values = engine.draw(values, render_style=style, industry='美业')
     values['brand'] = '用户自己写的品牌'
     view = SimpleNamespace(engine=engine, values={k:Value(v) for k,v in values.items()},

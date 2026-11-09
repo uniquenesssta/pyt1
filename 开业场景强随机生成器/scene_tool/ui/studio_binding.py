@@ -21,6 +21,8 @@ def sync_opening_studio(view, fixed_camera=False, fixed_key=None, preserve_value
             view.combos[key].configure(values=ANGLES if key == 'camera' else options[key])
     view.studio_values = dict(values)
     view.studio_camera = values['camera']
+    from scene_tool.ui.material_finish import refresh_finish_choices
+    refresh_finish_choices(view)
 
 
 def sync_scene_studio(panel, fixed_camera=False, fixed_key=None, preserve_values=False):
@@ -31,6 +33,8 @@ def sync_scene_studio(panel, fixed_camera=False, fixed_key=None, preserve_values
         panel.combos[key].configure(values=ANGLES if key == 'camera' else options[key])
     panel.studio_values = dict(panel.model.values)
     panel.studio_camera = panel.model.values['camera']
+    from scene_tool.ui.material_finish import refresh_finish_choices
+    refresh_finish_choices(panel,scene=True)
 
 
 def opening_camera_changed(view):

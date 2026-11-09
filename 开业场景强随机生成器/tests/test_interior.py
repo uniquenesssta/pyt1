@@ -26,11 +26,14 @@ class InteriorTests(unittest.TestCase):
         self.assertIn('内部装潢风格：', prompt)
         self.assertNotIn('门店建筑风格：', prompt)
 
-    def test_switch_overrides_incompatible_style_lock(self):
+    def test_random_preserves_locked_style_and_its_environment(self):
         old = self.engine.draw({'environment': '室外'}, ['environment'])
         new = self.engine.draw(old, ['architecture'])
-        self.assertEqual(new['environment'], '室内')
-        self.assertIn(new['architecture'], INTERIOR_STYLES)
+        self.assertEqual(new['environment'], '室外')
+        self.assertEqual(new['architecture'],old['architecture'])
+        switched = self.engine.draw(new, [])
+        self.assertEqual(switched['environment'],'室内')
+        self.assertIn(switched['architecture'], INTERIOR_STYLES)
         locked = self.engine.draw(new, ['architecture', 'environment'])
         self.assertEqual(locked['architecture'], new['architecture'])
 
@@ -46,11 +49,16 @@ class InteriorTests(unittest.TestCase):
         self.assertNotIn('placement', self.engine.bags)
         self.assertNotIn('balloons', self.engine.bags)
 
-    def test_scene_switch_replaces_locked_decor(self):
+    def test_locked_decor_keeps_environment_until_unlocked(self):
         outside = self.engine.draw({'environment': '室外'}, ['environment'])
         inside = self.engine.draw(outside, ['placement', 'balloons'])
+        self.assertEqual(inside['environment'],'室外')
+        self.assertEqual(inside['placement'],outside['placement'])
+        self.assertEqual(inside['balloons'],outside['balloons'])
+        inside=self.engine.draw(inside,[])
         self.assertIn(inside['placement'], self.engine.pools['indoor_placement'])
         self.assertIn(inside['balloons'], self.engine.pools['indoor_balloons'])
         kept = self.engine.draw(inside, ['environment', 'placement', 'balloons'])
         self.assertEqual(kept['placement'], inside['placement'])
         self.assertEqual(kept['balloons'], inside['balloons'])
+

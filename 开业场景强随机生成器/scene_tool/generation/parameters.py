@@ -6,6 +6,7 @@ from scene_tool.domain.scene_pools import pool_key as active_pool, INDOOR_KEYS
 from scene_tool.config.defaults import DIMENSIONS
 from scene_tool.domain.pools import validate_pools
 from scene_tool.generation.unique import fresh_value
+from scene_tool.generation.lock_policy import contextual_locks
 
 class Randomizer:
     """Each dimension has its own shuffle bag. Locks never consume bag entries.
@@ -57,7 +58,7 @@ class Randomizer:
         pools = self.scoped_pools(industry, current.get('environment'), CLOSEUP)
         pools.setdefault('ratio', self.pools['ratio'])
         pools['camera'] = ANGLES
-        return draw_shot(current, locked, pools, self.rng, self.bags, keep=keep, strong=strong)
+        return draw_shot(current, locked, pools, self.rng, self.bags, keep=keep, strong=strong, finish=current.get('close_finish'))
 
     def draw(self, current=None, locked=(), strong=True, render_style=None, industry=None, *, preserve_locked=False):
         if render_style in ('商业效果图', '近景摄影') and industry is None:
@@ -68,6 +69,7 @@ class Randomizer:
             sampled, _ = self.studio_draw(current, locked, industry, strong=strong)
             result.update(sampled)
             return result
+        locked = contextual_locks(current, locked, render_style)
         for key in ['environment'] + [k for k, _ in dimensions(render_style) if k != 'environment']:
             if preserve_locked and key in locked and current.get(key, '').strip():
                 continue

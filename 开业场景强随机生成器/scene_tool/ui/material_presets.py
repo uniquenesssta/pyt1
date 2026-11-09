@@ -2,11 +2,12 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from scene_tool.storage import material_presets as storage
-from scene_tool.ui.material_binding import apply_material
+from scene_tool.ui.material_binding import apply_material, finish_variable
+from scene_tool.config.material_finish import FOLLOW
 
 def material_preset_row(results, view, scene=False):
     name=tk.StringVar()
-    label=results.result('材质预设',name,None,choices=[])
+    label=results.result('材质预设',name,None,choices=[],hint='输入名称后保存材质描述和表面属性；下拉选择已有预设直接调用。')
     label.configure(width=10)
     row,box=label.master,label.editor
     def read():
@@ -21,15 +22,18 @@ def material_preset_row(results, view, scene=False):
     def choose(_=None):
         data=read()
         if data is not None and name.get() in data:
-            if not apply_material(view,data[name.get()],scene): name.set('')
+            item=data[name.get()]
+            if not apply_material(view,item['description'],scene,finish=item['finish']): name.set('')
     def save():
         data=read()
         if data is None: return
         key=name.get().strip()
         value=(view.close_material if scene else view.values['close_material']).get()
-        if key in data and data[key]!=value.strip() and not messagebox.askyesno('覆盖材质预设',f'更新“{key}”的材质描述？',parent=view): return
+        surface=finish_variable(view,scene)
+        finish=surface.get() if surface else FOLLOW
+        if key in data and data[key]!={'description':value.strip(),'finish':finish} and not messagebox.askyesno('覆盖材质预设',f'更新“{key}”的材质描述？',parent=view): return
         try:
-            storage.save(key,value)
+            storage.save(key,value,finish=finish)
             name.set(key)
             refresh()
         except (OSError,ValueError) as exc:
@@ -50,7 +54,5 @@ def material_preset_row(results, view, scene=False):
     # Controls occupy the same row; description retains its own full-width entry.
     ttk.Button(row,text='保存',width=4,style='Inline.TButton',command=save).pack(side='left',padx=(2,0))
     ttk.Button(row,text='删除',width=4,style='Inline.TButton',command=delete).pack(side='left',padx=2)
-    from scene_tool.ui.components.tooltip import Tooltip
-    Tooltip(box,lambda:'输入名称后保存上方材质描述；下拉选择已有预设直接调用。')
     refresh()
     return row

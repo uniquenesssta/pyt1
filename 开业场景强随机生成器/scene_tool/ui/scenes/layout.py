@@ -26,7 +26,11 @@ def build_panel(panel):
     panel.material_row = results.result('自定义材质', panel.close_material, None).master
     from scene_tool.ui.material_presets import material_preset_row
     panel.material_preset_row_index = results.next_row
+    panel.close_finish = tk.StringVar(value=panel.model.close_finish)
     panel.material_preset_row = material_preset_row(results, panel, scene=True)
+    from scene_tool.ui.material_finish import material_finish_row
+    panel.material_finish_row_index = results.next_row
+    panel.material_finish_row = material_finish_row(results, panel, scene=True)
     panel.parameter_labels = {}
     dimensions = panel.model.active_profile()['dimensions']
     if not any(d['key'] == reflection.KEY for d in dimensions):

@@ -3,7 +3,7 @@ from scene_tool.domain.industry_profiles import industry_key
 
 
 def draw_industry(engine, key, pool, previous, locked, industry, environment, style, strong=True):
-    if locked and previous in pool:
+    if locked and isinstance(previous, str) and previous.strip():
         return previous
     bag_key = 'industry:' + '|'.join((industry_key(industry), environment or '室外', style or '', key))
     bag = engine.bags.setdefault(bag_key, [])

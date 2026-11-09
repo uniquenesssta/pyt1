@@ -27,7 +27,7 @@ def make_prompt(values, industry='美业', constraints=DEFAULT_CONSTRAINTS,
         raise ValueError('请填写：' + '、'.join(missing))
     if render_style == '近景摄影':
         from scene_tool.config.closeup import closeup_brief
-        lines = [closeup_brief(values.get('close_subject'), values.get('close_material'), None if 'camera' in hidden else values.get('camera'))]
+        lines = [closeup_brief(values.get('close_subject'), values.get('close_material'), None if 'camera' in hidden else values.get('camera'), values.get('close_finish'))]
         if constraints != DEFAULT_CONSTRAINTS:
             lines.append(constraints)
         lines.extend(close_lines(((k,label,k) for k,label in active_dimensions), values, hidden))

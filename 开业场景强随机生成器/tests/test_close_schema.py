@@ -1,5 +1,6 @@
 import unittest
 from scene_tool.config.closeup import CLOSEUP
+from scene_tool.config.appearance_rules import covered
 from scene_tool.config.close_dimensions import DIMENSIONS
 from scene_tool.domain.industry_profiles import dimensions
 from scene_tool.domain.prompts import make_prompt
@@ -15,7 +16,11 @@ class CloseSchemaTests(unittest.TestCase):
         values = Randomizer(load_pools(RESOURCES/'pools.json')).draw({'brand':'旧品牌'}, render_style=CLOSEUP, industry='咖啡')
         prompt = make_prompt(values, copy='旧开业文案', render_style=CLOSEUP)
         for key, label in DIMENSIONS:
-            self.assertIn(label + '：' + values[key], prompt)
+            if covered(key,values[key]):
+                self.assertNotIn(label + '：',prompt)
+                self.assertIn('真实轮廓、底色和明暗过渡',prompt)
+            else:
+                self.assertIn(label + '：' + values[key], prompt)
         for text in ('旧开业文案', '旧品牌', '街道地址：', '门店建筑风格：'):
             self.assertNotIn(text, prompt)
         self.assertIn('brand', dict(dimensions('真实买家秀')))
@@ -27,7 +32,7 @@ class CloseSchemaTests(unittest.TestCase):
             for _ in range(3):
                 model.draw()
                 prompt = model.generate()
-                for label in ('细节主体','邻接边缘','外观保留重点','近景机位','亮光位置'):
+                for label in ('细节主体','邻接边缘','近景机位','亮光位置'):
                     self.assertIn(label + '：', prompt)
             model.render_style = '真实买家秀'
             self.assertEqual(model.active_profile(), profile)

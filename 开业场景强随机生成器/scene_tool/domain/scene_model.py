@@ -1,5 +1,6 @@
 """Independent scene state, shuffle bags, editable prompts and reset snapshots."""
 import random
+from scene_tool.config.material_finish import normalize as normalize_finish
 from scene_tool.config.random_strategy import normalize as normalize_strategy
 from scene_tool.config import surface_reflection as reflection
 from scene_tool.domain.camera_modes import camera_pool, draw_camera
@@ -25,6 +26,7 @@ class SceneModel:
         self.commercial_pools = state.get('commercial_pools', {}) if isinstance(state.get('commercial_pools', {}), dict) else {}
         self.close_subject = state.get('close_subject', '')
         self.close_material = state.get('close_material', '')
+        self.close_finish = normalize_finish(state.get('close_finish'))
         self.product_size = normalize_size(state.get('product_size'))
         self.render_style = normalize_style(state.get('render_style'))
         self.pools = {d['key']: list(d['options']) for d in profile['dimensions']}
@@ -104,7 +106,7 @@ class SceneModel:
         if fixed_key:
             locks.add(mapping[fixed_key])
         values, choices = draw_shot({v:self.values.get(k, '') for k,v in mapping.items()}, locks, pools,
-                                    self.rng, self.bags, keep=keep)
+                                    self.rng, self.bags, keep=keep, finish=self.close_finish)
         self.hidden.setdefault(reflection.KEY, False)
         self.locks.setdefault(reflection.KEY, False)
         self.values.update({k:values[v] for k,v in mapping.items()})
@@ -136,7 +138,7 @@ class SceneModel:
             self.values[key] = selected
 
     def generate(self):
-        return make_scene_prompt(self.active_profile(), dict(self.values, close_subject=self.close_subject, close_material=self.close_material), self.extra, self.hidden, self.render_style, self.product_size)
+        return make_scene_prompt(self.active_profile(), dict(self.values, close_subject=self.close_subject, close_material=self.close_material, close_finish=self.close_finish), self.extra, self.hidden, self.render_style, self.product_size)
 
     def regenerate(self):
         self.prompt = self.rendered = self.generate()
@@ -164,5 +166,5 @@ class SceneModel:
             self.bags[key] = []
 
     def state(self):
-        return {key: getattr(self, key) for key in ('random_strategy', 'strategy_step', 'values', 'locks', 'hidden', 'render_style', 'product_size', 'close_subject', 'close_material', 'commercial_pools', 'closeup_pools', 'pools', 'bags', 'extra', 'prompt', 'rendered')}
+        return {key: getattr(self, key) for key in ('random_strategy', 'strategy_step', 'values', 'locks', 'hidden', 'render_style', 'product_size', 'close_subject', 'close_material', 'close_finish', 'commercial_pools', 'closeup_pools', 'pools', 'bags', 'extra', 'prompt', 'rendered')}
 

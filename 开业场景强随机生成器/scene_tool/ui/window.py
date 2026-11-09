@@ -33,6 +33,7 @@ class App(tk.Tk):
         self.hidden = {k: tk.BooleanVar(value=False) for k in [*[key for key, _ in (*DIMENSIONS, *EXTRA_DIMENSIONS)], 'copy']}
         self.values['close_subject'] = tk.StringVar()
         self.values['close_material'] = tk.StringVar()
+        self.values['close_finish'] = tk.StringVar(value='跟随参考')
         self.product_size = tk.StringVar(value=FOLLOW_REFERENCE)
         self.render_style = tk.StringVar(value=BUYER)
         self.industry = tk.StringVar(value='美业')
@@ -109,7 +110,7 @@ class App(tk.Tk):
             self.copyline.set(self.copy_engine.draw(self.copyline.get(), self.copy_random.get(), self.copy_locked.get(), self.industry.get()))
         for key, value in values.items():
             self.values[key].set(value)
-        sync_style(self, preserve_values=self.random_strategy.get() == PRIMARY)
+        sync_style(self, preserve_values=True)
         self.ready = True
         self.rendered = self.prompt.get('1.0', 'end-1c')
         self.refresh()

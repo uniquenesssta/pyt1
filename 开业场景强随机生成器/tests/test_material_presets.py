@@ -20,9 +20,9 @@ class MaterialPresetTests(unittest.TestCase):
             storage.save('细面写真布','正面细腻，无粗织网格',path)
             storage.save('红纸','细腻微光红纸，保持原色',path)
             storage.save('细面写真布','只见微细表面纹理',path)
-            self.assertEqual(storage.load(path)['细面写真布'],'只见微细表面纹理')
+            self.assertEqual(storage.load(path)['细面写真布']['description'],'只见微细表面纹理')
             storage.delete('细面写真布',path)
-            self.assertEqual(storage.load(path),{'红纸':'细腻微光红纸，保持原色'})
+            self.assertEqual(storage.load(path),{'红纸':{'description':'细腻微光红纸，保持原色','finish':'跟随参考'}})
             with self.assertRaises(ValueError): storage.save('空',' ',path)
 
     def test_corrupt_file_is_not_overwritten(self):
