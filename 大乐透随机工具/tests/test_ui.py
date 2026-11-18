@@ -175,6 +175,40 @@ class UITests(unittest.TestCase):
         page.clear_filters()
         self.assertEqual((page.period.get(), page.text.get()), ('全部', ''))
 
+    def test_structure_draw_panel_applies_period_and_shows_results(self):
+        self.root.geometry('1040x740')
+        page = self.app.structure_weights
+        panel = page.draw_panel
+        self.app.tabs.select(page)
+        self.root.update()
+        self.assertTrue(panel.draw_button.instate(('disabled',)))
+        draws = [Draw(Ticket((1, 2, 8, 9, 15), (1, 2)), str(26001 + i)) for i in range(120)]
+        page.set_history(draws)
+        page.period.set('37')
+        self.assertTrue(panel.draw_button.instate(('disabled',)))
+        page.rebuild_button.invoke()
+        self.assertTrue(panel.draw_button.instate(('!disabled',)))
+        self.assertIn('26084 → 26120', page.summary.get())
+        panel.constraints.button.invoke()
+        self.root.update()
+        self.assert_visible_inside(panel.draw_button, page)
+        self.assert_visible_inside(panel.constraints.body, panel)
+        self.assert_visible_inside(page.edit_button, page)
+        panel.count_entry.delete(0, 'end')
+        panel.count_entry.insert(0, '3')
+        panel.back_entry.delete(0, 'end')
+        panel.back_entry.insert(0, '3')
+        self.assertEqual(self.app.controls.values['组数'].get(), '3')
+        self.app.controls.values['前区固定'].set('01 02 08 09 15')
+        panel.draw_button.invoke()
+        self.finish()
+        self.assertEqual(self.errors, [])
+        self.assertEqual(self.app.tabs.select(), str(self.app.generation))
+        self.assertEqual(self.app.controls.mode.get(), MODES[2])
+        self.assertEqual(len(self.app.generated.tickets), 3)
+        self.assertTrue(all(t.front == (1, 2, 8, 9, 15) and len(t.back) == 3
+                            for t in self.app.generated.tickets))
+
     def assert_visible_inside(self, widget, container):
         self.assertTrue(widget.winfo_ismapped(), str(widget))
         self.assertGreater(widget.winfo_width(), 1)

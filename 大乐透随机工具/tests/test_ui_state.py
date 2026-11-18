@@ -76,10 +76,12 @@ class PageStateTests(unittest.TestCase):
 
     def test_unapplied_period_preserves_profile_and_blocks_generation(self):
         profile = build_profile(self.draws, 50)
-        page = SimpleNamespace(profile=profile, period=self.var('100'), pending=self.var())
+        page = SimpleNamespace(profile=profile, period=self.var('100'), pending=self.var(),
+                               draw_panel=Mock(), use_button=Mock(), _busy=False)
         page.periods = lambda: StructureWeightsPage.periods(page)
         StructureWeightsPage.describe_pending(page)
         self.assertIn('尚未应用', page.pending.get())
         self.assertIs(page.profile, profile)
+        page.draw_panel.set_available.assert_called_once_with(False)
         with self.assertRaisesRegex(ValueError, '期数已修改'):
             StructureWeightsPage.snapshot(page)

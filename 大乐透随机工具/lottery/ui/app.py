@@ -15,6 +15,7 @@ from .history_navigation import search_history, open_statistic
 from .import_issues import show_import_issues
 from .jobs import Jobs
 from .results import TicketPanel
+from .selection_inputs import SelectionInputs
 from .statistics import StatisticsPage
 from .structure_weights import StructureWeightsPage
 from .cross_link import CrossWeightLink
@@ -53,7 +54,8 @@ class LotteryApp:
         self.tabs.add(generation, text="  随机选号  ")
         self.form_viewport = FormViewport(generation)
         self.form_viewport.pack(fill="x", pady=(0, 6))
-        self.controls = GenerationControls(self.form_viewport.body, self.generate)
+        inputs = SelectionInputs(root)
+        self.controls = GenerationControls(self.form_viewport.body, self.generate, inputs)
         self.controls.pack(fill="x")
         self.form_viewport.bind_controls()
         self.results_tabs = ttk.Notebook(generation)
@@ -67,10 +69,10 @@ class LotteryApp:
         self.statistics = StatisticsPage(self.tabs, self.set_status, self.error)
         self.tabs.add(self.history, text="  历史查询  ")
         self.tabs.add(self.statistics, text="  统计分析  ")
-        self.structure_weights = StructureWeightsPage(self.tabs, self.error)
+        self.structure_weights = StructureWeightsPage(
+            self.tabs, self.error, inputs, self.draw_from_structure, self.show_structure_selection)
         self.tabs.add(self.structure_weights, text="  结构权重  ")
         self.controls.on_structure = lambda: self.tabs.select(self.structure_weights)
-        self.structure_weights.on_generate = lambda: self.tabs.select(self.generation)
         self.history.on_return = lambda: self.tabs.select(self.structure_weights if self.history.statistic and self.history.statistic.source == "结构权重" else self.statistics)
         self.statistics.hot_cold.on_open = lambda area, number, periods: open_statistic(self, "统计分析", area+"·期数占比", number, periods_override=periods)
         self.statistics.table.bind_open(lambda row: open_statistic(self, "统计分析", row[0], row[1], periods_override=self.statistics.active_periods))
@@ -104,10 +106,22 @@ class LotteryApp:
         self.set_status(str(error).splitlines()[0])
         messagebox.showerror("操作未完成", str(error), parent=self.root)
 
-    def generate(self):
+    def show_structure_selection(self):
+        self.controls.use_structure_mode()
+        self.tabs.select(self.generation)
+
+    def draw_from_structure(self):
+        self.generate(from_structure=True)
+
+    def generate(self, *, from_structure=False):
+        if self.jobs.running:
+            self.set_status("请等待当前任务完成，或先取消")
+            return
         try:
-            config = self.controls.snapshot()
-            if config.mode != MODES[0]:
+            config = self.controls.snapshot(from_structure=from_structure)
+            if config.mode == MODES[2]:
+                config = replace(config, structure_profile=self.cross_link.snapshot())
+            elif config.mode == MODES[1]:
                 config = replace(config, structure_profile=self.structure_weights.snapshot())
         except ValueError as error:
             self.error(error)
@@ -115,11 +129,21 @@ class LotteryApp:
         stats = self.stats
         cache_hits_before = self.structure_cache.hits
 
+        history_note = ""
+        if config.structure_profile is not None:
+            draws = config.structure_profile.draws
+            history_note = f" · 实际使用 {len(draws):,} 期"
+            if draws[0].issue:
+                history_note += f"（{draws[0].issue}–{draws[-1].issue}）"
+
         def done(tickets):
             self.generated.set_tickets(tickets)
             self.results_tabs.tab(self.generated, text=f"本批号码 ({len(tickets)})")
             self.results_tabs.select(self.generated)
-            self.set_status(f"已生成 {len(tickets):,} 组 · {config.mode}" + (f" · 实际使用最近 {len(config.structure_profile.draws)} 期" if config.structure_profile else "") + (" · 已复用候选缓存" if self.structure_cache.hits > cache_hits_before else ""))
+            if from_structure:
+                self.show_structure_selection()
+            cache_note = " · 已复用候选缓存" if self.structure_cache.hits > cache_hits_before else ""
+            self.set_status(f"已生成 {len(tickets):,} 组 · {config.mode}{history_note}{cache_note}")
         self.set_status("正在生成…")
         self.jobs.start(lambda cancel, progress: generate(config, stats, cancel, progress, structure_cache=self.structure_cache), done, self.error)
 

@@ -9,6 +9,7 @@ from lottery.core.generation import GenerationConfig,MODES,generate
 from lottery.core.models import Draw,Ticket
 from lottery.core.structure_profile import build_profile
 from lottery.ui.cross_link import CrossWeightLink
+from lottery.ui.controls import GenerationControls
 
 
 class CrossLinkTests(unittest.TestCase):
@@ -19,7 +20,8 @@ class CrossLinkTests(unittest.TestCase):
         self.controls=SimpleNamespace(fill_button=Mock(),cross_period=var('跟随结构权重页'),
             weight_vars=[[var('1') for _ in range(5)] for _ in range(2)],
             custom=tk.BooleanVar(master=self.interp,value=False),mode=var(MODES[0]),
-            update_mode=Mock(),cross_source=var(''))
+            update_mode=Mock(),cross_source=var(''),values={'前区数量':var('8')})
+        self.controls.use_structure_mode=lambda:GenerationControls.use_structure_mode(self.controls)
         self.page=SimpleNamespace(profile=build_profile(self.draws,50),draws=self.draws,
                                   period=var('50'),describe=Mock(),render=Mock())
         self.page.snapshot=lambda:self.page.profile
@@ -32,6 +34,7 @@ class CrossLinkTests(unittest.TestCase):
         self.assertFalse(self.errors)
         self.assertTrue(self.controls.custom.get())
         self.assertEqual(self.controls.mode.get(),MODES[2])
+        self.assertEqual(self.controls.values['前区数量'].get(),'5')
         self.assertEqual(float(self.controls.weight_vars[0][0].get()),43.25)
 
     def test_editors_share_profile_even_before_first_fill(self):
@@ -61,6 +64,16 @@ class CrossLinkTests(unittest.TestCase):
         old=self.page.profile
         self.controls.cross_period.set('-1');self.link.fill()
         self.assertIs(self.page.profile,old);self.assertEqual(len(self.errors),1)
+
+    def test_snapshot_uses_shared_profile_and_rejects_unfinished_edit(self):
+        self.link.fill()
+        self.controls.weight_vars[0][1].set('67.5')
+        self.assertEqual(self.link.snapshot().weights[CROSS_GROUPS[0]][1],67.5)
+        self.controls.weight_vars[0][1].set('')
+        with self.assertRaisesRegex(ValueError,'尚未同步'):
+            self.link.snapshot()
+        self.link.fill()
+        self.assertEqual(self.link.snapshot().weights[CROSS_GROUPS[0]][1],67.5)
 
     def test_override_is_not_multiplied_twice(self):
         profile=self.page.profile

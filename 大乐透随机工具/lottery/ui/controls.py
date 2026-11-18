@@ -1,15 +1,18 @@
 """随机参数表单；常用参数优先，固定/排除与跨区编辑按需展开。"""
 import tkinter as tk
 from tkinter import ttk
-from ..core.generation import GenerationConfig, MODES
-from ..core.models import parse_numbers
-from .widgets import field, wrapped_label, Disclosure
+from ..core.generation import MODES
+from .number_constraints import NumberConstraints
+from .selection_inputs import COUNT_FIELDS
+from .widgets import field, wrapped_label
 
 
 class GenerationControls(ttk.Frame):
-    def __init__(self, parent, generate):
+    def __init__(self, parent, generate, inputs):
         super().__init__(parent, padding=10)
-        self.values = {}
+        self.inputs = inputs
+        self.values, self.unique = inputs.values, inputs.unique
+        self.constraint_summary = inputs.summary
         self.on_structure = lambda: None
         row = ttk.Frame(self)
         row.pack(fill="x")
@@ -17,28 +20,21 @@ class GenerationControls(ttk.Frame):
         self.mode_box = ttk.Combobox(field(row, "随机模式", 0), textvariable=self.mode,
                                      values=MODES, state="readonly", width=18)
         self.mode_box.pack(fill="x")
-        for i, (name, default) in enumerate((("组数", "1"), ("前区数量", "5"), ("后区数量", "2")), 1):
-            self.values[name] = tk.StringVar(value=default)
+        for i, (name, _) in enumerate(COUNT_FIELDS, 1):
             ttk.Entry(field(row, name, i), textvariable=self.values[name], width=8).pack(fill="x")
         self.generate_button = ttk.Button(row, text="生成号码", command=generate, style="Primary.TButton")
         row.columnconfigure(4, weight=1)
         self.generate_button.grid(row=0, column=4, sticky="se")
         actions = ttk.Frame(self)
         actions.pack(fill="x", pady=(6, 0))
-        self.unique = tk.BooleanVar(value=True)
         ttk.Checkbutton(actions, text="本批组合不重复", variable=self.unique).pack(side="left")
         self.structure_button = ttk.Button(actions, text="结构权重设置", command=lambda: self.on_structure())
         self.structure_button.pack(side="right")
         self.custom = tk.BooleanVar(value=False)
         self.custom_button = ttk.Checkbutton(actions, text="自定义跨区权重", variable=self.custom, command=self.update_mode)
         self.custom_button.pack(side="right", padx=16)
-        self.constraints = Disclosure(self, "固定 / 排除", toolbar=actions)
+        self.constraints = NumberConstraints(self, actions, inputs)
         self.constraints.pack(fill="x")
-        for i, name in enumerate(("前区固定", "后区固定", "前区排除", "后区排除")):
-            self.values[name] = tk.StringVar(value="")
-            ttk.Entry(field(self.constraints.body, name, i, 1), textvariable=self.values[name], width=13).pack(fill="x")
-            self.values[name].trace_add("write", self.describe_constraints)
-        self.constraint_summary = tk.StringVar(value="不限制号码；多个号码可用空格或逗号分隔")
         wrapped_label(self, textvariable=self.constraint_summary, style="Muted.TLabel").pack(fill="x", pady=(4, 0))
         self.advanced = ttk.Frame(self, padding=(0, 10, 0, 0))
         fill_row = ttk.Frame(self.advanced)
@@ -71,10 +67,10 @@ class GenerationControls(ttk.Frame):
         self.mode_box.bind("<<ComboboxSelected>>", lambda _: self.update_mode())
         self.update_mode()
 
-    def describe_constraints(self, *_):
-        names = ("前区固定", "后区固定", "前区排除", "后区排除")
-        active = [f"{name}：{self.values[name].get().strip()}" for name in names if self.values[name].get().strip()]
-        self.constraint_summary.set(" · ".join(active) if active else "不限制号码；多个号码可用空格或逗号分隔")
+    def use_structure_mode(self):
+        self.mode.set(MODES[2])
+        self.values["前区数量"].set("5")
+        self.update_mode()
 
     def update_mode(self):
         structure = self.mode.get() == MODES[2]
@@ -90,16 +86,7 @@ class GenerationControls(ttk.Frame):
         }
         self.hint.configure(text=hints[self.mode.get()])
 
-    def snapshot(self):
-        v = self.values
-        try:
-            count, front, back = (int(v[n].get()) for n in ("组数", "前区数量", "后区数量"))
-            weights = [tuple(float(var.get()) for var in group) for group in self.weight_vars] if self.mode.get() == MODES[2] and self.custom.get() else [(), ()]
-        except ValueError as error:
-            raise ValueError("组数与号码数量须为整数，跨区权重须为数值") from error
-        config = GenerationConfig(count, front, back,
-            parse_numbers(v["前区固定"].get(), 35, "前区固定"), parse_numbers(v["后区固定"].get(), 12, "后区固定"),
-            parse_numbers(v["前区排除"].get(), 35, "前区排除"), parse_numbers(v["后区排除"].get(), 12, "后区排除"),
-            self.mode.get(), self.unique.get(), weights[0], weights[1])
-        config.validate()
-        return config
+    def snapshot(self, *, from_structure=False):
+        if from_structure:
+            return self.inputs.snapshot(MODES[2], front_count=5)
+        return self.inputs.snapshot(self.mode.get())

@@ -3,6 +3,7 @@ from copy import deepcopy
 import tkinter as tk
 from tkinter import ttk
 from ..core.structure_profile import build_profile, domains
+from .structure_draw import StructureDrawPanel
 from .table import DataTable
 from .widgets import field, wrapped_label, Disclosure
 
@@ -17,11 +18,11 @@ GROUPS = {
 
 
 class StructureWeightsPage(ttk.Frame):
-    def __init__(self, parent, error):
+    def __init__(self, parent, error, inputs, draw, use_in_selection):
         super().__init__(parent, padding=10)
         self.error, self.draws, self.profile = error, [], None
         self.on_change = lambda profile: None
-        self.on_generate = lambda: None
+        self._busy = False
         top = ttk.Frame(self)
         top.pack(fill='x')
         ttk.Label(top, text='最近期数').pack(side='left')
@@ -30,11 +31,11 @@ class StructureWeightsPage(ttk.Frame):
         self.period_box.pack(side='left', padx=8)
         self.rebuild_button = ttk.Button(top, text='统计并自动填入权重', command=self.rebuild, style='Primary.TButton')
         self.rebuild_button.pack(side='left')
-        ttk.Button(top, text='去随机选号', command=lambda: self.on_generate()).pack(side='right')
+        self.use_button = ttk.Button(top, text='应用到选号页', command=use_in_selection, state='disabled')
+        self.use_button.pack(side='right')
         self.period_box.bind('<Return>', lambda _: self.rebuild())
         self.pending = tk.StringVar(value='可输入自定义期数；重算会重置所有手动权重')
         wrapped_label(self, textvariable=self.pending, style='Muted.TLabel').pack(fill='x', pady=(4, 0))
-        self.period.trace_add('write', lambda *_: self.describe_pending())
         self.summary = tk.StringVar(value='请先导入或更新历史数据')
         wrapped_label(self, textvariable=self.summary, style='Muted.TLabel').pack(fill='x', pady=(4, 8))
         row = ttk.Frame(self)
@@ -73,6 +74,9 @@ class StructureWeightsPage(ttk.Frame):
         help_box = Disclosure(self, '权重说明')
         help_box.pack(side='bottom', before=row, fill='x')
         wrapped_label(help_box.body, text='历史次数与占比保留实际数据；建议权重加1平滑，避免近期未出现的类别被直接排除。均值只供参考，生成使用完整分布与指标强度。最长连号与连号形态、空区数量与各区空区有重叠，所以最长连号和空区数量的强度默认关闭。权重是相对偏好，不是最终生成比例或中奖概率。', style='Muted.TLabel').pack(fill='x')
+        self.draw_panel = StructureDrawPanel(self, inputs, draw)
+        self.draw_panel.pack(side='bottom', before=help_box, fill='x', pady=(6, 0))
+        self.period.trace_add('write', lambda *_: self.describe_pending())
 
     def select_family(self):
         names = GROUPS[self.family.get()]
@@ -82,10 +86,17 @@ class StructureWeightsPage(ttk.Frame):
 
     def describe_pending(self):
         try:
-            pending = self.profile is not None and self.periods() != self.profile.requested
-        except ValueError:
-            pending = True
-        self.pending.set('期数尚未应用；点击统计后将重置所有手动权重' if pending else '可输入自定义期数；重算会重置所有手动权重')
+            requested = self.periods()
+        except ValueError as exc:
+            pending, note = True, str(exc)
+        else:
+            pending = self.profile is not None and requested != self.profile.requested
+            note = ('期数尚未应用；先统计并填入再抽取（会重置手动权重）' if pending
+                    else '可输入自定义期数；重新统计会重置手动权重')
+        self.pending.set(note)
+        ready = self.profile is not None and not pending and not self._busy
+        self.draw_panel.set_available(ready)
+        self.use_button.configure(state='normal' if ready else 'disabled')
 
     def describe_selection(self):
         selected = self.table.selected()
@@ -122,7 +133,13 @@ class StructureWeightsPage(ttk.Frame):
         try:
             profile = build_profile(self.draws, self.periods())
         except ValueError as exc:
-            self.error(exc); return
+            if self.profile is None:
+                self.table.set_rows(())
+                self.mean.set('填入权重后可查看各指标的实际分布')
+                self.summary.set(f'未填入权重：{exc}')
+                self.describe_pending()
+            self.error(exc)
+            return
         self.profile = profile
         self.describe()
         self.render()
@@ -131,7 +148,8 @@ class StructureWeightsPage(ttk.Frame):
     def describe(self):
         profile = self.profile
         first, last = profile.draws[0], profile.draws[-1]
-        self.summary.set(f'已应用：{profile.requested or "全部"} 期 · 实际 {len(profile.draws)} 期 · {first.issue or first.line} → {last.issue or last.line} · {profile.order}')
+        scope = f'近 {profile.requested} 期' if profile.requested else '全部'
+        self.summary.set(f'已填入：{scope} · 实际 {len(profile.draws)} 期 · {first.issue or first.line} → {last.issue or last.line} · {profile.order}')
         self.describe_pending()
 
     def render(self):
@@ -178,7 +196,9 @@ class StructureWeightsPage(ttk.Frame):
         return deepcopy(self.profile)
 
     def set_busy(self, busy):
+        self._busy = busy
         for widget in (self.rebuild_button,self.strength_button,self.edit_button,self.period_box,self.restore_button,self.strength_entry,self.edit_entry):
             widget.configure(state='disabled' if busy else 'normal')
         for widget in (self.family_box, self.group_box):
             widget.configure(state='disabled' if busy else 'readonly')
+        self.describe_pending()

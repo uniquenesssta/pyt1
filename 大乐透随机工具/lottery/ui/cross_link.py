@@ -1,7 +1,6 @@
 """选号页与结构页的双向跨区权重联动。"""
 from ..core.cross_weights import cross_values, with_cross_values
 from ..core.structure_profile import build_profile
-from ..core.generation import MODES
 
 
 class CrossWeightLink:
@@ -38,8 +37,7 @@ class CrossWeightLink:
                 self.page.render()
             self.linked = True
             self.controls.custom.set(True)
-            self.controls.mode.set(MODES[2])
-            self.controls.update_mode()
+            self.controls.use_structure_mode()
             self.controls.cross_period.set('跟随结构权重页')
             self.from_profile(profile)
         except ValueError as exc:
@@ -59,11 +57,25 @@ class CrossWeightLink:
     def describe(self, profile):
         self.controls.cross_source.set(f'已联动：最近 {len(profile.draws)} 期 · 最大/起始跨区强度 {profile.strengths["最大跨区（差值>7）"]:g}/{profile.strengths["起始跨区"]:g}（0关闭）')
 
+    def _entry_weights(self):
+        return tuple(tuple(float(var.get()) for var in group) for group in self.controls.weight_vars)
+
+    def snapshot(self):
+        """生成直接使用已同步的配置，未完成的跨区输入不能悄悄被忽略。"""
+        profile = self.page.snapshot()
+        if self.controls.custom.get():
+            try:
+                values = self._entry_weights()
+            except ValueError:
+                values = ()
+            if values != cross_values(profile):
+                raise ValueError('选号页的跨区权重尚未同步，请修正输入或点“一键填入”')
+        return profile
+
     def from_entries(self, *_):
         if self.syncing or not self.linked or self.page.profile is None: return
         try:
-            values = [tuple(float(var.get()) for var in group) for group in self.controls.weight_vars]
-            profile = with_cross_values(self.page.profile, values)
+            profile = with_cross_values(self.page.profile, self._entry_weights())
         except ValueError:
             self.controls.cross_source.set('跨区输入未完成或无效；修正后同步，生成时会校验')
             return
