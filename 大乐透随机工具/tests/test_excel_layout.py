@@ -1,6 +1,7 @@
 """报表列识别与真实导入入口回归。"""
 import tempfile
 import unittest
+from datetime import datetime
 from pathlib import Path
 from test_excel import xlsx
 from lottery.data.importing import load_dataset
@@ -20,6 +21,20 @@ class LayoutTests(unittest.TestCase):
             self.assertEqual((len(result.draws),len(result.issues),result.ignored,result.duplicates),(2,0,3,1))
             self.assertEqual(result.draws[0].issue,'07001')
             self.assertEqual(result.draws[0].ticket.back,(4,11))
+            self.assertEqual(result.draws[0].draw_date,'2007-05-30')
+
+    def test_date_cell_in_report_remains_available_for_matching(self):
+        from openpyxl import Workbook
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp)/'report.xlsx'
+            book = Workbook()
+            book.active.append(HEADER)
+            row = ROW.copy()
+            row[1] = datetime(2007, 5, 30)
+            book.active.append(row)
+            book.save(path)
+            book.close()
+            self.assertEqual(load_dataset(path).draws[0].draw_date, '2007-05-30')
 
     def test_missing_selected_cell_is_not_replaced_by_prize(self):
         with tempfile.TemporaryDirectory() as tmp:

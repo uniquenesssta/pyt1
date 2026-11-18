@@ -1,5 +1,6 @@
 """共享数据模型与输入约束。"""
 from dataclasses import dataclass
+from datetime import date
 from math import comb
 import re
 
@@ -54,10 +55,13 @@ class Draw:
     issue: str = ""
     line: int = 0
     sheet: str = ""
+    draw_date: str = ""
 
     def __post_init__(self):
         if len(self.ticket.front) != 5 or len(self.ticket.back) != 2:
             raise ValueError("历史记录必须为 5 个前区号码和 2 个后区号码")
+        if self.draw_date and date.fromisoformat(self.draw_date).isoformat() != self.draw_date:
+            raise ValueError("开奖日期须为 YYYY-MM-DD")
 
 
 class Cancelled(Exception):

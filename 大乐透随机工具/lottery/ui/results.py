@@ -7,7 +7,7 @@ from .widgets import wrapped_label
 
 
 class TicketPanel(ttk.Frame):
-    def __init__(self, parent, title, status, error, action, action_text):
+    def __init__(self, parent, title, status, error, action, action_text, on_open=None):
         super().__init__(parent, padding=10)
         self.status, self.error = status, error
         toolbar = ttk.Frame(self)
@@ -15,6 +15,8 @@ class TicketPanel(ttk.Frame):
         ttk.Button(toolbar, text="复制选中", command=self.copy).pack(side="left")
         ttk.Button(toolbar, text="导出全部", command=self.export).pack(side="left", padx=5)
         ttk.Button(toolbar, text=action_text, command=lambda: action(self.selected())).pack(side="right")
+        if on_open is not None:
+            ttk.Label(toolbar, text="双击一组号码，按期记录并收藏", style="Muted.TLabel").pack(side="left", padx=8)
         empty = '设置参数后点击“生成号码”' if title == '本批号码' else '选中本批号码后点击“收藏选中”，收藏会自动保存'
         self.table = DataTable(self, ("序号", "前区号码", "后区号码"), (80, 640, 300), empty_text=empty)
         self.table.pack(fill="both", expand=True)
@@ -22,7 +24,8 @@ class TicketPanel(ttk.Frame):
         self.summary.pack(side="bottom", before=self.table, fill="x", pady=(6, 0))
         self.table.tree.bind("<Control-c>", lambda _: self.copy())
         # Double-click affects the clicked row only, never unrelated multi-selection.
-        self.table.bind_open(lambda row: action([Ticket(parse_numbers(row[1], 35), parse_numbers(row[2], 12))]))
+        open_ticket = on_open or (lambda ticket: action([ticket]))
+        self.table.bind_open(lambda row: open_ticket(self.ticket_from_row(row)))
         self.set_tickets([])
 
     def set_tickets(self, tickets):
@@ -32,7 +35,11 @@ class TicketPanel(ttk.Frame):
         self.summary.configure(text=f"{len(tickets):,} 组 · 普通复式 {bets:,} 注 · 基本金额 {bets*2:,} 元 · 含追加 {bets*3:,} 元（仅计算）")
 
     def selected(self):
-        return [Ticket(parse_numbers(row[1], 35), parse_numbers(row[2], 12)) for row in self.table.selected()]
+        return [self.ticket_from_row(row) for row in self.table.selected()]
+
+    @staticmethod
+    def ticket_from_row(row):
+        return Ticket(parse_numbers(row[1], 35), parse_numbers(row[2], 12))
 
     def copy(self):
         selected = self.selected()

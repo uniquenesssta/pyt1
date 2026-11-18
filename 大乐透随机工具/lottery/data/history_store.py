@@ -26,7 +26,8 @@ class HistoryStore:
                 raise ValueError('不支持的历史快照版本')
             data = payload['dataset']
             data['draws'] = [Draw(Ticket(tuple(d['ticket']['front']), tuple(d['ticket']['back'])),
-                                  d['issue'], d['line'], d.get('sheet', '')) for d in data['draws']]
+                                  d['issue'], d['line'], d.get('sheet', ''), d.get('draw_date', ''))
+                             for d in data['draws']]
             data['issues'] = [ImportIssue(**item) for item in data['issues']]
             result = Dataset(**data)
             if not result.draws:

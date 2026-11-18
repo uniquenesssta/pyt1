@@ -18,7 +18,12 @@ def workbook_rows(path):
                 for row in range(sheet.nrows):
                     values = []
                     for cell in sheet.row(row):
-                        if cell.ctype in (xlrd.XL_CELL_DATE, xlrd.XL_CELL_BOOLEAN, xlrd.XL_CELL_ERROR):
+                        if cell.ctype == xlrd.XL_CELL_DATE:
+                            try:
+                                values.append(xlrd.xldate_as_datetime(cell.value, book.datemode))
+                            except (ValueError, OverflowError):
+                                values.append('[无效日期]')
+                        elif cell.ctype in (xlrd.XL_CELL_BOOLEAN, xlrd.XL_CELL_ERROR):
                             values.append('[日期/布尔/错误单元格]')
                         else:
                             values.append(cell.value)
@@ -63,10 +68,12 @@ def load_excel(path, cancel=None, progress=None):
                 continue
             text = ' | '.join(cells)
             try:
-                selected = layouts[sheet].extract(cells) if sheet in layouts else cells
+                layout = layouts.get(sheet)
+                selected = layout.extract(cells) if layout else cells
                 if any(not c for c in selected):
                     raise ValueError('行内有空单元格，请补全号码或移除空列')
-                draw = replace(parse_line(" | ".join(selected), line), sheet=sheet)
+                draw = replace(parse_line(" | ".join(selected), line), sheet=sheet,
+                               draw_date=layout.date_from(values) if layout else '')
                 key = (draw.issue, draw.ticket)
                 if key in seen:
                     result.duplicates += 1

@@ -1,12 +1,17 @@
 """真实 Tk 控件集成测试；无显示服务器时明确跳过，不用 mock 冒充运行。"""
 from pathlib import Path
+from datetime import datetime, timezone
 import tempfile
 import time
 import tkinter as tk
 import unittest
+from unittest.mock import patch
 from lottery.ui.app import LotteryApp
 from lottery.core.models import Draw, Ticket
 from lottery.core.generation import MODES
+from lottery.core.statistics import analyze
+from lottery.data.online_feed import parse_feed
+from lottery.ui.history_actions import apply_history
 
 
 class UITests(unittest.TestCase):
@@ -53,6 +58,34 @@ class UITests(unittest.TestCase):
         self.assertEqual(len(self.app.store.load()), 2)
         self.app.remove_favorites(self.app.favorites[:1])
         self.assertEqual(len(self.app.store.load()), 1)
+
+    def test_double_click_records_only_that_row_and_loaded_draw_checks_it(self):
+        ticket = Ticket((1, 2, 3, 4, 5), (1, 2))
+        other = Ticket((6, 7, 8, 9, 10), (3, 4))
+        self.app.generated.set_tickets([ticket, other])
+        self.root.update()
+        tree = self.app.generated.table.tree
+        tree.selection_set(('0', '1'))
+        x, y, _, height = tree.bbox('0', '#1')
+        with patch('lottery.ui.pick_log.datetime') as clock:
+            clock.now.return_value = datetime(2026, 11, 18, 12, 59, tzinfo=timezone.utc)
+            for stamp in (1000, 1120):
+                tree.event_generate('<ButtonPress-1>', x=x+8, y=y+height//2, time=stamp)
+                tree.event_generate('<ButtonRelease-1>', x=x+8, y=y+height//2, time=stamp+25)
+        self.root.update()
+        records = self.app.pick_log.store.load()
+        self.assertEqual([r.ticket for r in records], [ticket])
+        self.assertEqual(self.app.store.load(), [ticket])
+
+        dataset = parse_feed(b'26132 2026-11-18 01 02 03 04 05 01 02\n')
+        apply_history(self.app, (dataset, analyze(dataset.draws)), '开奖已载入')
+        panel = self.app.pick_log
+        self.app.results_tabs.select(panel)
+        self.root.update()
+        self.assertEqual(panel.table.rows[0][1], '第 26132 期')
+        self.assertEqual(panel.table.rows[0][4], '5+2')
+        self.assertIn('一等奖', panel.table.rows[0][5])
+        self.assertEqual(self.errors, [])
 
     def test_import_search_statistics_generation_flow(self):
         path = Path(self.folder.name) / 'test.txt'

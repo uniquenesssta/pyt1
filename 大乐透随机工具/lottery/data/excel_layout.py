@@ -1,5 +1,7 @@
 """识别开奖报表列布局；仅在明确表头下提取号码，不猜奖金列。"""
 from dataclasses import dataclass
+from datetime import date, datetime
+import re
 
 
 @dataclass(frozen=True)
@@ -7,6 +9,21 @@ class DrawColumns:
     issue: int
     front: tuple
     back: tuple
+
+    def date_from(self, cells):
+        value = cells[self.issue + 1]
+        if isinstance(value, datetime):
+            return value.date().isoformat()
+        if isinstance(value, date):
+            return value.isoformat()
+        if isinstance(value, str):
+            match = re.fullmatch(r'([0-9]{4})[-/年]([0-9]{1,2})[-/月]([0-9]{1,2})日?', value.strip())
+            if match:
+                try:
+                    return date(*map(int, match.groups())).isoformat()
+                except ValueError:
+                    pass
+        return ''
 
     def extract(self, cells):
         indexes = (self.issue,) + self.front + self.back

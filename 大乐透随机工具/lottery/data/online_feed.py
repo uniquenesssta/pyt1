@@ -1,5 +1,5 @@
 """乐彩网开奖文本下载与校验，不依赖 Excel 或执行宏。"""
-from datetime import date
+from dataclasses import replace
 import re
 import time
 from urllib.request import Request, urlopen
@@ -50,14 +50,14 @@ def parse_feed(raw, cancel=None):
         try:
             if len(cells) < 9 or not re.fullmatch(r'\d{4}-\d{2}-\d{2}', cells[1]):
                 raise ValueError('缺少期号、日期或 5+2 号码')
-            date.fromisoformat(cells[1])
-            draw = parse_line(' '.join([cells[0]] + cells[2:9]), number)
+            draw = replace(parse_line(' '.join([cells[0]] + cells[2:9]), number), draw_date=cells[1])
+            value = (draw.ticket, draw.draw_date)
             if draw.issue in seen:
-                if seen[draw.issue] != draw.ticket:
-                    raise ValueError(f'同一期 {draw.issue} 存在不同号码')
+                if seen[draw.issue] != value:
+                    raise ValueError(f'同一期 {draw.issue} 存在不同号码或开奖日期')
                 result.duplicates += 1
                 continue
-            seen[draw.issue] = draw.ticket
+            seen[draw.issue] = value
             result.draws.append(draw)
         except ValueError as exc:
             raise ValueError(f'在线数据第 {number} 行异常：{exc}；原数据保留') from exc

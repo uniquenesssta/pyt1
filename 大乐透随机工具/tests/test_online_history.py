@@ -1,4 +1,5 @@
 """在线数据解析、更新保护与持久化，不依赖公网运行测试。"""
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -19,6 +20,7 @@ class OnlineHistoryTests(unittest.TestCase):
         self.assertEqual([d.issue for d in data.draws], ['07001','07002'])
         self.assertEqual(data.duplicates, 1)
         self.assertEqual(data.draws[0].ticket.back, (4,11))
+        self.assertEqual([d.draw_date for d in data.draws], ['2007-05-30','2007-06-02'])
 
     def test_html_bad_date_bad_numbers_rejected(self):
         for raw in (b'<html>error</html>',ROW.replace(b'2007-05-30',b'2007-99-30'),ROW.replace(b'35 04',b'36 04'),b''):
@@ -26,6 +28,7 @@ class OnlineHistoryTests(unittest.TestCase):
 
     def test_conflicting_duplicate_rejected(self):
         with self.assertRaises(ValueError):parse_feed(ROW+ROW.replace(b'35 04',b'34 04'))
+        with self.assertRaises(ValueError):parse_feed(ROW+ROW.replace(b'2007-05-30',b'2007-05-31'))
 
     def test_update_count_missing_and_changed(self):
         previous=parse_feed(ROW)
@@ -52,6 +55,15 @@ class OnlineHistoryTests(unittest.TestCase):
             store=HistoryStore(Path(tmp)/'history.json');store.path.write_text('broken')
             with self.assertRaises(ValueError):store.load()
             self.assertEqual(store.path.read_text(),'broken')
+
+    def test_previous_history_without_dates_is_still_readable(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = HistoryStore(Path(tmp)/'history.json')
+            store.save(parse_feed(ROW))
+            payload = json.loads(store.path.read_text(encoding='utf-8'))
+            del payload['dataset']['draws'][0]['draw_date']
+            store.path.write_text(json.dumps(payload), encoding='utf-8')
+            self.assertEqual(store.load().draws[0].draw_date, '')
 
     def test_download_reads_actual_response_interface(self):
         import io

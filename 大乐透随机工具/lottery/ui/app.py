@@ -7,6 +7,7 @@ from tkinter import ttk, filedialog, messagebox
 from ..core.generation import generate, MODES
 from ..core.structure_cache import StructureCache
 from ..data.history_store import HistoryStore
+from ..data.pick_store import PickStore
 from .history_actions import import_history, update_history, restore_history
 from ..data.storage import FavoriteStore
 from .controls import GenerationControls
@@ -14,6 +15,7 @@ from .history import HistoryPage
 from .history_navigation import search_history, open_statistic
 from .import_issues import show_import_issues
 from .jobs import Jobs
+from .pick_log import PickLogPanel
 from .results import TicketPanel
 from .selection_inputs import SelectionInputs
 from .statistics import StatisticsPage
@@ -60,10 +62,14 @@ class LotteryApp:
         self.form_viewport.bind_controls()
         self.results_tabs = ttk.Notebook(generation)
         self.results_tabs.pack(fill="both", expand=True)
-        self.generated = TicketPanel(self.results_tabs, "本批号码", self.set_status, self.error, self.add_favorites, "收藏选中")
+        self.generated = TicketPanel(self.results_tabs, "本批号码", self.set_status, self.error,
+                                     self.add_favorites, "收藏选中", on_open=self.record_pick)
         self.saved = TicketPanel(self.results_tabs, "我的收藏", self.set_status, self.error, self.remove_favorites, "移除选中")
+        self.pick_log = PickLogPanel(self.results_tabs, PickStore(Path(data_dir) / "picks.json"),
+                                     self.set_status, self.error)
         self.results_tabs.add(self.generated, text="本批号码")
         self.results_tabs.add(self.saved, text=f"我的收藏 ({len(self.favorites)})")
+        self.results_tabs.add(self.pick_log, text="选号记录 / 对奖")
         self.saved.set_tickets(self.favorites)
         self.history = HistoryPage(self.tabs, self.search, self.set_status, self.error)
         self.statistics = StatisticsPage(self.tabs, self.set_status, self.error)
@@ -183,6 +189,14 @@ class LotteryApp:
         added = len(updated) - len(self.favorites)
         if self.commit_favorites(updated):
             self.set_status(f"新增收藏 {added} 组，已自动保存")
+
+    def record_pick(self, ticket):
+        message = self.pick_log.record(ticket)
+        if not message:
+            return
+        if ticket not in self.favorites and not self.commit_favorites(self.favorites + [ticket]):
+            message += "；收藏写入失败"
+        self.set_status(message)
 
     def remove_favorites(self, tickets):
         if not tickets:
