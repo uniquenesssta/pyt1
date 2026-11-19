@@ -20,7 +20,7 @@ class StatisticFilter:
     def contribution(self, draw):
         category, item = self.category, self.item
         if self.source == '结构权重':
-            values = structure_values(draw.ticket.front)
+            values = structure_values(draw.ticket.front, draw.ticket.back)
             if category not in values: raise ValueError('未知结构指标')
             return int(str(values[category]) == item)
         if category.startswith(('前区·','后区·')):

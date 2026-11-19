@@ -14,9 +14,8 @@ def subset_probability(subset, pool, weights):
     return prod(weights[n] / scale for n in subset) / sums[-1]
 
 
-def select_small_space(fronts, backs, config, fw, bw, structure, rng, cancel):
+def select_small_space(fronts, backs, config, fw, bw, structure, rng, cancel, *, back_structure=None):
     fp = [n for n in range(1, 36) if n not in config.front_fixed and n not in config.front_excluded]
-    bp = [n for n in range(1, 13) if n not in config.back_fixed and n not in config.back_excluded]
     fweights = []
     for i, front in enumerate(fronts):
         check_cancel(cancel)
@@ -25,7 +24,11 @@ def select_small_space(fronts, backs, config, fw, bw, structure, rng, cancel):
         else:
             value = subset_probability(tuple(n for n in front if n not in config.front_fixed), fp, fw)
         fweights.append(value)
-    bweights = [subset_probability(tuple(n for n in back if n not in config.back_fixed), bp, bw) for back in backs]
+    if back_structure:
+        bweights = back_structure.weights
+    else:
+        bp = [n for n in range(1, 13) if n not in config.back_fixed and n not in config.back_excluded]
+        bweights = [subset_probability(tuple(n for n in back if n not in config.back_fixed), bp, bw) for back in backs]
 
     def candidates():
         index = 0

@@ -48,7 +48,7 @@ class StructurePool:
             if max_weights[f.max_span] == 0 or start_weights[f.start_span] == 0:
                 continue
             if scorer is not None:
-                weight = scorer.weight(front)
+                weight = scorer.weight(front, f)
                 if config.max_span_weights:
                     weight *= config.max_span_weights[f.max_span]
                 if config.start_span_weights:
@@ -72,7 +72,7 @@ class StructurePool:
             self.cumulative.append(total)
         check_cancel(cancel)
         if not self.fronts:
-            raise ValueError("固定/排除号码与跨区权重冲突，没有可用的前区组合")
+            raise ValueError("固定/排除号码或结构权重限制过严，没有可用的前区组合")
 
     def choose(self, rng):
         index = bisect_right(self.cumulative, rng.random() * self.cumulative[-1])

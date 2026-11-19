@@ -242,6 +242,23 @@ class UITests(unittest.TestCase):
         self.assertTrue(all(t.front == (1, 2, 8, 9, 15) and len(t.back) == 3
                             for t in self.app.generated.tickets))
 
+    def test_trend_structure_shows_theory_and_applies_indicator_strength(self):
+        page = self.app.structure_weights
+        page.set_history([Draw(Ticket((2, 9, 16, 26, 35), (6, 11)), '26132')])
+        self.app.tabs.select(page)
+        page.family.set('后区结构')
+        page.family_box.event_generate('<<ComboboxSelected>>')
+        self.root.update()
+        self.assertIn('理论占比', page.table.tree['displaycolumns'])
+        row = next(row for row in page.table.rows if row[0] == '1:1')
+        self.assertEqual(row[1:5], (1, 1, '100.0000%', '54.5455%'))
+        self.assertEqual(page.strength.get(), '0')
+        page.strength.set('1')
+        page.strength_button.invoke()
+        self.assertEqual(page.snapshot().strengths['后区奇偶比'], 1.0)
+        self.assertIn('参与抽取', page.mean.get())
+        self.assertEqual(self.errors, [])
+
     def assert_visible_inside(self, widget, container):
         self.assertTrue(widget.winfo_ismapped(), str(widget))
         self.assertGreater(widget.winfo_width(), 1)

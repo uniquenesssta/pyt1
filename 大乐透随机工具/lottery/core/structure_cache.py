@@ -4,6 +4,7 @@ from dataclasses import asdict, dataclass
 from hashlib import sha256
 from threading import Lock
 from .models import check_cancel
+from .trend_indicators import BACK_INDICATORS
 from .weighted import StructurePool
 
 
@@ -17,10 +18,12 @@ def freeze(value):
 
 def cache_key(config, stats):
     profile = config.structure_profile
-    history = None if profile is None else (
-        profile.requested,
-        tuple((d.issue, d.ticket.front, d.ticket.back) for d in profile.draws),
-        freeze(profile.weights), freeze(profile.strengths))
+    history = None
+    if profile is not None:
+        strengths = {name: weight for name, weight in profile.strengths.items() if name not in BACK_INDICATORS}
+        history = (profile.requested,
+                   tuple((d.issue, d.ticket.front, d.ticket.back) for d in profile.draws),
+                   freeze({name: profile.weights[name] for name in strengths}), freeze(strengths))
     # 不纳入批量组数、去重开关和后区条件：它们不改变前区候选及评分。
     data = (config.front_count, tuple(sorted(config.front_fixed)),
             tuple(sorted(config.front_excluded)), config.max_span_weights,

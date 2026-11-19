@@ -3,6 +3,8 @@ from copy import deepcopy
 import tkinter as tk
 from tkinter import ttk
 from ..core.structure_profile import build_profile, domains
+from ..core.trend_baseline import uniform_fractions
+from ..core.trend_indicators import BACK, TREND_INDICATORS
 from .structure_draw import StructureDrawPanel
 from .table import DataTable
 from .widgets import field, wrapped_label, Disclosure
@@ -14,7 +16,12 @@ GROUPS = {
     '空区': ('空区数量',) + tuple(f'{z}区空区' for z in range(1, 6)),
     '跨区': ('最大跨区（差值>7）', '起始跨区'),
     '中间覆盖': tuple(f'{z}区中间覆盖（差值>10）' for z in range(1, 6)),
+    '前区形态': ('前区奇偶比', '前区小大比', '前区012路比'),
+    '前区数值': ('前区和值', '前区跨度'),
+    '后区结构': tuple(name for name, indicator in TREND_INDICATORS.items() if indicator.zone == BACK),
 }
+WEIGHT_COLUMNS = ('类别', '历史次数', '实际期数', '历史占比', '理论占比', '建议权重', '当前权重')
+CLASSIC_COLUMNS = tuple(name for name in WEIGHT_COLUMNS if name != '理论占比')
 
 
 class StructureWeightsPage(ttk.Frame):
@@ -57,7 +64,8 @@ class StructureWeightsPage(ttk.Frame):
         self.strength_button.grid(row=0, column=3, sticky='sw')
         self.mean = tk.StringVar(value='选择指标查看历史分布；双击次数回查开奖记录')
         wrapped_label(self, textvariable=self.mean, style='Muted.TLabel').pack(fill='x', pady=6)
-        self.table = DataTable(self, ('类别','历史次数','实际期数','历史占比','建议权重','当前权重'), (150,120,120,140,140,140))
+        self.table = DataTable(self, WEIGHT_COLUMNS, (140, 105, 105, 125, 125, 125, 125))
+        self.table.tree.configure(displaycolumns=CLASSIC_COLUMNS)
         self.table.pack(fill='both', expand=True)
         row = ttk.Frame(self)
         row.pack(side='bottom', before=self.table, fill='x', pady=6)
@@ -73,7 +81,15 @@ class StructureWeightsPage(ttk.Frame):
         self.table.tree.bind('<<TreeviewSelect>>', lambda _: self.describe_selection(), add='+')
         help_box = Disclosure(self, '权重说明')
         help_box.pack(side='bottom', before=row, fill='x')
-        wrapped_label(help_box.body, text='历史次数与占比保留实际数据；建议权重加1平滑，避免近期未出现的类别被直接排除。均值只供参考，生成使用完整分布与指标强度。最长连号与连号形态、空区数量与各区空区有重叠，所以最长连号和空区数量的强度默认关闭。权重是相对偏好，不是最终生成比例或中奖概率。', style='Muted.TLabel').pack(fill='x')
+        wrapped_label(
+            help_box.body,
+            text='历史占比是实际次数除以期数；理论占比是没有固定或排除号码时的均匀组合基准。'
+                 '原指标建议权重沿用加 1 平滑；新增指标对比实际次数与理论次数，50 表示中性。'
+                 '新增指标默认只统计，设强度后才参与抽取。最长连号、空区数量仍默认关闭，避免重复强调。'
+                 '启用后区结构后，复式按所有二码对子评分，含零权重对子则排除整组。'
+                 '均值供参考，权重是抽取偏好，不是中奖概率。',
+            style='Muted.TLabel',
+        ).pack(fill='x')
         self.draw_panel = StructureDrawPanel(self, inputs, draw)
         self.draw_panel.pack(side='bottom', before=help_box, fill='x', pady=(6, 0))
         self.period.trace_add('write', lambda *_: self.describe_pending())
@@ -108,9 +124,7 @@ class StructureWeightsPage(ttk.Frame):
             return
         new = deepcopy(self.profile)
         name = self.group.get()
-        keys = domains()[name]
-        total = len(new.draws)
-        new.weights[name] = {key: 100 * (new.counts[name][key] + 1) / (total + len(keys)) for key in keys}
+        new.weights[name] = new.suggested_weights(name)
         new.validate()
         self.profile = new
         self.render()
@@ -155,17 +169,33 @@ class StructureWeightsPage(ttk.Frame):
     def render(self):
         if not self.profile: return
         p, name = self.profile, self.group.get()
-        self.strength.set(str(p.strengths[name]))
+        strength = p.strengths[name]
+        self.strength.set(f'{strength:g}')
         average = p.means.get(name)
-        if name.endswith('空区') or '中间覆盖' in name:
+        indicator = TREND_INDICATORS.get(name)
+        if indicator:
+            state = '只统计（强度 0）' if strength == 0 else f'参与抽取（强度 {strength:g}）'
+            description = indicator.description + f'；理论占比按均匀组合计算；{state}'
+        elif name.endswith('空区') or '中间覆盖' in name:
             description = '0=未发生，1=发生；均值即发生比例'
         elif name == '连号形态':
             description = '连续段长度组合：2+2+1 表示两组二连号加一个单号；1+1+1+1+1 表示无连号'
         else:
             description = 'C1–C4为排序后相邻号码差；最大跨区保留差值>7定义，起始跨区为最小号码分区减1'
-        self.mean.set((f'历史均值：{average:.4f}；' if average is not None else '') + description)
-        total = len(p.draws); keys = domains()[name]
-        self.table.set_rows((str(k),p.counts[name][k],total,f'{100*p.counts[name][k]/total:.4f}%',f'{100*(p.counts[name][k]+1)/(total+len(keys)):.4f}',f'{p.weights[name][k]:.4f}') for k in keys)
+        if isinstance(average, tuple):
+            prefix = '平均每期：' + '、'.join(f'{part} {value:.2f}' for part, value in zip(indicator.parts, average)) + '；'
+        else:
+            prefix = f'历史均值：{average:.4f}；' if average is not None else ''
+        self.mean.set(prefix + description)
+        total = len(p.draws)
+        baseline = uniform_fractions(name) if indicator else None
+        suggestions = p.suggested_weights(name)
+        self.table.tree.configure(displaycolumns=WEIGHT_COLUMNS if indicator else CLASSIC_COLUMNS)
+        self.table.set_rows(
+            (str(k), p.counts[name][k], total, f'{100*p.counts[name][k]/total:.4f}%',
+             f'{100*baseline[k]:.4f}%' if baseline else '—', f'{suggestions[k]:.4f}', f'{p.weights[name][k]:.4f}')
+            for k in domains()[name]
+        )
 
     def apply_strength(self):
         if not self.profile: return

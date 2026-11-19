@@ -45,7 +45,7 @@ class GenerationConfig:
             if weights and (len(weights) != 5 or any(not isfinite(w) or w < 0 or w > 100 for w in weights) or not any(weights)):
                 raise ValueError("跨区权重须为 5 个 0–100 数值，且不能全为 0")
         if self.mode == MODES[2] and self.front_count != 5:
-            raise ValueError("历史结构加权仅适用于前区 5 个号码；复式请选择均匀或历史频率加权")
+            raise ValueError("历史结构加权仅适用于前区 5 个号码；前区复式请选择均匀或历史频率加权")
         if self.mode != MODES[2] and (self.max_span_weights or self.start_span_weights):
             raise ValueError("自定义跨区权重仅用于历史结构加权模式")
 
@@ -98,21 +98,26 @@ def generate(config, stats=None, cancel=None, progress=None, rng=None, structure
         raise ValueError("历史加权需要先导入有效历史数据")
     front_weights = {n: stats.front[n] + 1 for n in range(1, 36)}
     back_weights = {n: stats.back[n] + 1 for n in range(1, 13)}
-    structure = None
+    structure = back_structure = None
     if config.mode == MODES[2]:
+        from .back_structure import build_back_structure
+        back_structure = build_back_structure(back_pool, config.back_fixed, config.back_count,
+                                              back_weights, config.structure_profile, cancel)
         structure = (structure_cache.get(config, stats, cancel, progress) if structure_cache is not None
                      else StructurePool(config, stats, cancel, progress))
     if structure:
-        capacity = len(structure.fronts) * back_size
+        capacity = len(structure.fronts) * (len(back_structure.backs) if back_structure else back_size)
         if config.unique and config.count > capacity:
-            raise ValueError(f"跨区限制后最多 {capacity:,} 组不重复号码")
+            raise ValueError(f"结构权重限制后最多 {capacity:,} 组不重复号码")
     results, seen = [], set()
     # 较小候选空间全量求权重并无放回抽样，避免快抽满时反复碰撞。
     if config.unique and capacity <= 50000:
         fronts = structure.fronts if structure else [tuple(sorted(config.front_fixed + f)) for f in combinations(front_pool, nf)]
-        backs = [tuple(sorted(config.back_fixed + b)) for b in combinations(back_pool, nb)]
+        backs = (back_structure.backs if back_structure else
+                 [tuple(sorted(config.back_fixed + b)) for b in combinations(back_pool, nb)])
         from .selection import select_small_space
-        return select_small_space(fronts, backs, config, front_weights, back_weights, structure, rng, cancel)
+        return select_small_space(fronts, backs, config, front_weights, back_weights, structure, rng, cancel,
+                                  back_structure=back_structure)
     limit = max(20000, config.count * 200)
     for attempt in range(limit):
         if attempt % 100 == 0:
@@ -120,7 +125,8 @@ def generate(config, stats=None, cancel=None, progress=None, rng=None, structure
             if progress:
                 progress(f"已生成 {len(results):,} / {config.count:,} 组")
         front = structure.choose(rng) if structure else config.front_fixed + tuple(weighted_sample(front_pool, nf, front_weights, rng))
-        back = config.back_fixed + tuple(weighted_sample(back_pool, nb, back_weights, rng))
+        back = (back_structure.choose(rng) if back_structure else
+                config.back_fixed + tuple(weighted_sample(back_pool, nb, back_weights, rng)))
         ticket = Ticket(front, back)
         if config.unique and ticket in seen:
             continue

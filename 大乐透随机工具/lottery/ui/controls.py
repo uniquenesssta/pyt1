@@ -82,7 +82,7 @@ class GenerationControls(ttk.Frame):
         hints = {
             MODES[0]: "系统随机源 · 合法组合等概率；固定或排除后在剩余组合中抽取。",
             MODES[1]: "使用结构权重页所选期数的号码次数 + 1 加权；历史频率不代表下期概率。",
-            MODES[2]: "前区限5个 · 使用结构页的差值、连号、空区与跨区设置；跨区权重只计算一次。",
+            MODES[2]: "前区限 5 个 · 使用结构权重页已启用的前后区指标；后区结构默认关闭。",
         }
         self.hint.configure(text=hints[self.mode.get()])
 

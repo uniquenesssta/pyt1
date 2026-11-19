@@ -5,10 +5,12 @@ from math import isfinite
 from .features import features
 from .history_window import select_window
 from .statistics import analyze
+from .trend_baseline import trend_suggestions
+from .trend_indicators import BACK, FRONT, TREND_INDICATORS, trend_values
 
 
-def structure_values(front):
-    f = features(front)
+def classic_values(front, f=None):
+    f = features(front) if f is None else f
     runs, size = [], 1
     for gap in f.gaps:
         if gap == 1:
@@ -27,6 +29,14 @@ def structure_values(front):
     return values
 
 
+def structure_values(front, back=()):
+    values = classic_values(front)
+    values.update(trend_values(front, FRONT))
+    if back:
+        values.update(trend_values(back, BACK))
+    return values
+
+
 def domains():
     values = {f'C{i}差值': tuple(range(1, 32)) for i in range(1, 5)}
     values.update({'最长连号': tuple(range(1, 6)),
@@ -36,7 +46,27 @@ def domains():
     for z in range(1, 6):
         values[f'{z}区空区'] = (0,1)
         values[f'{z}区中间覆盖（差值>10）'] = (0,1)
+    values.update({name: indicator.categories for name, indicator in TREND_INDICATORS.items()})
     return values
+
+
+def _suggestions(name, keys, counts, samples):
+    if name in TREND_INDICATORS:
+        return trend_suggestions(name, counts, samples)
+    return {key: 100 * (counts[key]+1)/(samples+len(keys)) for key in keys}
+
+
+def _average(name, keys, counts, samples):
+    if isinstance(keys[0], int):
+        return sum(key * counts[key] for key in keys) / samples
+    indicator = TREND_INDICATORS.get(name)
+    if indicator and indicator.parts:
+        totals = [0] * len(indicator.parts)
+        for key, count in counts.items():
+            for i, value in enumerate(key.split(":")):
+                totals[i] += int(value) * count
+        return tuple(total / samples for total in totals)
+    return None
 
 
 @dataclass
@@ -49,6 +79,9 @@ class StructureProfile:
     weights: dict
     strengths: dict
     means: dict
+
+    def suggested_weights(self, name):
+        return _suggestions(name, domains()[name], self.counts[name], len(self.draws))
 
     def validate(self):
         for name, categories in domains().items():
@@ -64,17 +97,19 @@ class StructureProfile:
 
 def build_profile(draws, periods=50):
     selected, order = select_window(draws, periods)
-    counters = {name: Counter() for name in domains()}
+    categories = domains()
+    counters = {name: Counter() for name in categories}
     for draw in selected:
-        for name, value in structure_values(draw.ticket.front).items():
+        for name, value in structure_values(draw.ticket.front, draw.ticket.back).items():
             counters[name][value] += 1
     weights, means = {}, {}
-    for name, categories in domains().items():
+    for name, keys in categories.items():
         counts = counters[name]
-        weights[name] = {key: 100 * (counts[key]+1)/(len(selected)+len(categories)) for key in categories}
-        if all(type(k) is int for k in categories):
-            means[name] = sum(k * counts[k] for k in categories)/len(selected)
-    strengths = {name: 1.0 for name in counters}
+        weights[name] = _suggestions(name, keys, counts, len(selected))
+        average = _average(name, keys, counts, len(selected))
+        if average is not None:
+            means[name] = average
+    strengths = {name: 0.0 if name in TREND_INDICATORS else 1.0 for name in counters}
     # 形态已包含最长连号；空区数量与各区空区相关，默认避免重复叠加强调。
     strengths['最长连号'] = 0.0
     strengths['空区数量'] = 0.0
