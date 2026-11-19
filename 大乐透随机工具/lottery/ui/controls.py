@@ -1,39 +1,48 @@
 """随机参数表单；常用参数优先，固定/排除与跨区编辑按需展开。"""
 import tkinter as tk
 from tkinter import ttk
+from ..core.calendar_samples import CALENDAR_MODE
+from ..core.conditional_frequency import CONDITIONAL_MODE
 from ..core.generation import MODES
 from .indicator_picker import IndicatorPicker
 from .number_constraints import NumberConstraints
+from .post_mode_controls import CalendarControls, ConditionalControls
 from .selection_inputs import COUNT_FIELDS
 from .widgets import field, wrapped_label
 
 
+COMMON_MODES = (*MODES[:2], CALENDAR_MODE, CONDITIONAL_MODE)
+
+
 class GenerationControls(ttk.Frame):
-    def __init__(self, parent, generate, inputs, indicator_selection):
+    def __init__(self, parent, generate, inputs, indicator_selection, conditional_inputs):
         super().__init__(parent, padding=10)
         self.inputs = inputs
         self.values, self.unique = inputs.values, inputs.unique
         self.constraint_summary = inputs.summary
         self.on_structure = lambda: None
+        self.on_conditional = lambda: None
         row = ttk.Frame(self)
         row.pack(fill="x")
         self.mode = tk.StringVar(value=MODES[0])
         self.mode_box = ttk.Combobox(field(row, "随机模式", 0), textvariable=self.mode,
-                                     values=MODES, state="readonly", width=18)
+                                     values=COMMON_MODES, state="readonly", width=22)
         self.mode_box.pack(fill="x")
+        self.count_fields = []
         for i, (name, _) in enumerate(COUNT_FIELDS, 1):
-            ttk.Entry(field(row, name, i), textvariable=self.values[name], width=8).pack(fill="x")
+            count_field = field(row, name, i)
+            self.count_fields.append(count_field)
+            ttk.Entry(count_field, textvariable=self.values[name], width=8).pack(fill="x")
         self.generate_button = ttk.Button(row, text="生成号码", command=generate, style="Primary.TButton")
         row.columnconfigure(4, weight=1)
         self.generate_button.grid(row=0, column=4, sticky="se")
         actions = ttk.Frame(self)
         actions.pack(fill="x", pady=(6, 0))
-        ttk.Checkbutton(actions, text="本批组合不重复", variable=self.unique).pack(side="left")
-        self.structure_button = ttk.Button(actions, text="结构权重设置", command=lambda: self.on_structure())
+        self.unique_button = ttk.Checkbutton(actions, text="本批组合不重复", variable=self.unique)
+        self.structure_button = ttk.Button(actions, text="进阶结构权重", command=lambda: self.on_structure())
         self.structure_button.pack(side="right")
         self.custom = tk.BooleanVar(value=False)
         self.custom_button = ttk.Checkbutton(actions, text="自定义跨区权重", variable=self.custom, command=self.update_mode)
-        self.custom_button.pack(side="right", padx=16)
         self.constraints = NumberConstraints(self, actions, inputs)
         self.constraints.pack(fill="x")
         wrapped_label(self, textvariable=self.constraint_summary, style="Muted.TLabel").pack(fill="x", pady=(4, 0))
@@ -64,6 +73,9 @@ class GenerationControls(ttk.Frame):
                 ttk.Entry(group, textvariable=var, width=4).pack(side="left")
                 variables.append(var)
             self.weight_vars.append(variables)
+        self.calendar = CalendarControls(self)
+        self.conditional = ConditionalControls(self, conditional_inputs,
+                                               lambda: self.on_conditional())
         self.hint = wrapped_label(self, text="", style="Muted.TLabel")
         self.hint.pack(fill="x", pady=(4, 0))
         self.mode_box.bind("<<ComboboxSelected>>", lambda _: self.update_mode())
@@ -75,11 +87,27 @@ class GenerationControls(ttk.Frame):
         self.update_mode()
 
     def update_mode(self):
-        structure = self.mode.get() == MODES[2]
-        self.custom_button.configure(state="normal" if structure else "disabled")
+        mode = self.mode.get()
+        structure = mode == MODES[2]
+        calendar = mode == CALENDAR_MODE
+        self.mode_box.configure(values=(*COMMON_MODES, MODES[2]) if structure else COMMON_MODES)
+        self.generate_button.configure(text="生成三档号码" if calendar else "生成号码")
+        for count_field in self.count_fields:
+            count_field.grid_remove() if calendar else count_field.grid()
+        if calendar:
+            self.unique_button.pack_forget()
+        else:
+            self.unique_button.pack(side="left", before=self.constraints.button)
+        for settings, visible in ((self.calendar, calendar), (self.conditional, mode == CONDITIONAL_MODE)):
+            if visible:
+                settings.pack(fill="x", pady=(6, 0), before=self.hint)
+            else:
+                settings.pack_forget()
         if structure:
+            self.custom_button.pack(side="right", padx=16)
             self.indicator_picker.pack(fill="x", pady=(6, 0), before=self.hint)
         else:
+            self.custom_button.pack_forget()
             self.indicator_picker.pack_forget()
         if structure and self.custom.get():
             self.advanced.pack(fill="x", before=self.hint)
@@ -89,10 +117,15 @@ class GenerationControls(ttk.Frame):
             MODES[0]: "系统随机源 · 合法组合等概率；固定或排除后在剩余组合中抽取。",
             MODES[1]: "使用结构权重页所选期数的号码次数 + 1 加权；历史频率不代表下期概率。",
             MODES[2]: "前区限 5 个 · 只用上面选中的指标；未加权的一侧在合法号码中等概率抽取。",
+            CALENDAR_MODE: "按龙头、凤尾、前区奇偶和后区跨度生成一套三档；窗口填 0 则跳过。",
+            CONDITIONAL_MODE: "勾选区使用条件频次加权；另一侧等权。参照期之后的开奖不参与计算。",
         }
-        self.hint.configure(text=hints[self.mode.get()])
+        self.hint.configure(text=hints[mode])
 
     def snapshot(self, *, from_structure=False):
         if from_structure:
             return self.inputs.snapshot(MODES[2], front_count=5)
-        return self.inputs.snapshot(self.mode.get())
+        mode = self.mode.get()
+        if mode == CALENDAR_MODE:
+            return self.inputs.snapshot(MODES[0], count=1, front_count=5, back_count=2)
+        return self.inputs.snapshot(MODES[1] if mode == CONDITIONAL_MODE else mode)

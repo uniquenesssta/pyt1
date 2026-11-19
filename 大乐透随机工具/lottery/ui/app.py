@@ -4,6 +4,8 @@ from dataclasses import replace
 from pathlib import Path
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
+from ..core.calendar_samples import CALENDAR_MODE
+from ..core.conditional_frequency import CONDITIONAL_MODE
 from ..core.generation import generate, MODES
 from ..core.structure_cache import StructureCache
 from ..data.history_store import HistoryStore
@@ -17,6 +19,8 @@ from .import_issues import show_import_issues
 from .indicator_picker import IndicatorSelection
 from .jobs import Jobs
 from .pick_log import PickLogPanel
+from .post_mode_actions import calculate_conditional, generate_post_mode
+from .post_mode_controls import ConditionalInputs
 from .results import TicketPanel
 from .selection_inputs import SelectionInputs
 from .statistics import StatisticsPage
@@ -58,8 +62,10 @@ class LotteryApp:
         self.form_viewport = FormViewport(generation)
         self.form_viewport.pack(fill="x", pady=(0, 6))
         inputs = SelectionInputs(root)
+        self.conditional_inputs = ConditionalInputs(root)
         self.indicator_selection = IndicatorSelection(root)
-        self.controls = GenerationControls(self.form_viewport.body, self.generate, inputs, self.indicator_selection)
+        self.controls = GenerationControls(self.form_viewport.body, self.generate, inputs,
+                                           self.indicator_selection, self.conditional_inputs)
         self.controls.pack(fill="x")
         self.form_viewport.bind_controls()
         self.results_tabs = ttk.Notebook(generation)
@@ -74,7 +80,8 @@ class LotteryApp:
         self.results_tabs.add(self.pick_log, text="选号记录 / 对奖")
         self.saved.set_tickets(self.favorites)
         self.history = HistoryPage(self.tabs, self.search, self.set_status, self.error)
-        self.statistics = StatisticsPage(self.tabs, self.set_status, self.error)
+        self.statistics = StatisticsPage(self.tabs, self.set_status, self.error, self.conditional_inputs,
+                                         lambda: calculate_conditional(self))
         self.tabs.add(self.history, text="  历史查询  ")
         self.tabs.add(self.statistics, text="  统计分析  ")
         self.structure_weights = StructureWeightsPage(
@@ -82,6 +89,7 @@ class LotteryApp:
             self.indicator_selection)
         self.tabs.add(self.structure_weights, text="  结构权重  ")
         self.controls.on_structure = lambda: self.tabs.select(self.structure_weights)
+        self.controls.on_conditional = self.open_conditional
         self.history.on_return = lambda: self.tabs.select(self.structure_weights if self.history.statistic and self.history.statistic.source == "结构权重" else self.statistics)
         self.statistics.hot_cold.on_open = lambda area, number, periods: open_statistic(self, "统计分析", area+"·期数占比", number, periods_override=periods)
         self.statistics.table.bind_open(lambda row: open_statistic(self, "统计分析", row[0], row[1], periods_override=self.statistics.active_periods))
@@ -122,10 +130,18 @@ class LotteryApp:
     def draw_from_structure(self):
         self.generate(from_structure=True)
 
+    def open_conditional(self):
+        self.tabs.select(self.statistics)
+        self.statistics.lower_tabs.select(self.statistics.conditional)
+        if self.dataset is not None and not self.jobs.running:
+            calculate_conditional(self)
+
     def generate(self, *, from_structure=False):
         if self.jobs.running:
             self.set_status("请等待当前任务完成，或先取消")
             return
+        if not from_structure and self.controls.mode.get() in (CALENDAR_MODE, CONDITIONAL_MODE):
+            return generate_post_mode(self, self.controls.mode.get())
         try:
             config = self.controls.snapshot(from_structure=from_structure)
             if config.mode == MODES[2]:

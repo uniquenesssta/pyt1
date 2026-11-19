@@ -24,11 +24,12 @@ class SelectionInputs:
                   if self.values[name].get().strip()]
         self.summary.set(" · ".join(active) if active else "不限制号码；多个号码可用空格或逗号分隔")
 
-    def snapshot(self, mode, *, front_count=None):
+    def snapshot(self, mode, *, count=None, front_count=None, back_count=None):
         values = self.values
         try:
-            count, back = int(values["组数"].get()), int(values["后区数量"].get())
+            count = int(values["组数"].get()) if count is None else count
             front = int(values["前区数量"].get()) if front_count is None else front_count
+            back = int(values["后区数量"].get()) if back_count is None else back_count
         except ValueError as error:
             raise ValueError("组数与号码数量须为整数") from error
         config = GenerationConfig(

@@ -7,6 +7,8 @@ import tkinter as tk
 import unittest
 from unittest.mock import patch
 from lottery.ui.app import LotteryApp
+from lottery.core.calendar_samples import CALENDAR_MODE
+from lottery.core.conditional_frequency import CONDITIONAL_MODE
 from lottery.core.models import Draw, Ticket
 from lottery.core.generation import MODES
 from lottery.core.statistics import analyze
@@ -58,6 +60,47 @@ class UITests(unittest.TestCase):
         self.assertEqual(len(self.app.store.load()), 2)
         self.app.remove_favorites(self.app.favorites[:1])
         self.assertEqual(len(self.app.store.load()), 1)
+
+    def test_post_modes_and_conditional_analysis_link(self):
+        dataset = parse_feed(
+            b"25132 2025-11-12 01 06 17 20 29 03 10\n"
+            b"26129 2026-11-11 01 02 09 24 30 04 07\n"
+            b"26130 2026-11-14 03 09 12 15 25 08 12\n"
+            b"26131 2026-11-16 01 02 03 04 05 04 07\n"
+            b"26132 2026-11-18 02 09 16 26 35 06 11\n")
+        apply_history(self.app, (dataset, analyze(dataset.draws)), "开奖已载入")
+        controls = self.app.controls
+        self.assertNotIn(MODES[2], controls.mode_box["values"])
+        controls.mode.set(CALENDAR_MODE)
+        controls.update_mode()
+        controls.calendar.target.set("26132")
+        controls.values["前区数量"].set("8")
+        controls.generate_button.invoke()
+        self.finish()
+        self.assertEqual(self.errors, [])
+        self.assertEqual([row[0] for row in self.app.generated.table.rows], ["15+5", "9+3", "5+2"])
+        self.assertEqual(controls.values["前区数量"].get(), "8")
+
+        controls.mode.set(CONDITIONAL_MODE)
+        controls.update_mode()
+        self.app.conditional_inputs.anchor.set("26131")
+        self.app.open_conditional()
+        self.finish()
+        panel = self.app.statistics.conditional
+        self.assertEqual(panel.report.anchor.issue, "26131")
+        self.assertEqual(panel.report.back.top, (8, 12))
+        self.assertEqual(self.app.statistics.lower_tabs.select(), str(panel))
+        panel.view.set("后区整对 04+07")
+        panel.render()
+        self.assertEqual(panel.table.rows[0][1:4], ("08", 1, "100.00%"))
+        self.app.tabs.select(self.app.generation)
+        controls.generate_button.invoke()
+        self.finish()
+        self.assertEqual(self.errors, [])
+        self.assertEqual(len(self.app.generated.tickets[0].front), 8)
+        self.assertEqual(self.app.generated.table.rows[0][0], 1)
+        self.app.show_structure_selection()
+        self.assertIn(MODES[2], controls.mode_box["values"])
 
     def test_double_click_records_only_that_row_and_loaded_draw_checks_it(self):
         ticket = Ticket((1, 2, 3, 4, 5), (1, 2))

@@ -66,8 +66,17 @@ def unrank_combination(pool, count, rank):
     return tuple(result)
 
 
-def generate(config, stats=None, cancel=None, progress=None, rng=None, structure_cache=None):
+def generate(config, stats=None, cancel=None, progress=None, rng=None, structure_cache=None,
+             *, frequency_weights=None):
     config.validate()
+    if frequency_weights is not None:
+        if config.mode != MODES[1] or config.structure_profile is not None:
+            raise ValueError("单独提供的号码权重不能和其他加权方式同时使用")
+        front_weights, back_weights = frequency_weights
+        for weights, maximum in ((front_weights, 35), (back_weights, 12)):
+            if set(weights) != set(range(1, maximum + 1)) or any(
+                    not isfinite(weight) or weight <= 0 for weight in weights.values()):
+                raise ValueError("号码权重须覆盖该区全部号码，并为正数")
     from .cross_weights import resolve_cross_overrides
     config = resolve_cross_overrides(config)
     if config.structure_profile is not None and config.mode != MODES[0]:
@@ -100,14 +109,15 @@ def generate(config, stats=None, cancel=None, progress=None, rng=None, structure
                                   config.back_fixed + unrank_combination(back_pool, nb, b)))
         check_cancel(cancel)
         return results
-    if stats is None or stats.total == 0:
+    if frequency_weights is None and (stats is None or stats.total == 0):
         raise ValueError("历史加权需要先导入有效历史数据")
     structural = config.mode == MODES[2]
     explicit_structure = structural and config.structure_profile is not None
     if structural and not explicit_structure and not (config.max_span_weights or config.start_span_weights):
         raise ValueError("请先选择要参与抽取的加权指标")
-    front_weights = {n: 1 if structural else stats.front[n] + 1 for n in range(1, 36)}
-    back_weights = {n: 1 if structural else stats.back[n] + 1 for n in range(1, 13)}
+    if frequency_weights is None:
+        front_weights = {n: 1 if structural else stats.front[n] + 1 for n in range(1, 36)}
+        back_weights = {n: 1 if structural else stats.back[n] + 1 for n in range(1, 13)}
     structure = back_structure = None
     if config.mode == MODES[2]:
         from .back_structure import build_back_structure

@@ -8,13 +8,14 @@ from .table import DataTable
 from .charts import BarChart
 from .hot_cold import HotColdPanel
 from .omission_table import OmissionPanel
+from .conditional_table import ConditionalFrequencyPanel
 from .widgets import wrapped_label, initialize_split
 
 
 class StatisticsPage(ttk.Frame):
     HEADINGS = ("类别", "项目", "次数", "统计基数", "百分比")
 
-    def __init__(self, parent, status, error):
+    def __init__(self, parent, status, error, conditional_inputs, calculate_conditional):
         super().__init__(parent, padding=10)
         self.status, self.error = status, error
         self.stats, self.rows = None, []
@@ -57,6 +58,8 @@ class StatisticsPage(ttk.Frame):
         lower.insert(0, self.hot_cold, text="冷热号")
         self.omission = OmissionPanel(lower)
         lower.add(self.omission, text="号码遗漏")
+        self.conditional = ConditionalFrequencyPanel(lower, conditional_inputs, calculate_conditional)
+        lower.add(self.conditional, text="下期条件频次")
         lower.select(self.hot_cold)
         panes.add(lower, weight=2)
         initialize_split(panes, .45)
@@ -67,6 +70,7 @@ class StatisticsPage(ttk.Frame):
 
     def set_history(self, draws):
         self.draws = list(draws)
+        self.conditional.reset()
         self.refresh_scope()
 
     def refresh_scope(self):
@@ -90,6 +94,7 @@ class StatisticsPage(ttk.Frame):
         for button in self.scope_buttons.values():
             button.configure(state="disabled" if busy else "normal")
         self.hot_cold.set_busy(busy)
+        self.conditional.set_busy(busy)
 
     def set_statistics(self, stats):
         self.stats = stats
