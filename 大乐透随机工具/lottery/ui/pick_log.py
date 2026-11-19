@@ -92,8 +92,8 @@ class PickLogPanel(ttk.Frame):
         self.render()
         return True
 
-    def record(self, ticket):
-        pick = PickRecord.from_selection(ticket, datetime.now(BEIJING))
+    def record(self, ticket, *, saved_at=None):
+        pick = PickRecord.from_selection(ticket, saved_at if saved_at is not None else datetime.now(BEIJING))
         previous = existing_pick(self.records, pick, self.history)
         if previous:
             return f"该号码已记录 · 预计开奖日 {pick.target_date}"

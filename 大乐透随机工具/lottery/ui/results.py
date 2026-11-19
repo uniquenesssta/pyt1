@@ -7,7 +7,8 @@ from .widgets import wrapped_label
 
 
 class TicketPanel(ttk.Frame):
-    def __init__(self, parent, title, status, error, action, action_text, on_open=None):
+    def __init__(self, parent, title, status, error, action, action_text, on_open=None,
+                 *, label_column="序号 / 规格", widths=(90, 630, 300)):
         super().__init__(parent, padding=10)
         self.status, self.error = status, error
         toolbar = ttk.Frame(self)
@@ -18,8 +19,7 @@ class TicketPanel(ttk.Frame):
         if on_open is not None:
             ttk.Label(toolbar, text="双击一组号码，按期记录并收藏", style="Muted.TLabel").pack(side="left", padx=8)
         empty = '设置参数后点击“生成号码”' if title == '本批号码' else '选中本批号码后点击“收藏选中”，收藏会自动保存'
-        first_column = "序号 / 规格" if on_open is not None else "序号"
-        self.table = DataTable(self, (first_column, "前区号码", "后区号码"), (90, 630, 300), empty_text=empty)
+        self.table = DataTable(self, (label_column, "前区号码", "后区号码"), widths, empty_text=empty)
         self.table.pack(fill="both", expand=True)
         self.summary = wrapped_label(self, style="Muted.TLabel")
         self.summary.pack(side="bottom", before=self.table, fill="x", pady=(6, 0))
@@ -29,11 +29,13 @@ class TicketPanel(ttk.Frame):
         self.table.bind_open(lambda row: open_ticket(self.ticket_from_row(row)))
         self.set_tickets([])
 
-    def set_tickets(self, tickets, *, label_sizes=False):
+    def set_tickets(self, tickets, *, label_sizes=False, labels=None):
         self.tickets = list(tickets)
-        self.table.set_rows((f"{len(t.front)}+{len(t.back)}" if label_sizes else i,
-                             format_numbers(t.front), format_numbers(t.back))
-                            for i, t in enumerate(self.tickets, 1))
+        if labels is None:
+            labels = (f"{len(t.front)}+{len(t.back)}" if label_sizes else i
+                      for i, t in enumerate(self.tickets, 1))
+        self.table.set_rows((label, format_numbers(t.front), format_numbers(t.back))
+                            for label, t in zip(labels, self.tickets))
         if label_sizes:
             tiers = " · ".join(f"{len(t.front)}+{len(t.back)} {t.bets:,} 注" for t in self.tickets)
             self.summary.configure(text=f"同一套三档，逐档包含 · {tiers}（各档分别计算）")

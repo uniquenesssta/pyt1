@@ -41,6 +41,7 @@ class DataTable(ttk.Frame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.descending = {}
+        self.missing_sort_values = {}
         self.tree.bind("<Control-a>", self.select_page)
         self.tree.bind("<<TreeviewSelect>>", lambda _: self.update_selection())
         self.render()
@@ -102,7 +103,6 @@ class DataTable(ttk.Frame):
 
     def sort(self, column):
         reverse = not self.descending.get(column, True)
-        self.descending[column] = reverse
 
         def key(row):
             value = row[column]
@@ -111,10 +111,17 @@ class DataTable(ttk.Frame):
             except ValueError:
                 return 1, str(value)
         self.rows.sort(key=key, reverse=reverse)
-        for i, col in enumerate(self.columns):
-            self.tree.heading(col, text=col + ((' ▼' if reverse else ' ▲') if i == column else ''))
+        if column in self.missing_sort_values:
+            missing = self.missing_sort_values[column]
+            self.rows.sort(key=lambda row: row[column] == missing)
+        self.mark_sort(column, reverse)
         self.page = 0
         self.render()
+
+    def mark_sort(self, column, reverse):
+        self.descending[column] = reverse
+        for i, col in enumerate(self.columns):
+            self.tree.heading(col, text=col + ((' ▼' if reverse else ' ▲') if i == column else ''))
 
     def bind_open(self, callback):
         def open_row(event):

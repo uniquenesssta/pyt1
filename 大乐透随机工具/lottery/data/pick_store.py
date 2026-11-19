@@ -1,4 +1,4 @@
-"""选号记录单独保存在本机；收藏文件保持原格式。"""
+"""选号及对奖记录单独保存在本机。"""
 from datetime import date, datetime
 import json
 from pathlib import Path

@@ -9,6 +9,7 @@ from unittest.mock import patch
 from lottery.ui.app import LotteryApp
 from lottery.core.calendar_samples import CALENDAR_MODE
 from lottery.core.conditional_frequency import CONDITIONAL_MODE
+from lottery.core.favorites import FavoriteRecord
 from lottery.core.models import Draw, Ticket
 from lottery.core.generation import MODES
 from lottery.core.statistics import analyze
@@ -56,10 +57,26 @@ class UITests(unittest.TestCase):
         table.tree.selection_set(('0', '1'))
         self.app.generated.copy()
         self.assertIn(' | ', self.root.clipboard_get())
-        self.app.add_favorites(self.app.generated.selected())
-        self.assertEqual(len(self.app.store.load()), 2)
-        self.app.remove_favorites(self.app.favorites[:1])
-        self.assertEqual(len(self.app.store.load()), 1)
+        selected = self.app.generated.selected()
+        legacy = Ticket((1, 2, 3, 4, 5, 6), (1, 2))
+        self.assertTrue(self.app.commit_favorites([FavoriteRecord(legacy)]))
+        with patch('lottery.ui.app.datetime') as clock:
+            clock.now.return_value = datetime(2026, 11, 18, 15, 39, tzinfo=timezone.utc)
+            self.app.add_favorites(selected[:1])
+            clock.now.return_value = datetime(2026, 11, 18, 16, 20, tzinfo=timezone.utc)
+            self.app.add_favorites(selected)
+        saved = self.app.saved.table
+        self.assertEqual(saved.columns[0], "收藏时间（北京）")
+        self.assertEqual([row[0] for row in saved.rows],
+                         ["2026-11-19 00:20:00", "2026-11-18 23:39:00", "日期未记录"])
+        saved.sort(0)
+        self.assertEqual(saved.rows[0][0], "2026-11-18 23:39:00")
+        saved.sort(0)
+        self.assertEqual(saved.rows[0][0], "2026-11-19 00:20:00")
+        self.assertEqual(saved.rows[-1][0], "日期未记录")
+        saved.tree.selection_set("0")
+        self.app.remove_favorites(self.app.saved.selected())
+        self.assertEqual([r.ticket for r in self.app.store.load()], [legacy, selected[0]])
 
     def test_post_modes_and_conditional_analysis_link(self):
         dataset = parse_feed(
@@ -110,7 +127,7 @@ class UITests(unittest.TestCase):
         tree = self.app.generated.table.tree
         tree.selection_set(('0', '1'))
         x, y, _, height = tree.bbox('0', '#1')
-        with patch('lottery.ui.pick_log.datetime') as clock:
+        with patch('lottery.ui.app.datetime') as clock:
             clock.now.return_value = datetime(2026, 11, 18, 12, 59, tzinfo=timezone.utc)
             for stamp in (1000, 1120):
                 tree.event_generate('<ButtonPress-1>', x=x+8, y=y+height//2, time=stamp)
@@ -118,7 +135,7 @@ class UITests(unittest.TestCase):
         self.root.update()
         records = self.app.pick_log.store.load()
         self.assertEqual([r.ticket for r in records], [ticket])
-        self.assertEqual(self.app.store.load(), [ticket])
+        self.assertEqual(self.app.store.load(), [FavoriteRecord(ticket, records[0].saved_at)])
 
         dataset = parse_feed(b'26132 2026-11-18 01 02 03 04 05 01 02\n')
         apply_history(self.app, (dataset, analyze(dataset.draws)), '开奖已载入')

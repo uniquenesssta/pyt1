@@ -1,18 +1,22 @@
 """窗口组装和任务协调，算法、文件操作与页面各自独立。"""
 import logging
 from dataclasses import replace
+from datetime import datetime
 from pathlib import Path
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 from ..core.calendar_samples import CALENDAR_MODE
 from ..core.conditional_frequency import CONDITIONAL_MODE
+from ..core.draw_calendar import BEIJING
+from ..core.favorites import new_favorites
 from ..core.generation import generate, MODES
 from ..core.structure_cache import StructureCache
+from ..data.favorite_store import FavoriteStore
 from ..data.history_store import HistoryStore
 from ..data.pick_store import PickStore
 from .history_actions import import_history, update_history, restore_history
-from ..data.storage import FavoriteStore
 from .controls import GenerationControls
+from .favorite_panel import FavoritePanel
 from .history import HistoryPage
 from .history_navigation import search_history, open_statistic
 from .import_issues import show_import_issues
@@ -72,13 +76,13 @@ class LotteryApp:
         self.results_tabs.pack(fill="both", expand=True)
         self.generated = TicketPanel(self.results_tabs, "本批号码", self.set_status, self.error,
                                      self.add_favorites, "收藏选中", on_open=self.record_pick)
-        self.saved = TicketPanel(self.results_tabs, "我的收藏", self.set_status, self.error, self.remove_favorites, "移除选中")
+        self.saved = FavoritePanel(self.results_tabs, self.set_status, self.error, self.remove_favorites)
         self.pick_log = PickLogPanel(self.results_tabs, PickStore(Path(data_dir) / "picks.json"),
                                      self.set_status, self.error)
         self.results_tabs.add(self.generated, text="本批号码")
         self.results_tabs.add(self.saved, text=f"我的收藏 ({len(self.favorites)})")
         self.results_tabs.add(self.pick_log, text="选号记录 / 对奖")
-        self.saved.set_tickets(self.favorites)
+        self.saved.set_favorites(self.favorites)
         self.history = HistoryPage(self.tabs, self.search, self.set_status, self.error)
         self.statistics = StatisticsPage(self.tabs, self.set_status, self.error, self.conditional_inputs,
                                          lambda: calculate_conditional(self))
@@ -197,31 +201,34 @@ class LotteryApp:
             return
         show_import_issues(self.root, self.dataset, self.error)
 
-    def commit_favorites(self, tickets):
+    def commit_favorites(self, records):
         try:
-            self.store.save(tickets)
+            self.store.save(records)
         except OSError as error:
             self.error(error)
             return False
-        self.favorites = tickets
-        self.saved.set_tickets(tickets)
-        self.results_tabs.tab(self.saved, text=f"我的收藏 ({len(tickets)})")
+        self.favorites = records
+        self.saved.set_favorites(records)
+        self.results_tabs.tab(self.saved, text=f"我的收藏 ({len(records)})")
         return True
 
     def add_favorites(self, tickets):
         if not tickets:
             self.set_status("请先选择要收藏的号码")
             return
-        updated = list(dict.fromkeys(self.favorites + tickets))
-        added = len(updated) - len(self.favorites)
-        if self.commit_favorites(updated):
-            self.set_status(f"新增收藏 {added} 组，已自动保存")
+        added = new_favorites(self.favorites, tickets, datetime.now(BEIJING))
+        if not added:
+            self.set_status("选中的号码已收藏")
+        elif self.commit_favorites(self.favorites + added):
+            self.set_status(f"新增收藏 {len(added)} 组，已自动保存")
 
     def record_pick(self, ticket):
-        message = self.pick_log.record(ticket)
+        saved_at = datetime.now(BEIJING)
+        message = self.pick_log.record(ticket, saved_at=saved_at)
         if not message:
             return
-        if ticket not in self.favorites and not self.commit_favorites(self.favorites + [ticket]):
+        added = new_favorites(self.favorites, [ticket], saved_at)
+        if added and not self.commit_favorites(self.favorites + added):
             message += "；收藏写入失败"
         self.set_status(message)
 
@@ -230,7 +237,7 @@ class LotteryApp:
             self.set_status("请先选择要移除的收藏")
             return
         removed = set(tickets)
-        if self.commit_favorites([t for t in self.favorites if t not in removed]):
+        if self.commit_favorites([record for record in self.favorites if record.ticket not in removed]):
             self.set_status(f"已移除 {len(removed)} 组收藏")
 
     def close(self):
