@@ -7,7 +7,8 @@
 - 安装带 Tcl/Tk 的 Python 3.10 或更高版本，双击 `启动.cmd`。通过隐藏启动器运行 `pythonw.exe`，没有常驻 CMD；也可直接双击 `scripts/launch.vbs`。
 - 首次启动在本工具 `.venv` 中检查并安装 openpyxl、xlrd，可能需要等待。后续优先使用已记录的 Python 路径；启动失败会提示日志位置。移动工具或 Python 路径失效后自动重新检查。
 - Windows 禁用 Script Host 时运行 `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start.ps1`；排错可运行 `py -3 .\main.py`。
-- 双击 `拉取更新.cmd`，通过整个仓库的 `git pull --ff-only` 更新当前分支上游。不会切换分支、强制重置或覆盖本地修改；其他工具的本地修改也可能阻止更新。更新成功后重启工具。ZIP 下载版没有 Git 元数据，不能直接拉取。
+- 双击 `拉取更新.cmd`，从 `origin` 获取更新并仅允许快进当前分支。Git 会保留与更新无冲突的本地改动；如果新版会覆盖本地修改或文件（包括被忽略的文件），或者分支已分叉，窗口会停留并显示原因。更新成功后重启工具。ZIP 下载版没有 Git 元数据，不能直接拉取。
+- 旧版脚本若仍提示 `There are local changes`，先在工具目录用 PowerShell 执行一次 `git pull --ff-only --no-rebase` 拉到新版；之后即可双击更新。
 
 ## 四个工作区
 

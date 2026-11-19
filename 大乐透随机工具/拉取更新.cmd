@@ -1,11 +1,10 @@
 @echo off
 setlocal
-cd /d "%~dp0"
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\update.ps1"
-if errorlevel 1 (
+set "updateStatus=%ERRORLEVEL%"
+if not "%updateStatus%"=="0" (
   echo.
-  echo Update failed. The error above has been retained.
+  echo Update stopped. See the message above for the reason.
   pause
-  exit /b 1
 )
-exit /b 0
+exit /b %updateStatus%
