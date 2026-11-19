@@ -7,7 +7,8 @@ from .theme import COLORS
 class DataTable(ttk.Frame):
     PAGE_SIZE = 250
 
-    def __init__(self, parent, columns, widths=None, empty_text="暂无记录，请先导入或更新历史数据"):
+    def __init__(self, parent, columns, widths=None, empty_text="暂无记录，请先导入或更新历史数据",
+                 *, edge_navigation=False):
         super().__init__(parent)
         self.rows, self.page = [], 0
         self.columns = columns
@@ -26,10 +27,13 @@ class DataTable(ttk.Frame):
         self.empty = ttk.Label(self.tree, text=empty_text, style="Muted.TLabel", anchor="center", justify="center")
         pager = self.pager = ttk.Frame(self)
         pager.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(6, 0))
+        self.first_page_button = self.last_page_button = None
+        if edge_navigation:
+            self.first_page_button = ttk.Button(pager, text="首页", command=lambda: self.go_to_page(0), width=6)
+            self.last_page_button = ttk.Button(pager, text="尾页",
+                                               command=lambda: self.go_to_page(self.page_count - 1), width=6)
         self.previous = ttk.Button(pager, text="上一页", command=lambda: self.move(-1), width=8)
-        self.previous.pack(side="left")
         self.next = ttk.Button(pager, text="下一页", command=lambda: self.move(1), width=8)
-        self.next.pack(side="left", padx=5)
         self.caption = ttk.Label(pager)
         self.caption.pack(side="right")
         self.selection_caption = ttk.Label(pager, style='Muted.TLabel')
@@ -52,6 +56,10 @@ class DataTable(ttk.Frame):
     def selected(self):
         return [self.rows[int(i)] for i in self.tree.selection()]
 
+    @property
+    def page_count(self):
+        return max(1, (len(self.rows) + self.PAGE_SIZE - 1) // self.PAGE_SIZE)
+
     def render(self):
         children = self.tree.get_children()
         if children:
@@ -59,16 +67,19 @@ class DataTable(ttk.Frame):
         start = self.page * self.PAGE_SIZE
         for index in range(start, min(start + self.PAGE_SIZE, len(self.rows))):
             self.tree.insert("", "end", iid=str(index), values=self.rows[index], tags=('odd' if index % 2 else 'even',))
-        pages = max(1, (len(self.rows) + self.PAGE_SIZE - 1) // self.PAGE_SIZE)
+        pages = self.page_count
         self.caption.configure(text=f"{len(self.rows):,} 条 · {self.page+1}/{pages} 页")
-        self.previous.configure(state="normal" if self.page else "disabled")
-        self.next.configure(state="normal" if self.page + 1 < pages else "disabled")
-        if pages == 1:
-            self.previous.pack_forget()
-            self.next.pack_forget()
-        else:
-            self.previous.pack(side="left", before=self.selection_caption)
-            self.next.pack(side="left", padx=5, before=self.selection_caption)
+        can_go_back = self.page > 0
+        can_go_forward = self.page + 1 < pages
+        for button, available in ((self.first_page_button, can_go_back), (self.previous, can_go_back),
+                                  (self.next, can_go_forward), (self.last_page_button, can_go_forward)):
+            if button is None:
+                continue
+            button.configure(state="normal" if available else "disabled")
+            if self.first_page_button is not None or pages > 1:
+                button.pack(side="left", padx=(0, 5), before=self.selection_caption)
+            else:
+                button.pack_forget()
         if self.rows:
             self.empty.place_forget()
         else:
@@ -80,9 +91,14 @@ class DataTable(ttk.Frame):
         self.selection_caption.configure(text=f'已选 {count} 条' if count else 'Ctrl / Shift 多选')
 
     def move(self, offset):
-        pages = max(1, (len(self.rows) + self.PAGE_SIZE - 1) // self.PAGE_SIZE)
-        self.page = min(max(0, self.page + offset), pages - 1)
-        self.render()
+        self.go_to_page(self.page + offset)
+
+    def go_to_page(self, index):
+        page = min(max(0, index), self.page_count - 1)
+        if page != self.page:
+            self.page = page
+            self.render()
+            self.tree.yview_moveto(0)
 
     def sort(self, column):
         reverse = not self.descending.get(column, True)

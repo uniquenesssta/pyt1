@@ -54,7 +54,8 @@ class HistoryPage(ttk.Frame):
         wrapped_label(condition_row, textvariable=self.condition, style="Muted.TLabel").pack(side="left", fill="x", expand=True)
         self.condition.trace_add("write", lambda *_: self.update_condition_buttons())
         self.table = DataTable(self, self.HEADINGS, (110, 300, 150, 350, 90, 120),
-                               empty_text="暂无匹配结果；可清空筛选，或导入 / 更新历史数据")
+                               empty_text="暂无匹配结果；可清空筛选，或导入 / 更新历史数据",
+                               edge_navigation=True)
         self.table.pack(fill="both", expand=True)
         bottom = ttk.Frame(self)
         bottom.pack(side="bottom", before=self.table, fill="x", pady=(6, 0))
