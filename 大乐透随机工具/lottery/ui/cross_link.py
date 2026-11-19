@@ -1,5 +1,6 @@
 """选号页与结构页的双向跨区权重联动。"""
-from ..core.cross_weights import cross_values, with_cross_values
+from math import isfinite
+from ..core.cross_weights import CROSS_GROUPS, cross_values, with_cross_values
 from ..core.structure_profile import build_profile
 
 
@@ -55,30 +56,46 @@ class CrossWeightLink:
             self.syncing = False
 
     def describe(self, profile):
-        self.controls.cross_source.set(f'已联动：最近 {len(profile.draws)} 期 · 最大/起始跨区强度 {profile.strengths["最大跨区（差值>7）"]:g}/{profile.strengths["起始跨区"]:g}（0关闭）')
+        self.controls.cross_source.set(f'已联动：最近 {len(profile.draws)} 期 · 只有被选中的跨区指标才参与抽取')
 
-    def _entry_weights(self):
-        return tuple(tuple(float(var.get()) for var in group) for group in self.controls.weight_vars)
+    def _entry_weights(self, index):
+        values = tuple(float(var.get()) for var in self.controls.weight_vars[index])
+        if any(not isfinite(value) or not 0 <= value <= 100 for value in values):
+            raise ValueError('跨区权重须为 0–100 的有限数值')
+        return values
 
-    def snapshot(self):
-        """生成直接使用已同步的配置，未完成的跨区输入不能悄悄被忽略。"""
+    def snapshot(self, selected):
+        """只校验此次实际选用的跨区输入；其他草稿不阻塞抽取。"""
         profile = self.page.snapshot()
         if self.controls.custom.get():
-            try:
-                values = self._entry_weights()
-            except ValueError:
-                values = ()
-            if values != cross_values(profile):
-                raise ValueError('选号页的跨区权重尚未同步，请修正输入或点“一键填入”')
+            current = cross_values(profile)
+            for index, name in enumerate(CROSS_GROUPS):
+                if name not in selected:
+                    continue
+                try:
+                    values = self._entry_weights(index)
+                except ValueError:
+                    values = ()
+                if values != current[index]:
+                    raise ValueError(f'{name}的跨区权重尚未同步，请修正输入或点“一键填入”')
         return profile
 
     def from_entries(self, *_):
         if self.syncing or not self.linked or self.page.profile is None: return
-        try:
-            profile = with_cross_values(self.page.profile, self._entry_weights())
-        except ValueError:
-            self.controls.cross_source.set('跨区输入未完成或无效；修正后同步，生成时会校验')
-            return
-        self.page.profile = profile
-        self.page.render()
-        self.describe(profile)
+        profile = self.page.profile
+        old = cross_values(profile)
+        updated = list(old)
+        incomplete = []
+        for index, name in enumerate(CROSS_GROUPS):
+            try:
+                updated[index] = self._entry_weights(index)
+            except ValueError:
+                incomplete.append(name)
+        if tuple(updated) != old:
+            profile = with_cross_values(profile, updated)
+            self.page.profile = profile
+            self.page.render()
+        if incomplete:
+            self.controls.cross_source.set('输入未完成：' + '、'.join(incomplete) + '；只校验被选中的指标')
+        else:
+            self.describe(profile)

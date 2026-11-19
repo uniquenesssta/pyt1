@@ -4,7 +4,9 @@ from dataclasses import asdict, dataclass
 from hashlib import sha256
 from threading import Lock
 from .models import check_cancel
-from .trend_indicators import BACK_INDICATORS
+from .structure_profile import indicator_zone
+from .temporal_indicators import TEMPORAL_INDICATORS
+from .trend_indicators import FRONT
 from .weighted import StructurePool
 
 
@@ -20,10 +22,12 @@ def cache_key(config, stats):
     profile = config.structure_profile
     history = None
     if profile is not None:
-        strengths = {name: weight for name, weight in profile.strengths.items() if name not in BACK_INDICATORS}
+        names = tuple(sorted(name for name in config.indicators if indicator_zone(name) == FRONT))
+        strengths = {name: profile.strengths[name] for name in names}
+        reference = profile.reference if any(name in TEMPORAL_INDICATORS for name in names) else None
         history = (profile.requested,
                    tuple((d.issue, d.ticket.front, d.ticket.back) for d in profile.draws),
-                   freeze({name: profile.weights[name] for name in strengths}), freeze(strengths))
+                   freeze({name: profile.weights[name] for name in names}), freeze(strengths), reference)
     # 不纳入批量组数、去重开关和后区条件：它们不改变前区候选及评分。
     data = (config.front_count, tuple(sorted(config.front_fixed)),
             tuple(sorted(config.front_excluded)), config.max_span_weights,
@@ -35,6 +39,7 @@ def cache_key(config, stats):
 class CachedPool:
     fronts: tuple
     cumulative: tuple
+    log_weights: tuple
 
     def choose(self, rng):
         index = bisect_right(self.cumulative, rng.random() * self.cumulative[-1])
@@ -67,9 +72,9 @@ class StructureCache:
                 progress(f'复用结构候选缓存：{len(pool.fronts):,} 个组合，正在重新随机抽取')
             check_cancel(cancel)
             return pool
-        built = StructurePool(config, stats, cancel, progress)
+        built = StructurePool(config, cancel, progress)
         check_cancel(cancel)
-        pool = CachedPool(tuple(built.fronts), tuple(built.cumulative))
+        pool = CachedPool(tuple(built.fronts), tuple(built.cumulative), tuple(built.log_weights))
         with self._lock:
             check_cancel(cancel)
             if epoch == self._epoch:

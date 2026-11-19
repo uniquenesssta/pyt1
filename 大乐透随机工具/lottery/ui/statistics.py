@@ -7,6 +7,7 @@ from ..data.exporting import export_csv
 from .table import DataTable
 from .charts import BarChart
 from .hot_cold import HotColdPanel
+from .omission_table import OmissionPanel
 from .widgets import wrapped_label, initialize_split
 
 
@@ -54,6 +55,8 @@ class StatisticsPage(ttk.Frame):
         lower.add(charts, text="频次图表")
         self.hot_cold = HotColdPanel(lower)
         lower.insert(0, self.hot_cold, text="冷热号")
+        self.omission = OmissionPanel(lower)
+        lower.add(self.omission, text="号码遗漏")
         lower.select(self.hot_cold)
         panes.add(lower, weight=2)
         initialize_split(panes, .45)
@@ -69,6 +72,7 @@ class StatisticsPage(ttk.Frame):
     def refresh_scope(self):
         periods = {"近50期": 50, "近100期": 100, "全部": 0}[self.scope.get()]
         self.hot_cold.follow_scope(periods, self.draws)
+        self.omission.set_history(self.draws, periods)
         try:
             stats, caption = window_statistics(self.draws, periods)
         except ValueError as exc:

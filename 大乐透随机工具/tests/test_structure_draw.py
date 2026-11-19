@@ -12,6 +12,7 @@ from lottery.core.structure_cache import StructureCache
 from lottery.ui.app import LotteryApp
 from lottery.ui.controls import GenerationControls
 from lottery.ui.cross_link import CrossWeightLink
+from lottery.ui.indicator_picker import IndicatorSelection
 from lottery.ui.jobs import Jobs
 from lottery.ui.selection_inputs import SelectionInputs
 from lottery.ui.structure_weights import StructureWeightsPage
@@ -26,10 +27,13 @@ class StructureDrawTests(unittest.TestCase):
         draws = [Draw(Ticket((1, 2, 7, 18, 35) if i < 60 else (3, 5, 8, 21, 31),
                              (1, 2)), str(26001 + i)) for i in reversed(range(120))]
         errors = []
+        selection = IndicatorSelection(self.root)
+        selection.set(("C1差值",))
         self.page = SimpleNamespace(
             draws=draws, profile=None, period=var("50"), summary=var(), pending=var(),
             _busy=False, draw_panel=Mock(), use_button=Mock(), render=Mock(),
             error=errors.append,
+            indicator_selection=selection,
         )
         for method in ("periods", "describe_pending", "describe", "rebuild", "snapshot"):
             setattr(self.page, method, partial(getattr(StructureWeightsPage, method), self.page))
@@ -49,6 +53,7 @@ class StructureDrawTests(unittest.TestCase):
             generated=SimpleNamespace(set_tickets=results.append), results_tabs=Mock(),
             show_structure_selection=Mock(), set_status=statuses.append, error=errors.append,
             jobs=Jobs(self.root, statuses.append, lambda busy: None),
+            indicator_selection=selection,
         )
         self.app.generate = partial(LotteryApp.generate, self.app)
         self.draw = partial(LotteryApp.draw_from_structure, self.app)

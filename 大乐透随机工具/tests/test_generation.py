@@ -7,7 +7,7 @@ from threading import Event
 import unittest
 from lottery.core.generation import GenerationConfig, MODES, generate, unrank_combination
 from lottery.core.models import Ticket, Cancelled
-from lottery.core.statistics import analyze
+from lottery.core.structure_profile import build_profile
 from lottery.core.features import features
 from lottery.core.selection import subset_probability
 from lottery.core.weighted import weighted_sample
@@ -17,7 +17,13 @@ from lottery.data.importing import parse_text
 class GenerationTests(unittest.TestCase):
     def setUp(self):
         self.rng = random.Random(42)  # 仅测试注入；产品默认 SystemRandom，无可设置种子。
-        self.stats = analyze(parse_text('1 2 3 4 5 1 2\n8 11 19 25 32 5 10').draws)
+        self.profile = build_profile(parse_text('1 2 3 4 5 1 2\n8 11 19 25 32 5 10').draws)
+        self.stats = self.profile.stats
+
+    def select_mode(self, config, mode):
+        if mode == MODES[2]:
+            return replace(config, mode=mode, structure_profile=self.profile, indicators=("C1差值",))
+        return replace(config, mode=mode)
 
     def test_uniform_range_uniqueness_and_batch(self):
         tickets = generate(GenerationConfig(count=10000), rng=self.rng)
@@ -35,7 +41,7 @@ class GenerationTests(unittest.TestCase):
         for mode in MODES:
             config = GenerationConfig(count=20, front_fixed=(1, 3), back_fixed=(2,),
                                       front_excluded=(4, 7), back_excluded=(1, 12), mode=mode)
-            tickets = generate(config, self.stats, rng=self.rng)
+            tickets = generate(self.select_mode(config, mode), self.stats, rng=self.rng)
             self.assertEqual(len(set(tickets)), 20)
             for t in tickets:
                 self.assertTrue({1, 3} <= set(t.front))
@@ -46,7 +52,7 @@ class GenerationTests(unittest.TestCase):
     def test_small_space_exhaustion_and_overflow(self):
         cfg = GenerationConfig(count=3, front_fixed=(1, 2, 3, 4, 5), back_fixed=(1,), back_excluded=tuple(range(5, 13)))
         for mode in MODES:
-            result = generate(replace(cfg, mode=mode), self.stats, rng=self.rng)
+            result = generate(self.select_mode(cfg, mode), self.stats, rng=self.rng)
             self.assertEqual({t.back for t in result}, {(1, 2), (1, 3), (1, 4)})
         with self.assertRaisesRegex(ValueError, '最多 3'):
             generate(replace(cfg, count=4))
@@ -54,7 +60,7 @@ class GenerationTests(unittest.TestCase):
     def test_all_fixed_and_duplicates_allowed(self):
         cfg = GenerationConfig(count=10, front_fixed=(1, 2, 3, 4, 5), back_fixed=(1, 2), unique=False)
         for mode in MODES:
-            result = generate(replace(cfg, mode=mode), self.stats, rng=self.rng)
+            result = generate(self.select_mode(cfg, mode), self.stats, rng=self.rng)
             self.assertEqual(len(result), 10)
             self.assertEqual(len(set(result)), 1)
 
@@ -114,7 +120,8 @@ class GenerationTests(unittest.TestCase):
             generate(GenerationConfig(), cancel=cancel)
         cancel.clear()
         with self.assertRaises(Cancelled):
-            generate(GenerationConfig(mode=MODES[2]), self.stats, cancel, lambda _: cancel.set())
+            generate(GenerationConfig(mode=MODES[2], max_span_weights=(1,)*5),
+                     self.stats, cancel, lambda _: cancel.set())
 
     def test_import_does_not_change_uniform_sequence(self):
         cfg = GenerationConfig(count=10)

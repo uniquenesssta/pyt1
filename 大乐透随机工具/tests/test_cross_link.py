@@ -66,19 +66,24 @@ class CrossLinkTests(unittest.TestCase):
         self.assertIs(self.page.profile,old);self.assertEqual(len(self.errors),1)
 
     def test_snapshot_uses_shared_profile_and_rejects_unfinished_edit(self):
+        selected = (CROSS_GROUPS[0],)
         self.link.fill()
         self.controls.weight_vars[0][1].set('67.5')
-        self.assertEqual(self.link.snapshot().weights[CROSS_GROUPS[0]][1],67.5)
+        self.assertEqual(self.link.snapshot(selected).weights[CROSS_GROUPS[0]][1],67.5)
         self.controls.weight_vars[0][1].set('')
+        self.controls.weight_vars[1][1].set('42')
+        self.assertEqual(self.link.snapshot((CROSS_GROUPS[1],)).weights[CROSS_GROUPS[1]][1],42)
+        self.link.snapshot(('前区和值',))
         with self.assertRaisesRegex(ValueError,'尚未同步'):
-            self.link.snapshot()
+            self.link.snapshot(selected)
         self.link.fill()
-        self.assertEqual(self.link.snapshot().weights[CROSS_GROUPS[0]][1],67.5)
+        self.assertEqual(self.link.snapshot(selected).weights[CROSS_GROUPS[0]][1],67.5)
 
     def test_override_is_not_multiplied_twice(self):
         profile=self.page.profile
         values=cross_values(profile)
-        base=GenerationConfig(count=30,mode=MODES[2],front_excluded=tuple(range(15,36)),structure_profile=profile)
+        base=GenerationConfig(count=30,mode=MODES[2],front_excluded=tuple(range(15,36)),
+                              structure_profile=profile,indicators=CROSS_GROUPS)
         filled=replace(base,max_span_weights=values[0],start_span_weights=values[1])
         resolved=resolve_cross_overrides(filled)
         self.assertEqual(resolved.max_span_weights,())

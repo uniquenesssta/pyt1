@@ -14,6 +14,7 @@ from .controls import GenerationControls
 from .history import HistoryPage
 from .history_navigation import search_history, open_statistic
 from .import_issues import show_import_issues
+from .indicator_picker import IndicatorSelection
 from .jobs import Jobs
 from .pick_log import PickLogPanel
 from .results import TicketPanel
@@ -57,7 +58,8 @@ class LotteryApp:
         self.form_viewport = FormViewport(generation)
         self.form_viewport.pack(fill="x", pady=(0, 6))
         inputs = SelectionInputs(root)
-        self.controls = GenerationControls(self.form_viewport.body, self.generate, inputs)
+        self.indicator_selection = IndicatorSelection(root)
+        self.controls = GenerationControls(self.form_viewport.body, self.generate, inputs, self.indicator_selection)
         self.controls.pack(fill="x")
         self.form_viewport.bind_controls()
         self.results_tabs = ttk.Notebook(generation)
@@ -76,7 +78,8 @@ class LotteryApp:
         self.tabs.add(self.history, text="  历史查询  ")
         self.tabs.add(self.statistics, text="  统计分析  ")
         self.structure_weights = StructureWeightsPage(
-            self.tabs, self.error, inputs, self.draw_from_structure, self.show_structure_selection)
+            self.tabs, self.error, inputs, self.draw_from_structure, self.show_structure_selection,
+            self.indicator_selection)
         self.tabs.add(self.structure_weights, text="  结构权重  ")
         self.controls.on_structure = lambda: self.tabs.select(self.structure_weights)
         self.history.on_return = lambda: self.tabs.select(self.structure_weights if self.history.statistic and self.history.statistic.source == "结构权重" else self.statistics)
@@ -126,7 +129,12 @@ class LotteryApp:
         try:
             config = self.controls.snapshot(from_structure=from_structure)
             if config.mode == MODES[2]:
-                config = replace(config, structure_profile=self.cross_link.snapshot())
+                names = self.indicator_selection.names
+                if not names:
+                    raise ValueError("请先选择要参与抽取的加权指标")
+                profile = self.cross_link.snapshot(names)
+                profile.validate(names)
+                config = replace(config, structure_profile=profile, indicators=names)
             elif config.mode == MODES[1]:
                 config = replace(config, structure_profile=self.structure_weights.snapshot())
         except ValueError as error:
@@ -149,7 +157,10 @@ class LotteryApp:
             if from_structure:
                 self.show_structure_selection()
             cache_note = " · 已复用候选缓存" if self.structure_cache.hits > cache_hits_before else ""
-            self.set_status(f"已生成 {len(tickets):,} 组 · {config.mode}{history_note}{cache_note}")
+            names = config.indicators
+            indicator_note = (" · " + "、".join(names) if 0 < len(names) <= 4 else
+                              f" · 所选指标 {len(names)} 项" if names else "")
+            self.set_status(f"已生成 {len(tickets):,} 组 · {config.mode}{history_note}{indicator_note}{cache_note}")
         self.set_status("正在生成…")
         self.jobs.start(lambda cancel, progress: generate(config, stats, cancel, progress, structure_cache=self.structure_cache), done, self.error)
 

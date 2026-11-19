@@ -1,6 +1,6 @@
 """小候选空间的精确无放回抽样，保持与集合乘积权重同一分布。"""
 from heapq import nlargest
-from math import log, prod
+from math import log, log1p, prod
 from .models import Ticket, check_cancel
 
 
@@ -16,19 +16,19 @@ def subset_probability(subset, pool, weights):
 
 def select_small_space(fronts, backs, config, fw, bw, structure, rng, cancel, *, back_structure=None):
     fp = [n for n in range(1, 36) if n not in config.front_fixed and n not in config.front_excluded]
-    fweights = []
-    for i, front in enumerate(fronts):
-        check_cancel(cancel)
-        if structure:
-            value = structure.cumulative[i] - (structure.cumulative[i-1] if i else 0)
-        else:
-            value = subset_probability(tuple(n for n in front if n not in config.front_fixed), fp, fw)
-        fweights.append(value)
+    if structure:
+        fweights = structure.log_weights
+    else:
+        fweights = []
+        for front in fronts:
+            check_cancel(cancel)
+            fweights.append(log(subset_probability(tuple(n for n in front if n not in config.front_fixed), fp, fw)))
     if back_structure:
-        bweights = back_structure.weights
+        bweights = back_structure.log_weights
     else:
         bp = [n for n in range(1, 13) if n not in config.back_fixed and n not in config.back_excluded]
-        bweights = [subset_probability(tuple(n for n in back if n not in config.back_fixed), bp, bw) for back in backs]
+        bweights = [log(subset_probability(tuple(n for n in back if n not in config.back_fixed), bp, bw))
+                    for back in backs]
 
     def candidates():
         index = 0
@@ -36,7 +36,8 @@ def select_small_space(fronts, backs, config, fw, bw, structure, rng, cancel, *,
             for b, back in enumerate(backs):
                 if index % 100 == 0:
                     check_cancel(cancel)
-                key = log(1.0 - rng.random()) / (fweights[f] * bweights[b])
+                u = rng.random()
+                key = fweights[f] + bweights[b] - log(-log1p(-u)) if u else float("inf")
                 yield key, index, Ticket(front, back)
                 index += 1
 

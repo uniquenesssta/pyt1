@@ -91,7 +91,7 @@ class DataTable(ttk.Frame):
         def key(row):
             value = row[column]
             try:
-                return 0, float(str(value).rstrip("%"))
+                return 0, float(str(value).lstrip("≥").rstrip("%"))
             except ValueError:
                 return 1, str(value)
         self.rows.sort(key=key, reverse=reverse)

@@ -28,7 +28,7 @@ class DrilldownTests(unittest.TestCase):
                 rows,total,count,_=query_history(self.draws,Query(),2,StatisticFilter('结构权重',category,str(key)))
                 self.assertEqual(count,p.counts[category][key])
                 self.assertEqual(len(rows),count)
-                self.assertEqual(total,2)
+                self.assertEqual(total,p.samples(category))
 
     def test_occurrences_differ_from_periods(self):
         rows,_,count,_=query_history(self.draws,Query(),statistic=StatisticFilter('统计分析','分区号码频率','1区 (01–07)'))

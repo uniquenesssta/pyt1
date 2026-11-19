@@ -2,13 +2,14 @@
 import tkinter as tk
 from tkinter import ttk
 from ..core.generation import MODES
+from .indicator_picker import IndicatorPicker
 from .number_constraints import NumberConstraints
 from .selection_inputs import COUNT_FIELDS
 from .widgets import field, wrapped_label
 
 
 class GenerationControls(ttk.Frame):
-    def __init__(self, parent, generate, inputs):
+    def __init__(self, parent, generate, inputs, indicator_selection):
         super().__init__(parent, padding=10)
         self.inputs = inputs
         self.values, self.unique = inputs.values, inputs.unique
@@ -36,6 +37,7 @@ class GenerationControls(ttk.Frame):
         self.constraints = NumberConstraints(self, actions, inputs)
         self.constraints.pack(fill="x")
         wrapped_label(self, textvariable=self.constraint_summary, style="Muted.TLabel").pack(fill="x", pady=(4, 0))
+        self.indicator_picker = IndicatorPicker(self, indicator_selection)
         self.advanced = ttk.Frame(self, padding=(0, 10, 0, 0))
         fill_row = ttk.Frame(self.advanced)
         fill_row.pack(fill="x", pady=(0, 8))
@@ -75,6 +77,10 @@ class GenerationControls(ttk.Frame):
     def update_mode(self):
         structure = self.mode.get() == MODES[2]
         self.custom_button.configure(state="normal" if structure else "disabled")
+        if structure:
+            self.indicator_picker.pack(fill="x", pady=(6, 0), before=self.hint)
+        else:
+            self.indicator_picker.pack_forget()
         if structure and self.custom.get():
             self.advanced.pack(fill="x", before=self.hint)
         else:
@@ -82,7 +88,7 @@ class GenerationControls(ttk.Frame):
         hints = {
             MODES[0]: "系统随机源 · 合法组合等概率；固定或排除后在剩余组合中抽取。",
             MODES[1]: "使用结构权重页所选期数的号码次数 + 1 加权；历史频率不代表下期概率。",
-            MODES[2]: "前区限 5 个 · 使用结构权重页已启用的前后区指标；后区结构默认关闭。",
+            MODES[2]: "前区限 5 个 · 只用上面选中的指标；未加权的一侧在合法号码中等概率抽取。",
         }
         self.hint.configure(text=hints[self.mode.get()])
 

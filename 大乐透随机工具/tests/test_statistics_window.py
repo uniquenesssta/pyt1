@@ -40,7 +40,7 @@ class StatisticsWindowTests(unittest.TestCase):
         interp=tk.Tcl()
         page=SimpleNamespace(draws=self.draws,scope=tk.StringVar(master=interp,value='近50期'),
                              scope_summary=tk.StringVar(master=interp),set_statistics=Mock(),
-                             hot_cold=Mock(),error=Mock(),update_scope_buttons=Mock())
+                             hot_cold=Mock(),omission=Mock(),error=Mock(),update_scope_buttons=Mock())
         StatisticsPage.refresh_scope(page)
         self.assertEqual(page.active_periods,50)
         self.assertEqual(page.set_statistics.call_args.args[0].total,50)
@@ -49,3 +49,4 @@ class StatisticsWindowTests(unittest.TestCase):
         self.assertEqual(page.active_periods,100)
         self.assertEqual(page.set_statistics.call_args.args[0].total,100)
         page.hot_cold.follow_scope.assert_called_with(100,self.draws)
+        page.omission.set_history.assert_called_with(self.draws,100)

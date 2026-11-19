@@ -15,7 +15,7 @@ class StructureCacheTests(unittest.TestCase):
         self.draws=[Draw(Ticket((1,2,8,9,15),(1,2)),str(26000+i)) for i in range(1,121)]
         self.profile=build_profile(self.draws,50)
         self.config=GenerationConfig(count=20,mode=MODES[2],structure_profile=self.profile,
-                                     front_excluded=tuple(range(13,36)))
+                                     front_excluded=tuple(range(13,36)), indicators=('C1差值',))
         self.cache=StructureCache()
 
     def run_generation(self, config=None, seed=123, cancel=None):
@@ -44,6 +44,7 @@ class StructureCacheTests(unittest.TestCase):
         self.run_generation()
         variants=[replace(self.config,front_fixed=(1,)),
                   replace(self.config,front_excluded=tuple(range(12,36))),
+                  replace(self.config,indicators=('前区和值',)),
                   replace(self.config,structure_profile=build_profile(self.draws,100))]
         p=deepcopy(self.profile);p.weights['C1差值'][1]+=1
         variants.append(replace(self.config,structure_profile=p))

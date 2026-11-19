@@ -1,6 +1,6 @@
 """历史权重抽样；结构模式采用有限全集，避免旧版无限拒绝重试。"""
 from bisect import bisect_right
-from itertools import combinations
+from itertools import accumulate, combinations
 from math import exp, log
 from .features import features
 from .models import check_cancel
@@ -29,51 +29,42 @@ def weighted_sample(pool, count, weights, rng):
 
 
 class StructurePool:
-    def __init__(self, config, stats, cancel=None, progress=None):
-        self.fronts, self.cumulative = [], []
+    def __init__(self, config, cancel=None, progress=None):
+        self.fronts, self.log_weights = [], []
         pool = [n for n in range(1, 36) if n not in config.front_fixed and n not in config.front_excluded]
-        # 平滑各历史类别，避免小样本中未出现过的结构被永久禁止。
-        max_weights = config.max_span_weights or tuple(stats.max_span[i] + 1 for i in range(5))
-        start_weights = config.start_span_weights or tuple(stats.start_span[i] + 1 for i in range(5))
+        # 兼容直接传入跨区权重的入口；未指定的跨区指标也不参与。
+        max_weights = config.max_span_weights or (1,) * 5
+        start_weights = config.start_span_weights or (1,) * 5
         from .structure_scoring import StructureScorer
-        scorer = StructureScorer(config.structure_profile) if config.structure_profile is not None else None
-        total = 0.0
+        scorer = (StructureScorer(config.structure_profile, config.indicators)
+                  if config.structure_profile is not None else None)
         for i, rest in enumerate(combinations(pool, 5 - len(config.front_fixed))):
             if i % 1024 == 0:
                 check_cancel(cancel)
                 if progress:
                     progress(f"正在计算结构候选 {i:,} / 最多 324,632")
             front = tuple(sorted(config.front_fixed + rest))
+            if scorer is not None:
+                score = scorer.log_weight(front)
+                if score is not None:
+                    self.fronts.append(front)
+                    self.log_weights.append(score)
+                continue
             f = features(front)
             if max_weights[f.max_span] == 0 or start_weights[f.start_span] == 0:
                 continue
-            if scorer is not None:
-                weight = scorer.weight(front, f)
-                if config.max_span_weights:
-                    weight *= config.max_span_weights[f.max_span]
-                if config.start_span_weights:
-                    weight *= config.start_span_weights[f.start_span]
-                if weight <= 0:
-                    continue
-                total += weight
-                self.fronts.append(front)
-                self.cumulative.append(total)
-                continue
-            # 各维度为相对权重而非承诺的最终边际概率。几何平均抑制重复放大。
-            factors = [stats.front[n] + 1 for n in front]
-            factors += [stats.gaps[j][gap] + 1 for j, gap in enumerate(f.gaps)]
-            factors += [stats.runs[f.longest_run] + 1]
-            factors += [(stats.empty[z] if z in f.empty_zones else stats.total - stats.empty[z]) + 1
-                        for z in range(1, 6)]
-            weight = exp(sum(log(v) for v in factors) / len(factors))
-            weight *= max_weights[f.max_span] * start_weights[f.start_span]
-            total += weight
             self.fronts.append(front)
-            self.cumulative.append(total)
+            self.log_weights.append(log(max_weights[f.max_span]) + log(start_weights[f.start_span]))
         check_cancel(cancel)
         if not self.fronts:
             raise ValueError("固定/排除号码或结构权重限制过严，没有可用的前区组合")
+        self.cumulative = relative_cumulative(self.log_weights)
 
     def choose(self, rng):
         index = bisect_right(self.cumulative, rng.random() * self.cumulative[-1])
         return self.fronts[min(index, len(self.fronts) - 1)]
+
+
+def relative_cumulative(log_weights):
+    highest = max(log_weights)
+    return tuple(accumulate(exp(score - highest) for score in log_weights))

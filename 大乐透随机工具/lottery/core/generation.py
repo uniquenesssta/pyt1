@@ -23,6 +23,7 @@ class GenerationConfig:
     max_span_weights: tuple = ()
     start_span_weights: tuple = ()
     structure_profile: object = None
+    indicators: tuple[str, ...] = ()
 
     def validate(self):
         if type(self.count) is not int or not 1 <= self.count <= 10000:
@@ -70,8 +71,13 @@ def generate(config, stats=None, cancel=None, progress=None, rng=None, structure
     from .cross_weights import resolve_cross_overrides
     config = resolve_cross_overrides(config)
     if config.structure_profile is not None and config.mode != MODES[0]:
-        config.structure_profile.validate()
+        selected = config.indicators if config.mode == MODES[2] else ()
+        if config.mode == MODES[2] and not selected:
+            raise ValueError("请在选号主页或结构权重页至少选择一个要使用的加权指标")
+        config.structure_profile.validate(selected)
         stats = config.structure_profile.stats
+    elif config.mode == MODES[2] and config.indicators:
+        raise ValueError("使用所选结构指标前，请先填入历史结构权重")
     check_cancel(cancel)
     rng = rng if rng is not None else SystemRandom()
     front_pool = tuple(n for n in range(1, 36) if n not in config.front_fixed and n not in config.front_excluded)
@@ -96,17 +102,25 @@ def generate(config, stats=None, cancel=None, progress=None, rng=None, structure
         return results
     if stats is None or stats.total == 0:
         raise ValueError("历史加权需要先导入有效历史数据")
-    front_weights = {n: stats.front[n] + 1 for n in range(1, 36)}
-    back_weights = {n: stats.back[n] + 1 for n in range(1, 13)}
+    structural = config.mode == MODES[2]
+    explicit_structure = structural and config.structure_profile is not None
+    if structural and not explicit_structure and not (config.max_span_weights or config.start_span_weights):
+        raise ValueError("请先选择要参与抽取的加权指标")
+    front_weights = {n: 1 if structural else stats.front[n] + 1 for n in range(1, 36)}
+    back_weights = {n: 1 if structural else stats.back[n] + 1 for n in range(1, 13)}
     structure = back_structure = None
     if config.mode == MODES[2]:
         from .back_structure import build_back_structure
+        from .structure_profile import indicator_zone
+        from .trend_indicators import FRONT
         back_structure = build_back_structure(back_pool, config.back_fixed, config.back_count,
-                                              back_weights, config.structure_profile, cancel)
-        structure = (structure_cache.get(config, stats, cancel, progress) if structure_cache is not None
-                     else StructurePool(config, stats, cancel, progress))
-    if structure:
-        capacity = len(structure.fronts) * (len(back_structure.backs) if back_structure else back_size)
+                                              config.structure_profile, config.indicators, cancel)
+        if not explicit_structure or any(indicator_zone(name) == FRONT for name in config.indicators):
+            structure = (structure_cache.get(config, stats, cancel, progress) if structure_cache is not None
+                         else StructurePool(config, cancel, progress))
+    if structure or back_structure:
+        capacity = ((len(structure.fronts) if structure else front_size)
+                    * (len(back_structure.backs) if back_structure else back_size))
         if config.unique and config.count > capacity:
             raise ValueError(f"结构权重限制后最多 {capacity:,} 组不重复号码")
     results, seen = [], set()

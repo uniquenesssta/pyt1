@@ -1,8 +1,10 @@
 """统计条目回查：匹配具体开奖记录并保留每期贡献次数。"""
 from dataclasses import dataclass
 from .features import features, zone
-from .structure_profile import structure_values
+from .structure_profile import indicator_value
 from .history_window import select_window
+from .period_context import scoped_references
+from .temporal_indicators import TEMPORAL_INDICATORS
 from .querying import search
 from .models import check_cancel
 
@@ -17,12 +19,11 @@ class StatisticFilter:
     def label(self):
         return f'{self.category} · {self.item}'
 
-    def contribution(self, draw):
+    def contribution(self, draw, reference=None):
         category, item = self.category, self.item
         if self.source == '结构权重':
-            values = structure_values(draw.ticket.front, draw.ticket.back)
-            if category not in values: raise ValueError('未知结构指标')
-            return int(str(values[category]) == item)
+            value = indicator_value(category, draw, reference)
+            return int(value is not None and str(value) == item)
         if category.startswith(('前区·','后区·')):
             numbers = draw.ticket.front if category.startswith('前区') else draw.ticket.back
             return int(int(item) in numbers)
@@ -44,7 +45,14 @@ class StatisticFilter:
 
 def query_history(draws, query, periods=0, statistic=None, cancel=None):
     check_cancel(cancel)
-    if periods or (statistic and statistic.source == '结构权重'):
+    temporal = (TEMPORAL_INDICATORS.get(statistic.category)
+                if statistic and statistic.source == '结构权重' else None)
+    references = {}
+    if temporal:
+        selected, order, references, _ = scoped_references(draws, periods, cancel)
+        selected = [d for d in selected if temporal.codes(references.get(d)) is not None]
+        order += '；只计有连续参照的期数'
+    elif periods or (statistic and statistic.source == '结构权重'):
         selected, order = select_window(draws, periods)
     else:
         selected, order = list(draws), '全部导入记录（保留原统计重复行）'
@@ -54,10 +62,13 @@ def query_history(draws, query, periods=0, statistic=None, cancel=None):
     matched, contributions = [], 0
     for index, (draw, detail) in enumerate(rows):
         if index % 256 == 0: check_cancel(cancel)
-        count = statistic.contribution(draw)
+        reference = references.get(draw)
+        count = statistic.contribution(draw, reference)
         if count:
             contributions += count
             note = f'{statistic.label}；本期贡献 {count} 次'
+            if reference:
+                note += f'；参照上一期 {reference.issue}'
             matched.append((draw, note + ('；'+detail if detail else '')))
     check_cancel(cancel)
     return matched, len(selected), contributions, order

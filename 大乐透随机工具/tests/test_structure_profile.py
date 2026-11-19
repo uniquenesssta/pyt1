@@ -50,19 +50,22 @@ class StructureProfileTests(unittest.TestCase):
         short,long=build_profile(draws,50),build_profile(draws,100)
         self.assertEqual(short.counts['最长连号'][5],0)
         self.assertEqual(long.counts['最长连号'][5],50)
-        self.assertNotEqual(StructureScorer(short).weight((1,2,3,4,5)),StructureScorer(long).weight((1,2,3,4,5)))
+        selection = ('C1差值',)
+        self.assertNotEqual(StructureScorer(short, selection).weight((1,2,3,4,5)),
+                            StructureScorer(long, selection).weight((1,2,3,4,5)))
 
     def test_all_indicators_disabled_and_invalid_weights(self):
         p=build_profile([draw(26001)])
         p.strengths={name:0 for name in p.strengths}
-        self.assertEqual(StructureScorer(p).weight((1,2,3,4,5)),1)
+        self.assertEqual(StructureScorer(p, ()).weight((1,2,3,4,5)),1)
         p.weights['C1差值'][1]=float('nan')
         with self.assertRaises(ValueError):p.validate()
 
     def test_manual_weights_reach_generated_tickets(self):
         p=build_profile([draw(26001)])
         p.weights['C1差值']={k:100.0 if k==2 else 0.0 for k in p.weights['C1差值']}
-        config=GenerationConfig(count=30,mode=MODES[2],front_excluded=tuple(range(11,36)),structure_profile=p)
+        config=GenerationConfig(count=30,mode=MODES[2],front_excluded=tuple(range(11,36)),
+                                structure_profile=p,indicators=('C1差值',))
         tickets=generate(config,rng=random.Random(12))
         self.assertTrue(all(t.front[1]-t.front[0]==2 for t in tickets))
         p.weights['C1差值']={k:100.0 if k==31 else 0.0 for k in p.weights['C1差值']}

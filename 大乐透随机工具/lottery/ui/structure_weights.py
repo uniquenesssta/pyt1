@@ -2,32 +2,23 @@
 from copy import deepcopy
 import tkinter as tk
 from tkinter import ttk
-from ..core.structure_profile import build_profile, domains
-from ..core.trend_baseline import uniform_fractions
-from ..core.trend_indicators import BACK, TREND_INDICATORS
+from ..core.structure_profile import INDICATORS, build_profile, domains
+from ..core.temporal_indicators import TEMPORAL_INDICATORS
+from .indicator_groups import GROUPS
 from .structure_draw import StructureDrawPanel
 from .table import DataTable
 from .widgets import field, wrapped_label, Disclosure
 
 
-GROUPS = {
-    '差值': tuple(f'C{i}差值' for i in range(1, 5)),
-    '连号': ('连号形态', '最长连号'),
-    '空区': ('空区数量',) + tuple(f'{z}区空区' for z in range(1, 6)),
-    '跨区': ('最大跨区（差值>7）', '起始跨区'),
-    '中间覆盖': tuple(f'{z}区中间覆盖（差值>10）' for z in range(1, 6)),
-    '前区形态': ('前区奇偶比', '前区小大比', '前区012路比'),
-    '前区数值': ('前区和值', '前区跨度'),
-    '后区结构': tuple(name for name, indicator in TREND_INDICATORS.items() if indicator.zone == BACK),
-}
-WEIGHT_COLUMNS = ('类别', '历史次数', '实际期数', '历史占比', '理论占比', '建议权重', '当前权重')
+WEIGHT_COLUMNS = ('类别', '历史次数', '有效样本', '历史占比', '理论占比', '建议权重', '当前权重')
 CLASSIC_COLUMNS = tuple(name for name in WEIGHT_COLUMNS if name != '理论占比')
 
 
 class StructureWeightsPage(ttk.Frame):
-    def __init__(self, parent, error, inputs, draw, use_in_selection):
+    def __init__(self, parent, error, inputs, draw, use_in_selection, indicator_selection):
         super().__init__(parent, padding=10)
         self.error, self.draws, self.profile = error, [], None
+        self.indicator_selection = indicator_selection
         self.on_change = lambda profile: None
         self._busy = False
         top = ttk.Frame(self)
@@ -45,10 +36,11 @@ class StructureWeightsPage(ttk.Frame):
         wrapped_label(self, textvariable=self.pending, style='Muted.TLabel').pack(fill='x', pady=(4, 0))
         self.summary = tk.StringVar(value='请先导入或更新历史数据')
         wrapped_label(self, textvariable=self.summary, style='Muted.TLabel').pack(fill='x', pady=(4, 8))
+        wrapped_label(self, textvariable=indicator_selection.summary, style='Muted.TLabel').pack(fill='x', pady=(0, 6))
         row = ttk.Frame(self)
         row.pack(fill='x')
         self.family = tk.StringVar(value='差值')
-        self.family_box = ttk.Combobox(field(row, '指标组', 0), textvariable=self.family, values=tuple(GROUPS), state='readonly', width=10)
+        self.family_box = ttk.Combobox(field(row, '指标组', 0), textvariable=self.family, values=tuple(GROUPS), state='readonly', width=12)
         self.family_box.pack(fill='x')
         self.family_box.bind('<<ComboboxSelected>>', lambda _: self.select_family())
         self.group = tk.StringVar(value='C1差值')
@@ -60,8 +52,15 @@ class StructureWeightsPage(ttk.Frame):
         self.strength_entry.pack(fill='x')
         self.strength_entry.bind('<Return>', lambda _: self.apply_strength())
         self.strength_button = ttk.Button(row, text='应用强度', command=self.apply_strength)
-        row.columnconfigure(3, weight=1)
         self.strength_button.grid(row=0, column=3, sticky='sw')
+        self.current_selected = tk.BooleanVar(self)
+        self.active_button = ttk.Checkbutton(row, text='用于抽取', variable=self.current_selected,
+                                             command=self.toggle_current)
+        self.active_button.grid(row=0, column=4, sticky='sw', padx=10)
+        self.only_button = ttk.Button(row, text='只用这一项',
+                                      command=lambda: indicator_selection.set((self.group.get(),)))
+        self.only_button.grid(row=0, column=5, sticky='sw')
+        row.columnconfigure(5, weight=1)
         self.mean = tk.StringVar(value='选择指标查看历史分布；双击次数回查开奖记录')
         wrapped_label(self, textvariable=self.mean, style='Muted.TLabel').pack(fill='x', pady=6)
         self.table = DataTable(self, WEIGHT_COLUMNS, (140, 105, 105, 125, 125, 125, 125))
@@ -83,16 +82,23 @@ class StructureWeightsPage(ttk.Frame):
         help_box.pack(side='bottom', before=row, fill='x')
         wrapped_label(
             help_box.body,
-            text='历史占比是实际次数除以期数；理论占比是没有固定或排除号码时的均匀组合基准。'
-                 '原指标建议权重沿用加 1 平滑；新增指标对比实际次数与理论次数，50 表示中性。'
-                 '新增指标默认只统计，设强度后才参与抽取。最长连号、空区数量仍默认关闭，避免重复强调。'
-                 '启用后区结构后，复式按所有二码对子评分，含零权重对子则排除整组。'
-                 '均值供参考，权重是抽取偏好，不是中奖概率。',
+            text='只有选中的指标才参与，默认一项也不选。单项只用该指标；多项按各项权重的强度次幂相乘。'
+                 '未选的一侧等概率，强度和类别权重只影响所选项。理论占比以均匀组合为基准。'
+                 '重邻孤按真实连续期计算；遗漏结构需连续 12 期参照。'
+                 '后区复式按所有二码对子评分，含零权重对子则排除整组。权重是抽取偏好，不是中奖概率。',
             style='Muted.TLabel',
         ).pack(fill='x')
         self.draw_panel = StructureDrawPanel(self, inputs, draw)
         self.draw_panel.pack(side='bottom', before=help_box, fill='x', pady=(6, 0))
         self.period.trace_add('write', lambda *_: self.describe_pending())
+        indicator_selection.summary.trace_add('write', self.reflect_selection)
+
+    def reflect_selection(self, *_):
+        self.current_selected.set(self.group.get() in self.indicator_selection.names)
+        self.describe_pending()
+
+    def toggle_current(self):
+        self.indicator_selection.include(self.group.get(), self.current_selected.get())
 
     def select_family(self):
         names = GROUPS[self.family.get()]
@@ -111,7 +117,7 @@ class StructureWeightsPage(ttk.Frame):
                     else '可输入自定义期数；重新统计会重置手动权重')
         self.pending.set(note)
         ready = self.profile is not None and not pending and not self._busy
-        self.draw_panel.set_available(ready)
+        self.draw_panel.set_available(ready and bool(self.indicator_selection.names))
         self.use_button.configure(state='normal' if ready else 'disabled')
 
     def describe_selection(self):
@@ -167,15 +173,22 @@ class StructureWeightsPage(ttk.Frame):
         self.describe_pending()
 
     def render(self):
+        self.current_selected.set(self.group.get() in self.indicator_selection.names)
         if not self.profile: return
         p, name = self.profile, self.group.get()
         strength = p.strengths[name]
         self.strength.set(f'{strength:g}')
         average = p.means.get(name)
-        indicator = TREND_INDICATORS.get(name)
+        indicator = INDICATORS.get(name)
         if indicator:
-            state = '只统计（强度 0）' if strength == 0 else f'参与抽取（强度 {strength:g}）'
-            description = indicator.description + f'；理论占比按均匀组合计算；{state}'
+            description = indicator.description
+            if name in TEMPORAL_INDICATORS:
+                supported = indicator.codes(p.reference) is not None and p.samples(name)
+                description += (f'；抽取参照第 {p.reference.issue} 期' if supported
+                                else '；连续开奖不足，暂不能用于抽取')
+                description += '；理论占比按有效样本的各期参照计算'
+            else:
+                description += '；理论占比按均匀组合计算'
         elif name.endswith('空区') or '中间覆盖' in name:
             description = '0=未发生，1=发生；均值即发生比例'
         elif name == '连号形态':
@@ -187,13 +200,14 @@ class StructureWeightsPage(ttk.Frame):
         else:
             prefix = f'历史均值：{average:.4f}；' if average is not None else ''
         self.mean.set(prefix + description)
-        total = len(p.draws)
-        baseline = uniform_fractions(name) if indicator else None
+        total = p.samples(name)
+        baseline = p.baseline(name)
         suggestions = p.suggested_weights(name)
         self.table.tree.configure(displaycolumns=WEIGHT_COLUMNS if indicator else CLASSIC_COLUMNS)
         self.table.set_rows(
-            (str(k), p.counts[name][k], total, f'{100*p.counts[name][k]/total:.4f}%',
-             f'{100*baseline[k]:.4f}%' if baseline else '—', f'{suggestions[k]:.4f}', f'{p.weights[name][k]:.4f}')
+            (str(k), p.counts[name][k], total, f'{100*p.counts[name][k]/total:.4f}%' if total else '—',
+             f'{100*baseline[k]:.4f}%' if baseline else '—', f'{suggestions[k]:.4f}' if total else '—',
+             f'{p.weights[name][k]:.4f}')
             for k in domains()[name]
         )
 
@@ -227,7 +241,7 @@ class StructureWeightsPage(ttk.Frame):
 
     def set_busy(self, busy):
         self._busy = busy
-        for widget in (self.rebuild_button,self.strength_button,self.edit_button,self.period_box,self.restore_button,self.strength_entry,self.edit_entry):
+        for widget in (self.rebuild_button,self.strength_button,self.edit_button,self.period_box,self.restore_button,self.strength_entry,self.edit_entry,self.active_button,self.only_button):
             widget.configure(state='disabled' if busy else 'normal')
         for widget in (self.family_box, self.group_box):
             widget.configure(state='disabled' if busy else 'readonly')
