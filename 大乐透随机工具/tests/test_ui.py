@@ -175,14 +175,28 @@ class UITests(unittest.TestCase):
             self.assertEqual(self.app.store.load(), favorites)
 
             self.app.results_tabs.select(self.app.saved)
-            tree.selection_set("1")
+            tree.selection_set("0", "1")
             self.app.saved.record_button.invoke()
-            self.assertEqual([r.ticket for r in panel.store.load()], [ticket])
+            self.assertEqual([r.ticket for r in panel.store.load()], [ticket, other])
+            self.assertEqual(self.app.results_tabs.select(), str(panel))
+            self.assertEqual(set(panel.selected_indices()), {0, 1})
+            with patch("lottery.ui.pick_log_actions.simpledialog.askstring", return_value="2026133"):
+                panel.issue_button.invoke()
+            self.assertEqual([r.issue for r in panel.store.load()], ["26133", "26133"])
+
+        # A sorted selection must delete only the selected pick and preserve both favorites.
+        panel.table.sort(2)
+        panel.table.tree.selection_set("0")
+        self.root.update()
+        deleted = panel.records[panel.selected_index()]
+        with patch("lottery.ui.pick_log_actions.messagebox.askyesno", return_value=True):
+            panel.delete_button.invoke()
+        self.assertEqual([r.ticket for r in panel.store.load()], [t for t in (ticket, other) if t != deleted.ticket])
+        self.assertEqual(self.app.store.load(), favorites)
         self.app.results_tabs.select(self.app.saved)
         tree.selection_set("1")
         self.app.saved.action_button.invoke()
         self.assertEqual(self.app.store.load(), [FavoriteRecord(other)])
-        self.assertEqual([r.ticket for r in panel.store.load()], [ticket])
         self.assertEqual(self.errors, [])
 
     def test_import_search_statistics_generation_flow(self):

@@ -1,21 +1,22 @@
 """选号记录、期次筛选和对应开奖的号码比对。"""
-from dataclasses import replace
 from datetime import datetime
 import tkinter as tk
-from tkinter import simpledialog, ttk
+from tkinter import ttk
 
 from ..core.draw_calendar import BEIJING
 from ..core.draw_index import DrawIndex
 from ..core.models import format_numbers
-from ..core.pick_records import PickRecord, existing_pick
+from ..core.pick_records import prepare_pick_batch
 from ..core.prize_match import compare_pick
+from .pick_log_actions import correct_issues, delete_selected
+from .prize_amount_panel import PrizeAmountPanel
 from .table import DataTable
 from .widgets import wrapped_label
 
 
 ALL, LATEST, PENDING = "全部记录", "最近已载入期", "待对奖"
 LEVEL_NAMES = "一二三四五六七"
-EMPTY_NOTE = "在「本批号码」或「我的收藏」中双击一组号码，即可记入这里"
+EMPTY_NOTE = "在「我的收藏」选中号码后点击「记录选号」；也可双击一组直接记录"
 
 
 def issue_label(issue):
@@ -32,7 +33,7 @@ def comparison_label(match):
 
 
 class PickLogPanel(ttk.Frame):
-    def __init__(self, parent, store, status, error):
+    def __init__(self, parent, store, status, error, lookup_prizes):
         super().__init__(parent, padding=10)
         self.store, self.status, self.error = store, status, error
         self.history = DrawIndex()
@@ -52,8 +53,10 @@ class PickLogPanel(ttk.Frame):
         self.scope_box = ttk.Combobox(toolbar, textvariable=self.scope, state="readonly", width=18)
         self.scope_box.pack(side="left", padx=8)
         self.scope_box.bind("<<ComboboxSelected>>", lambda _: self.render())
-        self.issue_button = ttk.Button(toolbar, text="更正期号", command=self.edit_issue, state="disabled")
-        self.issue_button.pack(side="right")
+        self.delete_button = ttk.Button(toolbar, text="删除选中", command=lambda: delete_selected(self), state="disabled")
+        self.delete_button.pack(side="right")
+        self.issue_button = ttk.Button(toolbar, text="更正期号", command=lambda: correct_issues(self), state="disabled")
+        self.issue_button.pack(side="right", padx=(0, 8))
         wrapped_label(
             toolbar, text="周一、三、六按北京时间 21:00 归期；开奖后可更新数据对奖。",
             style="Muted.TLabel",
@@ -63,9 +66,12 @@ class PickLogPanel(ttk.Frame):
                                empty_text=EMPTY_NOTE)
         self.table.tree.configure(displaycolumns=columns[:-1])
         self.table.pack(fill="both", expand=True)
+        footer = ttk.Frame(self)
+        footer.pack(side="bottom", before=self.table, fill="x", pady=(6, 0))
         self.detail = tk.StringVar(self)
-        wrapped_label(self, textvariable=self.detail, style="Muted.TLabel").pack(
-            side="bottom", before=self.table, fill="x", pady=(6, 0))
+        wrapped_label(footer, textvariable=self.detail, style="Muted.TLabel").pack(fill="x")
+        self.amounts = PrizeAmountPanel(footer, lookup_prizes)
+        self.amounts.pack(fill="x", pady=(4, 0))
         self.table.tree.bind("<<TreeviewSelect>>", lambda _: self.show_detail(), add="+")
         self.set_history(())
 
@@ -93,36 +99,40 @@ class PickLogPanel(ttk.Frame):
         self.render()
         return True
 
-    def record(self, ticket, *, saved_at=None, reveal=False):
-        pick = PickRecord.from_selection(ticket, saved_at if saved_at is not None else datetime.now(BEIJING))
-        previous = existing_pick(self.records, pick, self.history)
-        if previous:
-            index, message = self.records.index(previous), "该号码已记录"
-        elif self.save(self.records + [pick]):
-            index, message = len(self.records) - 1, "已保存选号记录"
-        else:
+    def record_many(self, tickets, *, saved_at=None, reveal=False):
+        now = saved_at if saved_at is not None else datetime.now(BEIJING)
+        added, indices, target = prepare_pick_batch(self.records, tickets, now, self.history)
+        if not indices or (added and not self.save(self.records + added)):
             return ""
         if reveal:
-            self.reveal_record(index)
-        return f"{message} · 预计开奖日 {pick.target_date}"
+            self.reveal_records(indices)
+        existing = len(indices) - len(added)
+        if not added:
+            message = f"所选 {existing} 条已记录"
+        else:
+            message = f"已保存 {len(added)} 条选号记录"
+            if existing:
+                message += f" · 本期已有 {existing} 条"
+        return f"{message} · 预计开奖日 {target}"
 
-    def reveal_record(self, index):
+    def reveal_records(self, indices):
         table = self.table
+        wanted = set(indices)
 
-        def position():
-            return next((i for i, row in enumerate(table.rows) if row[-1] == index), None)
+        def positions():
+            return [i for i, row in enumerate(table.rows) if row[-1] in wanted]
 
-        row = position()
-        if row is None:
+        rows = positions()
+        if len(rows) < len(wanted) and self.scope.get() != ALL:
             self.scope.set(ALL)
             self.render()
-            row = position()
-        if row is not None:
-            table.go_to_page(row // table.PAGE_SIZE)
-            item = str(row)
-            table.tree.selection_set(item)
-            table.tree.focus(item)
-            table.tree.see(item)
+            rows = positions()
+        if rows:
+            page = rows[0] // table.PAGE_SIZE
+            table.go_to_page(page)
+            table.tree.selection_set(*(str(row) for row in rows if row // table.PAGE_SIZE == page))
+            table.tree.focus(str(rows[0]))
+            table.tree.see(str(rows[0]))
             self.show_detail()
 
     def render(self):
@@ -160,15 +170,25 @@ class PickLogPanel(ttk.Frame):
         self.show_detail()
 
     def selected_index(self):
-        rows = self.table.selected()
-        return rows[0][-1] if len(rows) == 1 else None
+        indices = self.selected_indices()
+        return indices[0] if len(indices) == 1 else None
+
+    def selected_indices(self):
+        return tuple(row[-1] for row in self.table.selected())
 
     def show_detail(self):
-        index = self.selected_index()
-        self.issue_button.configure(state="disabled" if index is None or self.load_error else "normal")
-        if index is None:
-            self.detail.set("选中一条查看开奖号码、命中的号码或更正期号。")
+        indices = self.selected_indices()
+        state = "normal" if indices and not self.load_error else "disabled"
+        self.issue_button.configure(state=state)
+        self.delete_button.configure(state=state)
+        self.amounts.show([self.details[index] for index in indices])
+        if not indices:
+            self.detail.set("选中记录查看命中；Ctrl / Shift 可多选、更正期号或删除。")
             return
+        if len(indices) > 1:
+            self.detail.set(f"已选 {len(indices)} 条记录，可一起更正期号或删除。")
+            return
+        index = indices[0]
         record, draw, match, waiting = self.details[index]
         saved = record.saved_at.strftime("%Y-%m-%d %H:%M:%S")
         if draw is None:
@@ -182,25 +202,3 @@ class PickLogPanel(ttk.Frame):
             f"{saved} 保存 · {issue_label(draw.issue)} {draw.draw_date} · 开奖 {draw.ticket.text()} · "
             f"命中前区 {format_numbers(match.front) or '无'} / 后区 {format_numbers(match.back) or '无'}{prizes}"
         )
-
-    def edit_issue(self):
-        index = self.selected_index()
-        if index is None:
-            return
-        record, current, _, _ = self.details[index]
-        value = simpledialog.askstring(
-            "更正对奖期号", "输入票面期号；留空恢复按预计开奖日匹配。",
-            initialvalue=record.issue or (current.issue if current else ""), parent=self,
-        )
-        if value is None:
-            return
-        try:
-            changed = replace(record, issue=value.strip())
-        except ValueError as exc:
-            self.error(exc)
-            return
-        updated = list(self.records)
-        updated[index] = changed
-        if self.save(updated):
-            self.reveal_record(index)
-            self.status(f"已改为按{issue_label(changed.issue)}核对" if changed.issue else "已恢复按预计开奖日核对")

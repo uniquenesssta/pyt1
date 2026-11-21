@@ -25,6 +25,7 @@ from .jobs import Jobs
 from .pick_log import PickLogPanel
 from .post_mode_actions import calculate_conditional, generate_post_mode
 from .post_mode_controls import ConditionalInputs
+from .prize_actions import lookup_prizes
 from .results import TicketPanel
 from .selection_inputs import SelectionInputs
 from .statistics import StatisticsPage
@@ -78,9 +79,9 @@ class LotteryApp:
                                      self.add_favorites, "收藏选中", on_open=self.record_pick,
                                      open_hint="双击一组号码，按期记录并收藏")
         self.saved = FavoritePanel(self.results_tabs, self.set_status, self.error, self.remove_favorites,
-                                   lambda ticket: self.record_pick(ticket, show_log=True))
+                                   self.record_favorites)
         self.pick_log = PickLogPanel(self.results_tabs, PickStore(Path(data_dir) / "picks.json"),
-                                     self.set_status, self.error)
+                                     self.set_status, self.error, lambda auto: lookup_prizes(self, auto))
         self.results_tabs.add(self.generated, text="本批号码")
         self.results_tabs.add(self.saved, text=f"我的收藏 ({len(self.favorites)})")
         self.results_tabs.add(self.pick_log, text="选号记录 / 对奖")
@@ -118,6 +119,7 @@ class LotteryApp:
     def set_busy(self, busy):
         self.structure_weights.set_busy(busy)
         self.statistics.set_busy(busy)
+        self.pick_log.amounts.set_busy(busy)
         for button in (self.import_button, self.update_button, self.controls.generate_button, self.controls.fill_button, self.controls.cross_period_box, self.history.search_button, self.history.period_box, self.history.clear_button, self.history.reset_button, self.history.back_button):
             button.configure(state="disabled" if busy else "normal")
         if not busy:
@@ -224,18 +226,21 @@ class LotteryApp:
         elif self.commit_favorites(self.favorites + added):
             self.set_status(f"新增收藏 {len(added)} 组，已自动保存")
 
-    def record_pick(self, ticket, *, show_log=False):
+    def record_pick(self, ticket):
         saved_at = datetime.now(BEIJING)
-        message = self.pick_log.record(ticket, saved_at=saved_at, reveal=show_log)
+        message = self.pick_log.record_many([ticket], saved_at=saved_at)
         if not message:
             return
-        if show_log:
-            self.results_tabs.select(self.pick_log)
-        else:
-            added = new_favorites(self.favorites, [ticket], saved_at)
-            if added and not self.commit_favorites(self.favorites + added):
-                message += "；收藏写入失败"
+        added = new_favorites(self.favorites, [ticket], saved_at)
+        if added and not self.commit_favorites(self.favorites + added):
+            message += "；收藏写入失败"
         self.set_status(message)
+
+    def record_favorites(self, tickets):
+        message = self.pick_log.record_many(tickets, saved_at=datetime.now(BEIJING), reveal=True)
+        if message:
+            self.results_tabs.select(self.pick_log)
+            self.set_status(message)
 
     def remove_favorites(self, tickets):
         if not tickets:
@@ -247,6 +252,7 @@ class LotteryApp:
 
     def close(self):
         self.root.after_cancel(self.restore_timer)
+        self.pick_log.amounts.close()
         self.jobs.close()
         self.structure_cache.clear()
         self.root.destroy()

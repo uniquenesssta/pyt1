@@ -10,8 +10,9 @@ UNDATED = "日期未记录"
 
 class FavoritePanel(TicketPanel):
     def __init__(self, parent, status, error, remove, record):
-        super().__init__(parent, "我的收藏", status, error, remove, "移除选中", on_open=record,
-                         open_hint="双击号码可记入选号记录",
+        super().__init__(parent, "我的收藏", status, error, remove, "移除选中",
+                         on_open=lambda ticket: record([ticket]),
+                         open_hint="Ctrl / Shift 多选；双击只记录一组",
                          label_column="收藏时间（北京）", widths=(177, 543, 300))
         self.record = record
         self.record_button = ttk.Button(self.toolbar, text="记录选号", command=self.record_selected)
@@ -20,10 +21,10 @@ class FavoritePanel(TicketPanel):
 
     def record_selected(self):
         tickets = self.selected()
-        if len(tickets) != 1:
-            self.status("请选择一组收藏号码")
+        if not tickets:
+            self.status("请选中要记录的收藏号码")
             return
-        self.record(tickets[0])
+        self.record(tickets)
 
     def set_favorites(self, records):
         ordered = newest_first(records)
