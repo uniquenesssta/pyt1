@@ -15,6 +15,7 @@ from lottery.core.generation import MODES
 from lottery.core.statistics import analyze
 from lottery.data.online_feed import parse_feed
 from lottery.ui.history_actions import apply_history
+from lottery.ui.pick_log import ALL, LATEST
 
 
 class UITests(unittest.TestCase):
@@ -145,6 +146,43 @@ class UITests(unittest.TestCase):
         self.assertEqual(panel.table.rows[0][1], '第 26132 期')
         self.assertEqual(panel.table.rows[0][4], '5+2')
         self.assertIn('一等奖', panel.table.rows[0][5])
+        self.assertEqual(self.errors, [])
+
+    def test_favorite_double_click_records_only_clicked_row_and_keeps_favorites(self):
+        ticket = Ticket((1, 2, 3, 4, 5), (1, 2))
+        other = Ticket((6, 7, 8, 9, 10), (3, 4))
+        favorites = [FavoriteRecord(other), FavoriteRecord(ticket)]
+        self.assertTrue(self.app.commit_favorites(favorites))
+        panel = self.app.pick_log
+        panel.scope.set(LATEST)
+        panel.render()
+        self.app.results_tabs.select(self.app.saved)
+        self.root.update()
+
+        tree = self.app.saved.table.tree
+        tree.selection_set(("0", "1"))
+        x, y, _, height = tree.bbox("1", "#1")
+        with patch("lottery.ui.app.datetime") as clock:
+            clock.now.return_value = datetime(2026, 11, 18, 12, 59, tzinfo=timezone.utc)
+            for stamp in (2000, 2120):
+                tree.event_generate("<ButtonPress-1>", x=x+8, y=y+height//2, time=stamp)
+                tree.event_generate("<ButtonRelease-1>", x=x+8, y=y+height//2, time=stamp+25)
+            self.root.update()
+            self.assertEqual(self.app.results_tabs.select(), str(panel))
+            self.assertEqual(panel.scope.get(), ALL)
+            self.assertEqual(panel.selected_index(), 0)
+            self.assertEqual([r.ticket for r in panel.store.load()], [ticket])
+            self.assertEqual(self.app.store.load(), favorites)
+
+            self.app.results_tabs.select(self.app.saved)
+            tree.selection_set("1")
+            self.app.saved.record_button.invoke()
+            self.assertEqual([r.ticket for r in panel.store.load()], [ticket])
+        self.app.results_tabs.select(self.app.saved)
+        tree.selection_set("1")
+        self.app.saved.action_button.invoke()
+        self.assertEqual(self.app.store.load(), [FavoriteRecord(other)])
+        self.assertEqual([r.ticket for r in panel.store.load()], [ticket])
         self.assertEqual(self.errors, [])
 
     def test_import_search_statistics_generation_flow(self):

@@ -75,8 +75,10 @@ class LotteryApp:
         self.results_tabs = ttk.Notebook(generation)
         self.results_tabs.pack(fill="both", expand=True)
         self.generated = TicketPanel(self.results_tabs, "本批号码", self.set_status, self.error,
-                                     self.add_favorites, "收藏选中", on_open=self.record_pick)
-        self.saved = FavoritePanel(self.results_tabs, self.set_status, self.error, self.remove_favorites)
+                                     self.add_favorites, "收藏选中", on_open=self.record_pick,
+                                     open_hint="双击一组号码，按期记录并收藏")
+        self.saved = FavoritePanel(self.results_tabs, self.set_status, self.error, self.remove_favorites,
+                                   lambda ticket: self.record_pick(ticket, show_log=True))
         self.pick_log = PickLogPanel(self.results_tabs, PickStore(Path(data_dir) / "picks.json"),
                                      self.set_status, self.error)
         self.results_tabs.add(self.generated, text="本批号码")
@@ -222,14 +224,17 @@ class LotteryApp:
         elif self.commit_favorites(self.favorites + added):
             self.set_status(f"新增收藏 {len(added)} 组，已自动保存")
 
-    def record_pick(self, ticket):
+    def record_pick(self, ticket, *, show_log=False):
         saved_at = datetime.now(BEIJING)
-        message = self.pick_log.record(ticket, saved_at=saved_at)
+        message = self.pick_log.record(ticket, saved_at=saved_at, reveal=show_log)
         if not message:
             return
-        added = new_favorites(self.favorites, [ticket], saved_at)
-        if added and not self.commit_favorites(self.favorites + added):
-            message += "；收藏写入失败"
+        if show_log:
+            self.results_tabs.select(self.pick_log)
+        else:
+            added = new_favorites(self.favorites, [ticket], saved_at)
+            if added and not self.commit_favorites(self.favorites + added):
+                message += "；收藏写入失败"
         self.set_status(message)
 
     def remove_favorites(self, tickets):

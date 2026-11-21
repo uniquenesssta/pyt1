@@ -1,18 +1,26 @@
 """真实记录文件、开奖文本和对奖规则的一体化回归。"""
 from dataclasses import replace
 from datetime import date, datetime
+from functools import partial
 from pathlib import Path
 import tempfile
+import tkinter as tk
+from types import SimpleNamespace
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from lottery.core.draw_calendar import expected_draw_date
 from lottery.core.draw_index import DrawIndex
+from lottery.core.favorites import FavoriteRecord
 from lottery.core.models import Draw, Ticket
 from lottery.core.pick_records import PickRecord, existing_pick
 from lottery.core.prize_match import compare_pick
+from lottery.data.favorite_store import FavoriteStore
 from lottery.data.online_feed import parse_feed
 from lottery.data.pick_store import PickStore
+from lottery.ui.app import LotteryApp
+from lottery.ui.favorite_panel import FavoritePanel
+from lottery.ui.pick_log import ALL, LATEST, PickLogPanel
 
 
 TICKET = Ticket((1, 2, 3, 4, 5), (1, 2))
@@ -102,3 +110,43 @@ class PickLogTests(unittest.TestCase):
                 with self.assertRaises(OSError):
                     store.save([replace(pick, issue="26133")])
             self.assertEqual(store.load(), [pick])
+
+    def test_record_from_favorites_is_visible_and_preserves_favorite_file(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = tk.Tcl()
+            favorite_store = FavoriteStore(Path(directory) / "favorites.json")
+            favorite_store.save([FavoriteRecord(TICKET, timestamp("2026-11-15T12:00"))])
+            original = favorite_store.path.read_bytes()
+            pick_store = PickStore(Path(directory) / "picks.json")
+            table = Mock(rows=[], PAGE_SIZE=250)
+            table.set_rows.side_effect = lambda rows: setattr(table, "rows", list(rows))
+            status, error, tabs = Mock(), Mock(), Mock()
+            panel = SimpleNamespace(table=table, history=DrawIndex(parse_feed(MONDAY).draws),
+                                    scope=tk.StringVar(root, value=LATEST), scope_box=Mock(),
+                                    load_error=None, store=pick_store, records=[], show_detail=Mock(), error=error)
+            for name in ("record", "reveal_record", "save", "render"):
+                setattr(panel, name, partial(getattr(PickLogPanel, name), panel))
+            app = SimpleNamespace(pick_log=panel, results_tabs=tabs, set_status=status,
+                                  favorites=favorite_store.load(),
+                                  commit_favorites=lambda records: favorite_store.save(records))
+            favorites = SimpleNamespace(selected=lambda: [TICKET], status=status,
+                                        record=partial(LotteryApp.record_pick, app, show_log=True))
+
+            with patch("lottery.ui.app.datetime") as clock:
+                clock.now.return_value = timestamp("2026-11-18T12:59")
+                FavoritePanel.record_selected(favorites)
+                self.assertEqual(panel.scope.get(), ALL)
+                self.assertEqual(table.rows[0][1:6],
+                                 ("预计 2026-11-18", "01 02 03 04 05", "01 02", "—", "待开奖数据"))
+                table.tree.selection_set.assert_called_once_with("0")
+                tabs.select.assert_called_once_with(panel)
+                FavoritePanel.record_selected(favorites)
+
+            saved, = pick_store.load()
+            self.assertEqual((saved.ticket, saved.target_date), (TICKET, date(2026, 11, 18)))
+            self.assertEqual(favorite_store.path.read_bytes(), original)
+            panel.history = DrawIndex(parse_feed(MONDAY + WEDNESDAY + SATURDAY).draws)
+            panel.render()
+            self.assertEqual(table.rows[0][1], "第 26132 期")
+            self.assertEqual(table.rows[0][4], "5+2")
+            error.assert_not_called()

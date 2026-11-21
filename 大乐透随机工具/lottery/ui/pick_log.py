@@ -15,6 +15,7 @@ from .widgets import wrapped_label
 
 ALL, LATEST, PENDING = "全部记录", "最近已载入期", "待对奖"
 LEVEL_NAMES = "一二三四五六七"
+EMPTY_NOTE = "在「本批号码」或「我的收藏」中双击一组号码，即可记入这里"
 
 
 def issue_label(issue):
@@ -59,7 +60,7 @@ class PickLogPanel(ttk.Frame):
         ).pack(side="left", fill="x", expand=True)
         columns = ("保存时间（北京）", "对应期次", "前区号码", "后区号码", "命中数", "对奖结果", "记录索引")
         self.table = DataTable(self, columns, (175, 135, 205, 95, 75, 190, 60),
-                               empty_text="在本批号码中双击一组即可保存选号记录")
+                               empty_text=EMPTY_NOTE)
         self.table.tree.configure(displaycolumns=columns[:-1])
         self.table.pack(fill="both", expand=True)
         self.detail = tk.StringVar(self)
@@ -92,14 +93,37 @@ class PickLogPanel(ttk.Frame):
         self.render()
         return True
 
-    def record(self, ticket, *, saved_at=None):
+    def record(self, ticket, *, saved_at=None, reveal=False):
         pick = PickRecord.from_selection(ticket, saved_at if saved_at is not None else datetime.now(BEIJING))
         previous = existing_pick(self.records, pick, self.history)
         if previous:
-            return f"该号码已记录 · 预计开奖日 {pick.target_date}"
-        if self.save(self.records + [pick]):
-            return f"已保存选号记录 · 预计开奖日 {pick.target_date}"
-        return ""
+            index, message = self.records.index(previous), "该号码已记录"
+        elif self.save(self.records + [pick]):
+            index, message = len(self.records) - 1, "已保存选号记录"
+        else:
+            return ""
+        if reveal:
+            self.reveal_record(index)
+        return f"{message} · 预计开奖日 {pick.target_date}"
+
+    def reveal_record(self, index):
+        table = self.table
+
+        def position():
+            return next((i for i, row in enumerate(table.rows) if row[-1] == index), None)
+
+        row = position()
+        if row is None:
+            self.scope.set(ALL)
+            self.render()
+            row = position()
+        if row is not None:
+            table.go_to_page(row // table.PAGE_SIZE)
+            item = str(row)
+            table.tree.selection_set(item)
+            table.tree.focus(item)
+            table.tree.see(item)
+            self.show_detail()
 
     def render(self):
         entries = []
@@ -131,6 +155,8 @@ class PickLogPanel(ttk.Frame):
             self.table.empty.configure(text=str(self.load_error).splitlines()[0])
         elif self.records:
             self.table.empty.configure(text="当前期次没有选号记录")
+        else:
+            self.table.empty.configure(text=EMPTY_NOTE)
         self.show_detail()
 
     def selected_index(self):
@@ -176,4 +202,5 @@ class PickLogPanel(ttk.Frame):
         updated = list(self.records)
         updated[index] = changed
         if self.save(updated):
+            self.reveal_record(index)
             self.status(f"已改为按{issue_label(changed.issue)}核对" if changed.issue else "已恢复按预计开奖日核对")
